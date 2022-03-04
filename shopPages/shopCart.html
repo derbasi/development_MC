@@ -1,3 +1,23 @@
+%%[
+set @sku = RequestParameter("sku")
+set @productsDE = "productCatalog"
+
+set @productDetails = lookupRows(@productsDE, "sku", @sku)
+set @rows = RowCount(@productDetails)
+
+if @rows == 1 then
+    set @productRow = Row(@productDetails,1)
+    set @name = Field(@productRow,"name")
+    set @description = Field(@productRow,"description")
+    set @price = Field(@productRow,"price")
+    set @priceOffer = Field(@productRow,"priceOffer")
+    set @imgURL = Field(@productRow,"imgURL")
+    set @category = Field(@productRow,"category")
+    set @priceTotal = add(iif(empty(@priceOffer),@price,@priceOffer),29.99)
+endif
+
+]%%
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -355,6 +375,7 @@
                     <!--End table header-->
 
                     <!--Table body-->
+                    <!--Product in Cart-->
                     <tbody>
 
                         <tr class="cart_item">
@@ -366,13 +387,13 @@
                             </td>
 
                             <td class="product-name">
-                                <a href="single-product.html">Liv Race Day Short </a>
+                                <a href="single-product.html">%%=v(@name)=%%</a>
                                 <span class="color">
                                     Color: <i class="orange"></i>
                                 </span>
                             </td>
                             <td class="product-price">
-                                <span class="amount">$20.00</span>
+                                <span class="amount">%%=v(@price)=%% €</span>
                             </td>
 
                             <td class="product-quantity">
@@ -380,61 +401,10 @@
                             </td>
 
                             <td class="product-subtotal">
-                                <span class="amount">$229.00</span>
+                                <span class="amount">%%=v(@price)=%% €</span>
                             </td>
                         </tr>
-                        <tr class="cart_item">
-                            <td class="product-remove">
-                                <a href="#" class="remove fa-" title="Remove this item"></a>
-                            </td>
-                            <td class="product-thumbnail">
-                                <a href="single-product.html"><img src="images/product/widget2.jpg" alt="cart" /></a>
-                            </td>
 
-                            <td class="product-name">
-                                <a href="single-product.html">City Pedals Sport </a>
-                                <span class="color">
-                                    Color: <i class="light-blue"></i>
-                                </span>
-                            </td>
-                            <td class="product-price">
-                                <span class="amount">$20.00</span>
-                            </td>
-
-                            <td class="product-quantity">
-                                <div class="quantity"><input type="number" step="1" min="0" name="cart" value="1" title="Qty" class="input-text qty text" size="4"></div>
-                            </td>
-
-                            <td class="product-subtotal">
-                                <span class="amount">$229.00</span>
-                            </td>
-                        </tr>
-                        <tr class="cart_item">
-                            <td class="product-remove">
-                                <a href="#" class="remove fa-" title="Remove this item"></a>
-                            </td>
-                            <td class="product-thumbnail">
-                                <a href="single-product.html"><img src="images/product/widget3.jpg" alt="cart" /></a>
-                            </td>
-
-                            <td class="product-name">
-                                <a href="single-product.html">Gloss </a>
-                                <span class="color">
-                                    Color: <i class="red-light"></i>
-                                </span>
-                            </td>
-                            <td class="product-price">
-                                <span class="amount">$20.00</span>
-                            </td>
-
-                            <td class="product-quantity">
-                                <div class="quantity"><input type="number" step="1" min="0" name="cart" value="1" title="Qty" class="input-text qty text" size="4"></div>
-                            </td>
-
-                            <td class="product-subtotal">
-                                <span class="amount">$229.00</span>
-                            </td>
-                        </tr>
                         <tr>
                             <td class="actions" colspan="6">
                                 <a class="back-shop" href="#"><i class="fa fa-angle-left"></i> BACK TO SHOP</a>
@@ -443,6 +413,7 @@
                         </tr>
 
                     </tbody>
+                    <!--End Product in Cart-->
                     <!--End table body-->
                 </table>
             </form>
@@ -450,18 +421,6 @@
 
             <!--Cart attr-->
             <div class="row">
-                <div class="col-md-6 col-sm-6">
-                    <!--Coupon-->
-                    <div class="coupon">
-                        <h3>Coupon</h3>
-                        <form>
-                            <p>Enter your coupon code if you have one.</p>
-                            <input type="text" name="coupon_code" class="input-text" id="coupon_code" value="" placeholder="Coupon code">
-                            <input type="submit" class="button" name="apply_coupon" value="Apply Coupon">
-                        </form>
-                    </div>
-                    <!--End coupon-->
-                </div>
                 <div class="col-md-6 col-sm-6">
 
                     <!--Cart totals-->
@@ -471,49 +430,15 @@
                                 <tbody>
                                     <tr class="cart-subtotal">
                                         <th>Subtotal</th>
-                                        <td><span class="amount">$293.00</span></td>
+                                        <td><span class="amount">%%=v(@price)=%% €</span></td>
                                     </tr>
-                                    <tr class="shipping">
-                                        <th>Shipping and handling</th>
-                                        <td>
-                                            <form class="shop-shipping-calculator"  method="post">
-                                               <p class="form-r">
-                                                   <input type="checkbox" name="rate" value="1" />
-                                                   <span>
-                                                       Flat Rate:
-                                                       <span class="price">
-                                                           $30.00
-                                                       </span>
-                                                   </span>
-                                               </p>
-                                                <p class="form-r">
-                                                    <input type="checkbox" name="international" value="1" />
-                                                   <span>
-                                                       International Delivery:
-                                                       <span class="price">
-                                                           $150.00
-                                                       </span>
-                                                   </span>
-                                                </p>
-                                                <p class="form-r">
-                                                    <input type="checkbox" name="rate" value="1" />
-                                                   <span>
-                                                       Local Delivery:
-                                                       <span class="price">
-                                                           $90.00
-                                                       </span>
-                                                   </span>
-                                                </p>
-                                                <p class="form-r">
-                                                    <input type="checkbox" name="pickup" value="1" />
-                                                   <span>Local Pickup (Free)</span>
-                                                </p>
-                                            </form>
-                                        </td>
+                                    <tr class="cart-subtotal">
+                                        <th>Shipping</th>
+                                        <td><span class="amount">29,99 €</span></td>
                                     </tr>
                                     <tr class="order-total">
                                         <th>Order total</th>
-                                        <td><span class="amount">$293.00</span></td>
+                                        <td><span class="amount">%%=v(@priceTotal)=%% €</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -522,9 +447,15 @@
                     </div>
                     <!--End cart totals-->
 
+
                 </div>
             </div>
             <!--End cart attr-->
+        </div>
+        <div>
+            <td class="actions" colspan="6">
+                <button class="update-cart" type="submit">Checkout</button>
+            </td>
         </div>
     </section>
 
