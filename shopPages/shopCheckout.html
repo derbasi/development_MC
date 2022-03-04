@@ -1,38 +1,16 @@
-%%[
-set @sku = RequestParameter("sku")
-set @productsDE = "productCatalog"
-
-set @productDetails = lookupRows(@productsDE, "sku", @sku)
-set @rows = RowCount(@productDetails)
-
-if @rows == 1 then
-    set @productRow = Row(@productDetails,1)
-    set @name = Field(@productRow,"name")
-    set @description = Field(@productRow,"description")
-    set @price = Field(@productRow,"price")
-    set @priceOffer = Field(@productRow,"priceOffer")
-    set @imgURL = Field(@productRow,"imgURL")
-    set @category = Field(@productRow,"category")
-    set @priceTotal = add(iif(empty(@priceOffer),@price,@priceOffer),29.99)
-endif
-
-]%%
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Shop Cart</title>
+    <title>Checkout</title>
 
     <link href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/seqw0dsfurg" rel="stylesheet" type='text/css'>
     <link href='fonts/font-awesome/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900,300italic,400italic,700italic' rel='stylesheet' type='text/css'>
     <link href='fonts/lovelo/stylesheet.css' rel='stylesheet' type='text/css'>
 
-    <link href='https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/4k1ibbqo5ce' rel='stylesheet' type='text/css'>
-    <link href='https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/u22nrrv3mik' rel='stylesheet' type='text/css'>
     <link href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/lkwnku0m504" rel="stylesheet" type='text/css'>
 
     <!--[if lt IE 9]>
@@ -119,7 +97,7 @@ endif
 
             <!--Start header content-->
             <div class="header-content">
-                <h3 class="tz-logo pull-left"><a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/en1ml3ckyvg"><img src="images/logo.png" alt="home" /></a></h3>
+                <h3 class="tz-logo pull-left"><a href="index.html"><img src="images/logo.png" alt="home" /></a></h3>
                 <div class="tz-search pull-right">
 
                     <!--Start form search-->
@@ -201,7 +179,7 @@ endif
                 <!--Main Menu-->
                 <ul class="tz-main-menu pull-left nav-collapse">
                     <li>
-                        <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/en1ml3ckyvg">Home</a>
+                        <a href="index.html">Home</a>
                         <ul class="sub-menu">
                             <li>
                                 <a href="home-boxed.html">Home Boxed</a>
@@ -344,7 +322,7 @@ endif
     </header>
     <!--End id tz header-->
 
-    <section class="shop-checkout">
+    <section class="shop-cart">
         <div class="container">
             <!--Start Breadcrumbs-->
             <ul class="tz-breadcrumbs">
@@ -352,80 +330,191 @@ endif
                     <a href="#">Home</a>
                 </li>
                 <li class="current">
-                    Shop Cart
+                    Checkout
                 </li>
             </ul>
             <!--End Breadcrumbs-->
-            <h1 class="page-title">Shop Cart</h1>
 
-            <!--Start form table-->
-            <form>
-                <table class="shop_table cart">
-                    <!--Table header-->
-                    <thead>
-                        <tr>
-                            <th class="product-remove">&nbsp;</th>
-                            <th class="product-thumbnail">Product</th>
-                            <th class="product-name">&nbsp;</th>
-                            <th class="product-price">Price</th>
-                            <th class="product-quantity">Quantity</th>
-                            <th class="product-subtotal">Total</th>
-                        </tr>
-                    </thead>
-                    <!--End table header-->
-
-                    <!--Table body-->
-                    <!--Product in Cart-->
-                    <tbody>
-
-                        <tr class="cart_item">
-                            <td class="product-remove">
-                                <a href="#" class="remove" title="Remove this item"></a>
-                            </td>
-                            <td class="product-thumbnail">
-                                <a href="single-product.html"><img src="%%=v(@imgURL)=%%" alt="cart" /></a>
-                            </td>
-
-                            <td class="product-name">
-                                <a href="single-product.html">%%=v(@name)=%%</a>
-                                <span class="color">
-                                    Color: <i class="orange"></i>
-                                </span>
-                            </td>
-                            <td class="product-price">
-                                <span class="amount">%%=v(@price)=%% €</span>
-                            </td>
-
-                            <td class="product-quantity">
-                                <div class="quantity"><input type="number" step="1" min="0" name="cart" value="1" title="Qty" class="input-text qty text" size="4"></div>
-                            </td>
-
-                            <td class="product-subtotal">
-                                <span class="amount">%%=v(@price)=%% €</span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="actions" colspan="6">
-                                <a class="back-shop" href="#"><i class="fa fa-angle-left"></i> < BACK TO SHOP</a>
-                                <button class="update-cart" type="submit">Checkout</button>
-                            </td>
-                        </tr>
-
-                    </tbody>
-                    <!--End Product in Cart-->
-                    <!--End table body-->
-                </table>
-            </form>
-            <!--End form table-->
-
-            <!--Cart attr-->
             <div class="row">
-                <div class="col-md-6 col-sm-6">
+                <div class="col-md-6">
+                    <h1 class="page-title">Checkout</h1>
+
+                    <!--Shop info-->
+                    <div class="shop-info">
+                        <p>Returning customer? <a href="#">Click here to login</a></p>
+                    </div>
+                    <!--End shop info-->
+
+                    <!--Start form checkout-->
+                    <form>
+                        <div class="shop-billing-fields">
+                            <h3>Billing Details</h3>
+                            <p class="form-row">
+                                <label>Country <span class="required">*</span></label>
+                                <select>
+                                    <option>Germany (DE)</option>
+                                    <option>Turkey (TR)</option>
+                                    <option>United States (US)</option>
+                                </select>
+                            </p>
+                            <p class="form-row form-row-first">
+                                <label for="billing_first_name" class="">First Name <span class="required">*</span></label>
+                                <input type="text" class="input-text " name="billing_first_name" id="billing_first_name" placeholder="" value="">
+                            </p>
+                            <p class="form-row form-row-last">
+                                <label for="billing_last_name" class="">Last Name <span class="required">*</span></label>
+                                <input type="text" class="input-text " name="billing_last_name" id="billing_last_name" placeholder="" value="">
+                            </p>
+                            <div class="clear"></div>
+                            <p class="form-row">
+                                <label for="company_name">Company Name</label>
+                                <input type="text" class="input-text " name="company_name" id="company_name" placeholder="" value="">
+                            </p>
+                            <p class="form-row">
+                                <label for="address">Address  <span class="required">*</span></label>
+                                <input type="text" class="input-text " name="address" id="address" placeholder="" value="">
+                            </p>
+                            <p class="form-row">
+                                <label for="city">Town / City<span class="required">*</span></label>
+                                <input type="text" class="input-text " name="city" id="city" placeholder="" value="">
+                            </p>
+                            <p class="form-row form-row-first">
+                                <label for="state">State <span class="required">*</span></label>
+                                <input type="text" class="input-text " name="state" id="state" placeholder="" value="">
+                            </p>
+                            <p class="form-row form-row-last">
+                                <label for="zip">Zip  <span class="required">*</span></label>
+                                <input type="text" class="input-text " name="zip" id="zip" placeholder="" value="">
+                            </p>
+                            <div class="clear"></div>
+                            <p class="form-row form-row-first">
+                                <label for="email">Email Address<span class="required">*</span></label>
+                                <input type="email" class="input-text " name="email" id="email" placeholder="" value="">
+                            </p>
+                            <p class="form-row form-row-last">
+                                <label for="phone">Phone  <span class="required">*</span></label>
+                                <input type="text" class="input-text " name="phone" id="phone" placeholder="" value="">
+                            </p>
+                            <div class="clear"></div>
+                            <p class="form-row create-account">
+                                <input class="createaccount" id="createaccount" type="checkbox" name="createaccount" value="1"> <label for="createaccount" class="checkbox">Create an account?</label>
+                            </p>
+                            <p class="form-row ship-to-different-address-checkbox">
+                                <input class="input-checkbox" id="ship-to-different-address-checkbox" type="checkbox" name="ship-to-different-address-checkbox" value="1">
+                                <label for="ship-to-different-address-checkbox" class="ship-to-different-address-checkbox">Ship to a different address?</label>
+                            </p>
+                            <p class="form-row notes">
+                                <label for="order_comments" class="">Order Notes</label>
+                                <textarea name="order_comments" class="input-text " id="order_comments" placeholder="Notes about your order, e.g. special notes for delivery." rows="2" cols="5"></textarea>
+                            </p>
+                        </div>
+                    </form>
+                    <!--End form checkout-->
+
+                </div>
+                <div class="col-md-6">
+
+                    <!--Order review-->
+                    <div id="order_review">
+                        <h3>Your Order</h3>
+
+                        <!--Shop table-->
+                        <table class="shop_table">
+                            <thead>
+                                <tr>
+                                    <th class="product-name">Product</th>
+                                    <th class="product-total">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="cart_item">
+                                    <td class="product-name">
+                                        Liv Race Day Short
+                                        <strong class="product-quantity">× 1</strong>
+                                    </td>
+                                    <td class="product-total">
+                                        <span class="amount">$30.00</span>
+                                    </td>
+                                </tr>
+                                <tr class="cart_item">
+                                    <td class="product-name">
+                                        City Pedals Sport
+                                        <strong class="product-quantity">× 1</strong>
+                                    </td>
+                                    <td class="product-total">
+                                        <span class="amount">$18.00</span>
+                                    </td>
+                                </tr>
+                                <tr class="cart_item">
+                                    <td class="product-name">
+                                        Gloss
+                                        <strong class="product-quantity">× 1</strong>
+                                    </td>
+                                    <td class="product-total">
+                                        <span class="amount">$325.00</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr class="cart-subtotal">
+                                <th>Cart Subtotal</th>
+                                <td><span class="amount">$490.00</span></td>
+                            </tr>
+
+                            <tr class="shipping">
+                                <th>Shipping and Handling</th>
+                                <td>
+                                    <form class="shop-shipping-calculator"  method="post">
+                                        <p class="form-r">
+                                            <input type="checkbox" name="rate" value="1" />
+                                            <span>
+                                               Flat Rate:
+                                               <span class="price">
+                                                   $30.00
+                                               </span>
+                                            </span>
+                                        </p>
+                                        <p class="form-r">
+                                            <input type="checkbox" name="international" value="1" />
+                                            <span>
+                                               International Delivery:
+                                               <span class="price">
+                                                   $150.00
+                                               </span>
+                                            </span>
+                                        </p>
+                                        <p class="form-r">
+                                            <input type="checkbox" name="rate" value="1" />
+                                            <span>
+                                               Local Delivery:
+                                               <span class="price">
+                                                   $90.00
+                                               </span>
+                                            </span>
+                                        </p>
+                                        <p class="form-r">
+                                            <input type="checkbox" name="pickup" value="1" />
+                                            <span>Local Pickup (Free)</span>
+                                        </p>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <tr class="order-total">
+                                <th>Order Total</th>
+                                <td><strong><span class="amount">$520.00</span></strong> </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                        <!--End shop table-->
+
+
+                    </div>
+                    <!--End order review-->
 
                 </div>
             </div>
-            <!--End cart attr-->
+
         </div>
     </section>
 
@@ -580,13 +669,13 @@ endif
                     </div>
                     <div class="col-md-6 col-sm-6">
                         <div class="pull-right">
-                        <span class="payments-method">
-                            <a href="#"><img src="images/Visa.png" alt="visa"></a>
-                            <a href="#"><img src="images/Intersection.png" alt="Intersection"></a>
-                            <a href="#"><img src="images/ebay.png" alt="ebay"></a>
-                            <a href="#"><img src="images/Amazon.png" alt="Amazon"></a>
-                            <a href="#"><img src="images/Discover.png" alt="Discover"></a>
-                        </span>
+                            <span class="payments-method">
+                                <a href="#"><img src="images/Visa.png" alt="visa"></a>
+                                <a href="#"><img src="images/Intersection.png" alt="Intersection"></a>
+                                <a href="#"><img src="images/ebay.png" alt="ebay"></a>
+                                <a href="#"><img src="images/Amazon.png" alt="Amazon"></a>
+                                <a href="#"><img src="images/Discover.png" alt="Discover"></a>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -600,12 +689,6 @@ endif
 <script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/m5f2rsb11qq"></script>
 <script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/1tan2dziln0"></script>
 <script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/kvmcxzne132"></script>
-<!--jQuery Countdow-->
-<script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/ewjtqo4plxi"></script>
-<script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/eifzwy0wm0m"></script>
-<!--End Countdow-->
-
-<script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/gukgku11dt0"></script>
 <script src="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/eskvurd3h4g"></script>
 
 </body>
