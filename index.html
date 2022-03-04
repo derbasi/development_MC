@@ -1,22 +1,4 @@
-%%[
-set @productsDE = "Products"
-set @deRows = lookupRows(@productsDE, "help", "true")
-set @rows = RowCount(@deRows)
-
-FOR @i = 1 TO @rows DO
-
-  SET @row = Row(@deRows,@i)
-  
-  set @key = Field(@Row,'Key')
-  SET @value = Field(@Row,'Value')
-
-  SET @generator = TreatAsContent(CONCAT('%','%[SET ', CONCAT('@',@key), ' = "',@value,'"]%', '%')) 
-
-NEXT @i 
-]%%
-
-
-<!DOCTYPE html>
+test<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -118,77 +100,7 @@ NEXT @i
 
                 <!--Start header content-->
                 <div class="header-content">
-                    <h3 class="tz-logo pull-left"><a href="index.html"><img src="%%=v(@logoURL)=%%" alt="home" /></a></h3>
-                    <div class="tz-search pull-right">
-
-                        <!--Start form search-->
-                        <form>
-                            <label class="select-arrow">
-                                <select name="category">
-                                    <option value="">All Category</option>
-                                    <option value="#">Baby Seats</option>
-                                    <option value="#">Halfwheelers</option>
-                                    <option value="#">Locks/Security</option>
-                                    <option value="#">WheelSystems</option>
-                                    <option value="#">Rim Tape</option>
-                                </select>
-                            </label>
-                            <input type="text" class="tz-query" id="tz-query" value="" placeholder="Search for product">
-                            <button type="submit"></button>
-                        </form>
-                        <!--End Form search-->
-
-                        <!--live search-->
-                        <div class="live-search">
-                            <ul>
-                                <li>
-                                    <div class="live-img"><img src="images/product/product-search1.jpg" alt="product search one"></div>
-                                    <div class="live-search-content">
-                                        <h6><a href="single-product.html">Defy Advanced</a></h6>
-                                        <span class="live-meta">
-                                            <a href="single-product.html">$2650.00</a>
-                                            <span class="product-color">
-                                                <i class="light-blue"></i>
-                                                <i class="orange"></i>
-                                                <i class="orange-dark"></i>
-                                            </span>
-                                        </span>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="live-img"><img src="images/product/product-search2.jpg" alt="product search two"></div>
-                                    <div class="live-search-content">
-                                        <h6><a href="single-product.html">Defy Advanced</a></h6>
-                                        <span class="live-meta">
-                                            <a href="single-product.html">$2650.00</a>
-                                            <span class="product-color">
-                                                <i class="light-blue"></i>
-                                                <i class="orange"></i>
-                                                <i class="blueviolet"></i>
-                                                <i class="orange-dark"></i>
-                                            </span>
-                                        </span>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="live-img"><img src="images/product/product-search3.jpg" alt="product search one"></div>
-                                    <div class="live-search-content">
-                                        <h6><a href="single-product.html">Defy Advanced</a></h6>
-                                        <span class="live-meta">
-                                            <a href="single-product.html">$2650.00</a>
-                                            <span class="product-color">
-                                                <i class="blueviolet"></i>
-                                                <i class="light-blue"></i>
-                                                <i class="orange-dark"></i>
-                                                <i class="orange"></i>
-                                            </span>
-                                        </span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                        <!--End live search-->
-                    </div>
+                    <h3 class="tz-logo pull-left"><a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/en1ml3ckyvg"><img src="%%=v(@logoURL)=%%" alt="home" /></a></h3>
                 </div>
                 <!--End class header content-->
             </div>
@@ -200,7 +112,7 @@ NEXT @i
                     <!--Main Menu-->
                     <ul class="tz-main-menu pull-left nav-collapse">
                         <li>
-                            <a href="index.html">Home</a>
+                            <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/en1ml3ckyvg">Home</a>
                             <ul class="sub-menu">
                                 <li>
                                     <a href="home-boxed.html">Home Boxed</a>
@@ -708,7 +620,7 @@ NEXT @i
 
                     <!--Tabs Header-->
                     <div class="tz-tabs-header">
-                        <h2 class="tz-tabs-title pull-left">Products</h2>
+                        <h2 class="tz-tabs-title pull-left">Bikes by Category</h2>
                         <ul class="nav nav-tabs pull-right tz-nav-tabs">
                             <li role="presentation" class="active"><a href="#mountainBikes" data-toggle="tab">Mountainbikes<i class="fa fa-circle"></i></a></li>
                             <li role="presentation"><a href="#racingBikes" data-toggle="tab">Racing Bikes<i class="fa fa-circle"></i></a></li>
@@ -746,7 +658,7 @@ NEXT @i
                                     <!--Start product item-->
                                     <div class="product-item">
                                         <div class="product-thubnail">
-                                            <img src="%%=v(@image_URL1001)=%%" alt="%%=v(@name1001)=%%" />
+                                            <img src="%%=v(@imgURL)=%%" alt="%%=v(@name)=%%" />
                                             <div class="product-meta">
                                                 <a class="add-to-cart" href="shop-cart.html">Add to cart</a>
                                                 <span class="quick-view">
@@ -755,8 +667,8 @@ NEXT @i
                                             </div>
                                         </div>
                                         <div class="product-infomation">
-                                            <h4><a href="single-product.html">%%=v(@name1001)=%%</a></h4>
-                                            <span class="product-price">%%=v(@price1001)=%% €</span>
+                                            <h4><a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/gi5alvb3sg4?sku=%%=v(@sku)=%%">%%=v(@name)=%%</a></h4>
+                                            <span class="product-price">%%=v(@price)=%% €</span>
                                             <span class="product-attr">
                                                 <i class="fa fa-circle light-blue"></i>
                                                 <i class="fa fa-circle orange"></i>
@@ -809,7 +721,7 @@ NEXT @i
                                     <!--Start product item-->
                                     <div class="product-item">
                                         <div class="product-thubnail">
-                                            <img src="%%=v(@image_URL2001)=%%" alt="%%=v(@name2001)=%%" />
+                                            <img src="%%=v(@imgURL)=%%" alt="%%=v(@name)=%%" />
                                             <div class="product-meta">
                                                 <a class="add-to-cart" href="shop-cart.html">Add to cart</a>
                                                 <span class="quick-view">
@@ -818,8 +730,8 @@ NEXT @i
                                             </div>
                                         </div>
                                         <div class="product-infomation">
-                                            <h4><a href="single-product.html">%%=v(@name2001)=%%</a></h4>
-                                            <span class="product-price">%%=v(@price2001)=%% €</span>
+                                            <h4><a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/gi5alvb3sg4?sku=%%=v(@sku)=%%">%%=v(@name)=%%</a></h4>
+                                            <span class="product-price">%%=v(@price)=%% €</span>
                                             <span class="product-attr">
                                                 <i class="fa fa-circle light-blue"></i>
                                                 <i class="fa fa-circle orange"></i>
@@ -868,7 +780,7 @@ NEXT @i
                                     <!--Start product item-->
                                     <div class="product-item">
                                         <div class="product-thubnail">
-                                            <img src="%%=v(@image_URL3001)=%%" alt="%%=v(@name3001)=%%" />
+                                            <img src="%%=v(@imgURL)=%%" alt="%%=v(@name)=%%" />
                                             <div class="product-meta">
                                                 <a class="add-to-cart" href="shop-cart.html">Add to cart</a>
                                                 <span class="quick-view">
@@ -877,8 +789,8 @@ NEXT @i
                                             </div>
                                         </div>
                                         <div class="product-infomation">
-                                            <h4><a href="single-product.html">%%=v(@name3001)=%%</a></h4>
-                                            <span class="product-price">%%=v(@price3001)=%% €</span>
+                                            <h4><a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/gi5alvb3sg4?sku=%%=v(@sku)=%%">%%=v(@name)=%%</a></h4>
+                                            <span class="product-price">%%=v(@price)=%% €</span>
                                             <span class="product-attr">
                                                 <i class="fa fa-circle light-blue"></i>
                                                 <i class="fa fa-circle orange"></i>
