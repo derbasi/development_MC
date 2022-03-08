@@ -1,3 +1,29 @@
+%%[
+    set @contentDE = "Shop_Content"
+    set @logoURL = Lookup(@contentDE,"Value","Key","logo")
+
+    set @productsDE = "productCatalog"
+    set @cartSKU = requestParameter("sku")
+
+    if not empty(@cartSKU) then 
+        set @productDetails = lookupRows(@productsDE, "sku", @cartSKU)
+        set @rows = RowCount(@productDetails)
+        
+        if @rows == 1 then
+            set @productRow = Row(@productDetails,1)
+            set @name = Field(@productRow,"name")
+            set @price = Field(@productRow,"price")
+            set @priceOffer = Field(@productRow,"priceOffer")
+            set @imgURL = Field(@productRow,"imgURL")
+            set @priceToDisplay = Concat(iif(empty(@priceOffer),@price,@priceOffer)," €")
+        endif
+        set @badge = "1"
+    else
+        set @badge = "0"
+    endif
+
+]%%
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,7 +60,7 @@
                     <ul class="pull-left">
                         <li>
                             <a href="#">
-                                USD
+                                EURO
                                 <span class="fa fa-angle-down tz-down"></span>
                             </a>
                             <ul class="sub-menu">
@@ -67,10 +93,10 @@
                             <a href="#">Wishlist</a>
                         </li>
                         <li>
-                            <a href="shop-cart.html">My Cart</a>
+                            <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/03gtgdeyeeq?sku=%%=v(@cartSKU)=%%">My Cart</a>
                         </li>
                         <li>
-                            <a href="shop-checkout.html">Checkout</a>
+                            <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/hkgozhq2kv3?sku=%%=v(@cartSKU)=%%">Checkout</a>
                         </li>
                         <li class="tz-header-login">
                             <a href="#">Login</a>
@@ -164,68 +190,42 @@
 
                     <!--Shop meta-->
                     <ul class="tz-ecommerce-meta pull-right">
-                        <li class="tz-menu-wishlist">
-                            <a href="#"><strong>0</strong></a>
-                        </li>
                         <li class="tz-mini-cart">
-                            <a href="shop-cart.html"><strong>2</strong>Cart : $199.00</a>
+
+                            <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/03gtgdeyeeq?sku=%%=v(cartSKU)=%%"><strong>%%=v(@badge)=%%</strong>%%=v(@priceToDisplay)=%%</a>
+
+                            %%[ if not empty(@cartSKU) then ]%%
 
                             <!--Mini cart-->
                             <ul class="cart-inner">
                                 <li class="mini-cart-content">
-                                    <div class="mini-cart-img"><img src="images/product/product-cart1.png" alt="product search one"></div>
+                                    <div class="mini-cart-img"><img src="%%=v(@imgURL)=%%" alt="product search one"></div>
                                     <div class="mini-cart-ds">
-                                        <h6><a href="single-product.html">Liv Race Day Short</a></h6>
+                                        <h6><a href="single-product.html">%%=v(@name)=%%</a></h6>
                                         <span class="mini-cart-meta">
-                                            <a href="single-product.html">$2650.00</a>
+                                            <a href="single-product.html">%%=v(@priceToDisplay)=%%</a>
                                             <span class="mini-meta">
                                                <span class="mini-color">Color: <i class="orange"></i></span>
-                                               <span class="mini-qty">Qty: 5</span>
+                                               <span class="mini-qty">Qty: 1</span>
                                             </span>
                                         </span>
                                     </div>
-                                    <span class="mini-cart-delete"><img src="images/delete.png" alt="delete"></span>
-                                </li>
-                                <li class="mini-cart-content">
-                                    <div class="mini-cart-img"><img src="images/product/product-cart2.png" alt="product search one"></div>
-                                    <div class="mini-cart-ds">
-                                        <h6><a href="single-product.html">City Pedals Sport</a></h6>
-                                        <span class="mini-cart-meta">
-                                            <a href="single-product.html">$2650.00</a>
-                                            <span class="mini-meta">
-                                               <span class="mini-color">Color: <i class="orange"></i></span>
-                                               <span class="mini-qty">Qty: 5</span>
-                                            </span>
-                                        </span>
-                                    </div>
-                                    <span class="mini-cart-delete"><img src="images/delete.png" alt="delete"></span>
-                                </li>
-                                <li class="mini-cart-content">
-                                    <div class="mini-cart-img"><img src="images/product/product-cart3.png" alt="product search one"></div>
-                                    <div class="mini-cart-ds">
-                                        <h6><a href="single-product.html">Gloss</a></h6>
-                                        <span class="mini-cart-meta">
-                                            <a href="single-product.html">$2650.00</a>
-                                            <span class="mini-meta">
-                                               <span class="mini-color">Color: <i class="orange"></i></span>
-                                               <span class="mini-qty">Qty: 5</span>
-                                            </span>
-                                        </span>
-                                    </div>
-                                    <span class="mini-cart-delete"><img src="images/delete.png" alt="delete"></span>
+                                    <span class="mini-cart-delete"><img src="https://image.s51.sfmc-content.com/lib/fe3511737364047c761775/m/1/8282648f-0a43-45ae-be45-7028567b0e74.png" alt="delete"></span>
                                 </li>
                                 <li class="mini-subtotal">
                                     <span class="subtotal-content">
                                         Subtotal:
-                                        <strong class="pull-right">$1,100.00</strong>
+                                        <strong class="pull-right">%%=v(@priceToDisplay)=%%</strong>
                                     </span>
                                 </li>
                                 <li class="mini-footer">
-                                    <a href="shop-cart.html" class="view-cart">View Cart</a>
-                                    <a href="shop-checkout.html" class="check-out">Checkout</a>
+                                    <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/03gtgdeyeeq?sku=%%=v(@cartSKU)=%%" class="view-cart">View Cart</a>
+                                    <a href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/hkgozhq2kv3?sku=%%=v(@cartSKU)=%%" class="check-out">Checkout</a>
                                 </li>
                             </ul>
                             <!--End mini cart-->
+
+                            %%[ endif ]%%
 
                         </li>
                     </ul>
@@ -418,7 +418,7 @@
                     </li>
                     <li data-transition="fade" data-slotamount="7" data-masterspeed="700"  data-saveperformance="off" >
                         <!-- MAIN IMAGE -->
-                        <img src="images/slider/slider31.jpg"  alt="slider31"  data-bgposition="center top" data-bgfit="cover" data-bgrepeat="no-repeat">
+                        <img src="https://image.s51.sfmc-content.com/lib/fe3511737364047c761775/m/1/2b3fafa9-761a-4bef-9e52-938b6158cfce.jpg"  alt="slider31"  data-bgposition="center top" data-bgfit="cover" data-bgrepeat="no-repeat">
                         <!-- LAYERS -->
 
                         <!-- LAYER NR. 1 -->
@@ -671,10 +671,7 @@
                                         <div class="product-thubnail">
                                             <img src="%%=v(@imgURL)=%%" alt="%%=v(@name)=%%" />
                                             <div class="product-meta">
-                                                <a class="add-to-cart" href="shop-cart.html">Add to cart</a>
-                                                <span class="quick-view">
-                                                    <a href="#">Quick view</a>
-                                                </span>
+                                                <a class="add-to-cart" href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/03gtgdeyeeq?sku=%%=v(@sku)=%%">Add to cart</a>
                                             </div>
                                         </div>
                                         <div class="product-infomation">
@@ -734,10 +731,7 @@
                                         <div class="product-thubnail">
                                             <img src="%%=v(@imgURL)=%%" alt="%%=v(@name)=%%" />
                                             <div class="product-meta">
-                                                <a class="add-to-cart" href="shop-cart.html">Add to cart</a>
-                                                <span class="quick-view">
-                                                    <a href="#">Quick view</a>
-                                                </span>
+                                                <a class="add-to-cart" href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/03gtgdeyeeq?sku=%%=v(@sku)=%%">Add to cart</a>
                                             </div>
                                         </div>
                                         <div class="product-infomation">
@@ -793,10 +787,7 @@
                                         <div class="product-thubnail">
                                             <img src="%%=v(@imgURL)=%%" alt="%%=v(@name)=%%" />
                                             <div class="product-meta">
-                                                <a class="add-to-cart" href="shop-cart.html">Add to cart</a>
-                                                <span class="quick-view">
-                                                    <a href="#">Quick view</a>
-                                                </span>
+                                                <a class="add-to-cart" href="https://mc2xsctbllc5pw-0ck06pnh5c6g8.pub.sfmc-content.com/03gtgdeyeeq?sku=%%=v(@sku)=%%">Add to cart</a>
                                             </div>
                                         </div>
                                         <div class="product-infomation">
