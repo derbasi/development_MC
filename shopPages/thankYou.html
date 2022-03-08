@@ -1,0 +1,56 @@
+%%[
+
+/* define Data Extensions */
+ set @orderDE = "Order_v01"
+ set @orderItemsDE = "Order_LineItems_v01"
+ set @productsDE = "productCatalog"
+
+/* generate OrderIDs */
+ set @orderID = 
+ set @orderLineItemID = 
+
+/* get parameters from URL */
+ set @firstName = requestParameter("firstName")
+ set @lastName = requestParameter("lastName")
+ set @address = requestParameter("address")
+ set @city = requestParameter("city")
+ set @state = requestParameter("state")
+ set @zip = requestParameter("zip")
+ set @email = requestParameter("email")
+ set @phone = requestParameter("phone")
+ set @createaccount = requestParameter("createaccount")
+ set @sku = requestParameter("sku")
+
+/* get Price */
+ set @productDetails = lookupRows(@productsDE, "sku", @sku)
+ set @rows = RowCount(@productDetails)
+
+ if @rows == 1 then
+    set @productRow = Row(@productDetails,1)
+    set @price = Field(@productRow,"price")
+ endif
+
+/* write order in order data extension */
+ set @addRow = InsertData(@orderDE,'Order_ID',@orderID,'Order_ContactID',TBD,'Order_Value',@price,'Order_DateCreated',Now(),'Order_DateCompleted',???)
+
+/* write order in order line items data extension */
+ set @addRow = InsertData(@orderItemsDE,'OrderLineItem_ID',@orderLineItemID,'Order_ID',@orderID,'Product_ID',@sku,'OrderLineItem_Price',@price)
+
+/* trigger send */
+
+]%%
+
+
+
+
+
+firstName: %%=v(@firstName)=%%
+lastName: %%=v(@lastName)=%%
+address: %%=v(@address)=%%
+city: %%=v(@city)=%%
+state: %%=v(@state)=%%
+zip: %%=v(@zip)=%%
+email: %%=v(@email)=%%
+phone: %%=v(@phone)=%%
+createaccount: %%=v(@createaccount)=%%
+sku: %%=v(@sku)=%%
