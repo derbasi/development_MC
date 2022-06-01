@@ -1,13 +1,13 @@
-3<script runat=server>
+<script runat=server>
 Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
 
-//Create new Folder
+// Create new Folder
 
 var parentFolderId = 23234; // Your first parent folder
-var config = {
-    "Name": "MyNewFolder3",
+var props = {
+    "Name": "MyNewFolder",
     "Description": "API Created Folder",
     "ParentFolder": {
         ID : parentFolderId,
@@ -18,14 +18,11 @@ var config = {
     "AllowChildren": true,
     "ContentType": "dataextension"
 };
+// execute folder creation
+var result = api.createItem("DataFolder", props); 
 
-var result = api.createItem("DataFolder", config); 
 
-var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
-var newId2 = result.Results[0].NewID;
-  
-Write("result: " + result);
-Write("newId2: " + newId2);
-Write("newFolderId: " + newId);
+var myObj = Platform.Function.ParseJSON(String(createResult.Results[0].NewID));
+  Write("id: " + myObj);
 
 </script>
