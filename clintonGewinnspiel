@@ -27,11 +27,70 @@ var props = {
 // execute folder creation
 var createResult = api.createItem("DataFolder", props); 
 
+
+// get categoryID from response
 var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
-  Write("newID: " + newId)
 
 // ==================================
 // Create Data Extension
 // ==================================
+
+
+// define fields
+var fields = [
+    {
+        "Name": "subscriberKey",
+        "FieldType": "Text",
+        "MaxLength": 50,
+        "IsPrimaryKey": true,
+        "IsRequired" : true
+    },
+    {
+        "Name": "email",
+        "FieldType": "EmailAddress"
+    },
+    {
+        "Name": "firstName",
+        "FieldType": "Text",
+        "MaxLength": 50
+    }, 
+    {
+        "Name": "lastName",
+        "FieldType": "Text",
+        "MaxLength": 50
+    },
+    {
+        "Name": "salutation",
+        "FieldType": "Text",
+        "MaxLength": 50
+    },
+    {
+        "Name": "couponCode",
+        "FieldType": "Text",
+        "MaxLength": 50
+    },
+    {
+        "Name": "expiryDate",
+        "FieldType": "Text",
+        "MaxLength": 50
+    },
+    {
+        "Name": "gewinnspielName",
+        "FieldType": "Text",
+        "MaxLength": 200
+    }
+
+];
+
+var propsDE = {
+    "CustomerKey": "newDataExtensionTEST",
+    "Name": "newDataExtensionTEST",
+    "CategoryID": newId,
+    "Fields": fields
+};
+
+// execute Data Extension creation
+var result = api.createItem("DataExtension", propsDE); 
+
 
 </script>
