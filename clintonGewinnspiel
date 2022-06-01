@@ -2,34 +2,7 @@
 Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
-// define variables
-var folderName = "MyNewFolder5000"
-var parentFolderId = 23234;
 
-
-// ==================================
-// Create new Folder
-// ==================================
-
-
-var props = {
-    "Name": folderName,
-    "Description": "API Created Folder",
-    "ParentFolder": {
-        ID : parentFolderId,
-        IDSpecified: true
-    },
-    "IsActive": true,
-    "IsEditable": true,
-    "AllowChildren": true,
-    "ContentType": "dataextension"
-};
-// execute folder creation
-var createResult = api.createItem("DataFolder", props); 
-
-
-// get categoryID from response
-var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
 
 // ==================================
 // Create Data Extension
@@ -85,7 +58,7 @@ var fields = [
 var propsDE = {
     "CustomerKey": "newDataExtensionTEST",
     "Name": "newDataExtensionTEST",
-    "CategoryID": newId,
+    "CategoryID": 24265,
     "Fields": fields
 };
 
