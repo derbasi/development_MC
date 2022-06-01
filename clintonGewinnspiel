@@ -25,106 +25,17 @@ var folderName = gewinnspielName
 var deName = gewinnspielName + "_send"
 
 //==================================
-// Create new Folder
-//==================================
-
-
-var props = {
-    "Name": folderName,
-    "Description": "API Created Folder",
-    "ParentFolder": {
-        ID : parentFolderId,
-        IDSpecified: true
-    },
-    "IsActive": true,
-    "IsEditable": true,
-    "AllowChildren": true,
-    "ContentType": "dataextension"
-};
-// execute folder creation
-var createResult = api.createItem("DataFolder", props); 
-
-
-// get categoryID from response
-var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
-
-//==================================
-// Create Data Extension
-//==================================
-
-
-// define fields
-var fields = [
-    {
-        "Name": "subscriberKey",
-        "FieldType": "Text",
-        "MaxLength": 50,
-        "IsPrimaryKey": true,
-        "IsRequired" : true
-    },
-    {
-        "Name": "email",
-        "FieldType": "EmailAddress"
-    },
-    {
-        "Name": "firstName",
-        "FieldType": "Text",
-        "MaxLength": 50
-    }, 
-    {
-        "Name": "lastName",
-        "FieldType": "Text",
-        "MaxLength": 50
-    },
-    {
-        "Name": "salutation",
-        "FieldType": "Text",
-        "MaxLength": 50
-    },
-    {
-        "Name": "couponCode",
-        "FieldType": "Text",
-        "MaxLength": 50
-    },
-    {
-        "Name": "expiryDate",
-        "FieldType": "Text",
-        "MaxLength": 50
-    },
-    {
-        "Name": "gewinnspielName",
-        "FieldType": "Text",
-        "MaxLength": 200
-    }
-
-];
-
-var propsDE = {
-    "CustomerKey": deName,
-    "Name": deName,
-    "CategoryID": newId,
-    "Fields": fields
-};
-
-// execute Data Extension creation
-var result = api.createItem("DataExtension", propsDE); 
-
-
-//==================================
 // Update Query Activity 1
 //==================================
+
+
+var props = { "ObjectID": queryObjectId, "DataExtensionTarget" : { "Name" : deName, "CustomerKey" : deName}};
+
 try {
-    var prox = new Script.Util.WSProxy();
-    var result = prox.updateItem("QueryDefinition", {
-      ObjectID: queryObjectId, 
-      DataExtensionTarget : {                                       // required. But add Name and CustomerKey only if updating the target DE
-        Name : deName,                                         // Add only if changing the target DE
-        CustomerKey : deName                                   // Add only if changing the target DE, else leave blank
-      },
-    });
-    Write(Stringify(result));
+    var updateQueryActivity = prox.updateItem("QueryDefinition", props)
   } catch(e) {
     Write(Stringify(e));
   }
+  
 
 </script>
