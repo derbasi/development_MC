@@ -28,14 +28,19 @@ var deName = gewinnspielName + "_send"
 // Update Query Activity 1
 //==================================
 
-
-var props = ({ "ObjectID": queryObjectId, "DataExtensionTarget" : { "Name" : deName, "CustomerKey" : deName}});
-
 try {
-    var updateQueryActivity = prox.updateItem("QueryDefinition", props)
-  } catch(e) {
-    Write(Stringify(e));
-  }
+
+    var result = prox.updateItem("QueryDefinition", {
+      ObjectID: queryObjectId, 
+      DataExtensionTarget : {
+        Name : deName,
+        CustomerKey : deName
+      },
+    });
+
+    } catch(e) {
+        Write(Stringify(e));
+    }
 
 
 </script>
