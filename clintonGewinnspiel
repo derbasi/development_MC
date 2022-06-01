@@ -1,6 +1,6 @@
 <script runat=server>
 Platform.Load("Core", "1.1.5");
-var api = new Script.Util.WSProxy();
+var prox = new Script.Util.WSProxy();
 
 
 // define global variables
