@@ -22,9 +22,10 @@ var config = {
 var result = api.createItem("DataFolder", config); 
 
 var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
-  
+var newId2 = result.Results[0].NewID;
   
 Write("result: " + result);
+Write("newId2: " + newId2);
 Write("newFolderId: " + newId);
 
 </script>
