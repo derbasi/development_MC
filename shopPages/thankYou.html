@@ -7,6 +7,9 @@
 
 /* generate OrderIDs */
  set @orderID = 
+
+
+
  set @orderLineItemID = 
 
 /* get parameters from URL */
@@ -30,6 +33,10 @@
     set @price = Field(@productRow,"price")
  endif
 
+
+
+
+
 /* write order in order data extension */
  set @addRow = InsertData(@orderDE,'Order_ID',@orderID,'Order_ContactID',TBD,'Order_Value',@price,'Order_DateCreated',Now(),'Order_DateCompleted',???)
 
@@ -37,7 +44,7 @@
  set @addRow = InsertData(@orderItemsDE,'OrderLineItem_ID',@orderLineItemID,'Order_ID',@orderID,'Product_ID',@sku,'OrderLineItem_Price',@price)
 
 /* trigger send */
-
+ 
 ]%%
 
 
