@@ -15,5 +15,12 @@ var data = UpdateDE.Rows.Retrieve(filter);
 var data_len = data.length
 Write("<br>rows: " + data_len)
 
+for (var i = 0; i < data.length; i++) {
+
+    var gewinnspielName = data[i].gewinnspielName;
+
+}
+
+Write("gewinnspielName: " + gewinnspielName)
 
 </script>
