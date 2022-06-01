@@ -21,9 +21,10 @@ var config = {
 
 var result = api.createItem("DataFolder", config); 
 
-Platform.Function.Stringify(createResult.Results[0].NewID);
+var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
   
   
-Write("newFolderId: " + newFolderId);
+Write("result: " + result);
+Write("newFolderId: " + newId);
 
 </script>
