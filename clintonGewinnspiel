@@ -110,16 +110,5 @@ var propsDE = {
 var result = api.createItem("DataExtension", propsDE); 
 
 
-//==================================
-// Update Query Activity 1
-//==================================
-
-var prox = new Script.Util.WSProxy();
-    var result = prox.updateItem("QueryDefinition", {
-      ObjectID: queryObjectId,
-      DataExtensionTarget : {
-        Name : deName,
-        CustomerKey : deName
-      }
 
 </script>
