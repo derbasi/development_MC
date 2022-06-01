@@ -22,4 +22,6 @@ Write("gewinnspielName: " + gewinnspielName)
 var folderName = gewinnspielName
 var deName = gewinnspielName + "_send"
 
+Write("folderName: " + folderName)
+Write("deName: " + deName)
 </script>
