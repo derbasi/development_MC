@@ -9,9 +9,9 @@ var queryObjectId1 = "";
 var queryObjectId2 = "";
 
 // get gewinnspielName
-var nameDE = DataExtension.Init("gewinnspielName");
-var filter = { Property: "check", SimpleOperator: "equal", Value: "true" };
-var data = nameDE.Rows.Retrieve(filter);
+var UpdateDE = DataExtension.Init("gewinnspielSource");
+var filter = { Property: "email", SimpleOperator: "like", Value: "@" };
+var data = UpdateDE.Rows.Retrieve(filter);
 var data_len = data.length
 Write("<br>rows: " + data_len)
 
@@ -20,9 +20,5 @@ for (var i = 0; i < 1 ; i++) {
 }
 
 Write("gewinnspielName: " + gewinnspielName)
-
-// use gewinnspielName for folder and DE names
-var folderName = gewinnspielName
-var deName = gewinnspielName + "_send"
 
 </script>
