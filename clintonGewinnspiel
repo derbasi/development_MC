@@ -7,7 +7,7 @@ var api = new Script.Util.WSProxy();
 
 var parentFolderId = 23234; // Your first parent folder
 var config = {
-    "Name": "MyNewFolder",
+    "Name": "MyNewFolder3",
     "Description": "API Created Folder",
     "ParentFolder": {
         ID : parentFolderId,
@@ -21,7 +21,7 @@ var config = {
 
 var result = api.createItem("DataFolder", config); 
 
-var newFolderId = Platform.Function.Stringify(createResult.Results[0].NewID);
+Platform.Function.Stringify(createResult.Results[0].NewID);
   
   
 Write("newFolderId: " + newFolderId);
