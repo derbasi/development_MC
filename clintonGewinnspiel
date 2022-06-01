@@ -56,8 +56,8 @@ var fields = [
 ];
 
 var propsDE = {
-    "CustomerKey": "newDataExtensionTEST",
-    "Name": "newDataExtensionTEST",
+    "CustomerKey": "newDataExtensionTEST2",
+    "Name": "newDataExtensionTEST2",
     "CategoryID": 24265,
     "Fields": fields
 };
