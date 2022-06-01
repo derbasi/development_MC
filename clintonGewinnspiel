@@ -1,24 +1,18 @@
-<script runat=server>
-Platform.Load("Core", "1.1.5");
-var api = new Script.Util.WSProxy();
-
-
-// define global variables
-var parentFolderId = 23234;
-var queryObjectId1 = "";
-var queryObjectId2 = "";
-
-// get gewinnspielName
-var UpdateDE = DataExtension.Init("gewinnspielName");
-var filter = { Property: "check", SimpleOperator: "equals", Value: "true" };
-var data = UpdateDE.Rows.Retrieve(filter);
-var data_len = data.length
-Write("<br>rows: " + data_len)
-
-for (var i = 0; i < 1 ; i++) {
-    var gewinnspielName = data[i].gewinnspielName;
-}
-
-Write("gewinnspielName: " + gewinnspielName)
-
+<script language="javascript" runat="server">
+  Platform.Load("core", "1.1");
+    try {
+    var prox = new Script.Util.WSProxy();
+    var result = prox.retrieve(
+      "QueryDefinition", 
+      ["ObjectID"],                      // Status, DataExtensionTarget.Name, ObjectID, CustomerKey, CreatedDate, TargetUpdateType 
+      {
+        Property: "Name",                   // Select search parameters with Name, ObjectID, CustomerKey
+        SimpleOperator: "equals",
+        Value: "getGewinnspielName"
+      }
+    );
+    Write(Stringify(result));
+  } catch(e) {
+    Write(Stringify(e));
+  }
 </script>
