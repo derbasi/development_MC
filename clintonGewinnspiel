@@ -10,7 +10,7 @@ var queryObjectId2 = "";
 
 // get gewinnspielName
 var UpdateDE = DataExtension.Init("gewinnspielName");
-var filter = { Property: "check", SimpleOperator: "equal", Value: "true" };
+var filter = { Property: "check", SimpleOperator: "equals", Value: "true" };
 var data = UpdateDE.Rows.Retrieve(filter);
 var data_len = data.length
 Write("<br>rows: " + data_len)
