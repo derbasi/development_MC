@@ -3,12 +3,10 @@ Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
 
-
-
-// define variables
-var folderName = "MyNewFolder5000"
+// define global variables
 var parentFolderId = 23234;
 
+// get gewinnspielName
 var UpdateDE = DataExtension.Init("gewinnspielSource");
 var filter = { Property: "email", SimpleOperator: "like", Value: "@" };
 var data = UpdateDE.Rows.Retrieve(filter);
@@ -16,11 +14,12 @@ var data_len = data.length
 Write("<br>rows: " + data_len)
 
 for (var i = 0; i < 1 ; i++) {
-
     var gewinnspielName = data[i].gewinnspielName;
-
 }
 
 Write("gewinnspielName: " + gewinnspielName)
+
+var folderName = gewinnspielName
+var deName = gewinnspielName + "_send"
 
 </script>
