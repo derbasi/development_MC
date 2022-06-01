@@ -3,7 +3,7 @@ Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
 // define variables
-var folderName = "MyNewFolder5001"
+var folderName = "MyNewFolder5000"
 var parentFolderId = 23234;
 
 
@@ -25,26 +25,11 @@ var props = {
     "ContentType": "dataextension"
 };
 // execute folder creation
-var result = api.createItem("DataFolder", props); 
+var createResult = api.createItem("DataFolder", props); 
 
+var newId = Platform.Function.Stringify(createResult.Results[0].NewID);
+  Write("newID: " + newId)
 
-
-try {
-
-     ContentJSONObj = Platform.Function.ParseJSON(result);
-
-  } catch (e) {
-
-     Platform.Function.RaiseError("Could not parse JSON payload", true);
-
-  }
-
-  if (debug) {
-   Write("<br>ContentJSONObj: " + Stringify(ContentJSONObj))
-  }
-
-
-  
 // ==================================
 // Create Data Extension
 // ==================================
