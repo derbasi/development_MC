@@ -27,8 +27,23 @@ var props = {
 // execute folder creation
 var result = api.createItem("DataFolder", props); 
 
-var newID = Platform.Function.ParseJSON(result)
-Write("newID: " + newID)
+
+
+try {
+
+     ContentJSONObj = Platform.Function.ParseJSON(result);
+
+  } catch (e) {
+
+     Platform.Function.RaiseError("Could not parse JSON payload", true);
+
+  }
+
+  if (debug) {
+   Write("<br>ContentJSONObj: " + Stringify(ContentJSONObj))
+  }
+
+
   
 // ==================================
 // Create Data Extension
