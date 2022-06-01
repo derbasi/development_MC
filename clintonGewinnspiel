@@ -5,7 +5,8 @@ var api = new Script.Util.WSProxy();
 
 // define global variables
 var parentFolderId = 23234;
-var queryObjectId = "3279dbe3-58e4-44f8-a687-b16fb7223652";
+var queryObjectId = "2480b1be-86aa-4036-b44a-51e798209063";
+
 
 // get gewinnspielName
 var UpdateDE = DataExtension.Init("gewinnspielName");
