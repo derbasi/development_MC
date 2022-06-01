@@ -117,8 +117,8 @@ var result = api.createItem("DataExtension", propsDE);
 try {
 
     var updateQuery = api.updateItem("QueryDefinition", {
-      ObjectID: queryObjectId, 
-      DataExtensionTarget : {
+      "ObjectID": queryObjectId, 
+      "DataExtensionTarget" : {
         "Name" : deName,
         "CustomerKey" : deName
       }
