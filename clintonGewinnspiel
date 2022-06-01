@@ -27,7 +27,8 @@ var props = {
 // execute folder creation
 var result = api.createItem("DataFolder", props); 
 
-Write(Stringify(Platform.Function.ParseJSON(result.Response[0])))
+var newID = Platform.Function.ParseJSON(result)
+Write("newID: " + newID)
   
 // ==================================
 // Create Data Extension
