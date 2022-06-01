@@ -2,12 +2,13 @@
 Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
+var folderName = "MyNewFolder5000"
 
 // Create new Folder
 
 var parentFolderId = 23234; // Your first parent folder
 var props = {
-    "Name": "MyNewFolder",
+    "Name": folderName,
     "Description": "API Created Folder",
     "ParentFolder": {
         ID : parentFolderId,
@@ -21,6 +22,18 @@ var props = {
 // execute folder creation
 var result = api.createItem("DataFolder", props); 
   
-var catId = result.Results[0].CategoryID;
-Write("catId: " + catId);
+
+
+
+
+var req = api.retrieve("DataFolder", ["ID"], {
+    Property: "Name",
+    SimpleOperator: "equals",
+    Value: folderName
+});
+
+var newId = req.Results[0].NewID;
+Write("newId: " + newId);
+
+
 </script>
