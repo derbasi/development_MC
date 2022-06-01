@@ -18,7 +18,7 @@ for (var i = 0; i < 1 ; i++) {
     var gewinnspielName = data[i].gewinnspielName;
 }
 
-Write("gewinnspielName: " + gewinnspielName)
+Write("<br>gewinnspielName: " + gewinnspielName)
 
 // use gewinnspielName for folder and DE names
 var folderName = gewinnspielName
@@ -128,5 +128,7 @@ try {
         Write(Stringify(e));
     }
 
+var responseQuery = (Stringify(updateQuery));
+Write("<br>responseQuery: " + responseQuery);
 
 </script>
