@@ -9,7 +9,7 @@ var queryObjectId1 = "";
 var queryObjectId2 = "";
 
 // get gewinnspielName
-var UpdateDE = DataExtension.Init("gewinnspielSource");
+var UpdateDE = DataExtension.Init("gewinnspielName");
 var filter = { Property: "email", SimpleOperator: "like", Value: "@" };
 var data = UpdateDE.Rows.Retrieve(filter);
 var data_len = data.length
