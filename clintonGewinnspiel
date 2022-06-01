@@ -20,8 +20,7 @@ var props = {
 };
 // execute folder creation
 var result = api.createItem("DataFolder", props); 
-var newId = Platform.Function.Stringify(CreateResponse.Results[0].NewID);
-
-  Write("newId: " + newId);
-
+  
+var catId = result.Results[0].CategoryID;
+Write("catId: " + catId);
 </script>
