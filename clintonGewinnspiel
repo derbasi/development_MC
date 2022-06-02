@@ -114,6 +114,11 @@ var fields = [
         "Name": "gewinnspielName",
         "FieldType": "Text",
         "MaxLength": 200
+    },
+    {
+        "Name": "country",
+        "FieldType": "Text",
+        "MaxLength": 50
     }
 
 ];
