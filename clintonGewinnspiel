@@ -8,6 +8,8 @@ var req = api.retrieve("DataFolder", ["ID"], {
     Value: "Hasensuche"
 });
 
-Write("req: " + req);
+var result = req.Results[0].ID;
+
+Write("result: " + result);
 
 </script>
