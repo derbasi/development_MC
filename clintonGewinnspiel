@@ -6,6 +6,7 @@ var api = new Script.Util.WSProxy();
 // Create Data Extension
 //==================================
 
+try{
 
 // define fields
 var fields = [
@@ -67,5 +68,8 @@ var propsDE = {
 // execute Data Extension creation
 var result = api.createItem("DataExtension", propsDE); 
 
+}catch(e){
+Write(Stringify(e));
+}
 
 </script>
