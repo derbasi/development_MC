@@ -60,10 +60,10 @@ var fields = [
 ];
 
 var propsDE = {
-    "CustomerKey": "ladida1",
-    "Name": "ladida1",
-    "IsSendable" = "true",
-    "Fields": fields
+    CustomerKey: "ladida1",
+    Name: "ladida1",
+    Fields: fields
+
 };
 
 // execute Data Extension creation
