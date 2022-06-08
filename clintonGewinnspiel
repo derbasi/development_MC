@@ -62,6 +62,7 @@ var fields = [
 var propsDE = {
     "CustomerKey": "ladida1",
     "Name": "ladida1",
+    "IsSendable" = "true",
     "Fields": fields
 };
 
