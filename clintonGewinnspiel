@@ -62,7 +62,15 @@ var fields = [
 var propsDE = {
     CustomerKey: "ladida1",
     Name: "ladida1",
-    Fields: fields
+    Fields: fields,
+    IsSendable: "true",
+    SendableDataExtensionField: {
+    Name: "Email",
+    DataType: "EmailAddress"
+      },
+      SendableSubscriberField: {
+        Name: "Subscriber Key"
+      }
 
 };
 
