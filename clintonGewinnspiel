@@ -3,70 +3,6 @@ Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
 
-// define global variables
-var parentFolderId = 23234;
-var queryObjectId = "2480b1be-86aa-4036-b44a-51e798209063";
-
-
-// get gewinnspielName and country
-var UpdateDE = DataExtension.Init("gewinnspielName");
-var filter = { Property: "check", SimpleOperator: "equals", Value: "true" };
-var data = UpdateDE.Rows.Retrieve(filter);
-
-var data_len = data.length
-Write("<br>rows: " + data_len)
-
-for (var i = 0; i < 1 ; i++) {
-    var gewinnspielName = data[i].gewinnspielName;
-    var country = data[i].country;
-} 
-
-//check for already existing folder
-var req = api.retrieve("DataFolder", ["ID"], {
-    Property: "Name",
-    SimpleOperator: "equals",
-    Value: gewinnspielName
-});
-
-var existingFolderId = req.Results[0].ID;
-
-// set name for folder
-if (existingFolderId) {
-var folderId = existingFolderId;
-Write("<br>existingFolderId: " + existingFolderId);
-
-} else {
-
-//==================================
-// Create new Folder
-//==================================
-
-
-var props = {
-    "Name": gewinnspielName,
-    "Description": "API Created Folder",
-    "ParentFolder": {
-        ID : parentFolderId,
-        IDSpecified: true
-    },
-    "IsActive": true,
-    "IsEditable": true,
-    "AllowChildren": true,
-    "ContentType": "dataextension"
-};
-// execute folder creation
-var createResult = api.createItem("DataFolder", props); 
-// get categoryID from response
-var folderId = Platform.Function.Stringify(createResult.Results[0].NewID);
-Write("<br>folderId: " + folderId);
-
-};
-
-
-// set name for dataExtesion
-var deName = gewinnspielName + "_" + country + "_send"
-
-
 //==================================
 // Create Data Extension
 //==================================
@@ -123,36 +59,21 @@ var fields = [
 
 ];
 
+
 var propsDE = {
-    "CustomerKey": deName,
-    "Name": deName,
-    "CategoryID": folderId,
-    "Fields": fields
+    "CustomerKey": "ladida1",
+    "Name": "ladida1",
+    "IsSendable": "true",
+    "Fields": fields,
+    "SendableDataExtensionField": {
+    "Name": "subscriberKey"
+    },
+    SendableSubscriberField: {
+        "Name": "Subscriber Key"
+    };
 };
 
 // execute Data Extension creation
 var result = api.createItem("DataExtension", propsDE); 
-
-
-//==================================
-// Update Query Activity 1
-//==================================
-
-try {
-
-    var updateQuery = api.updateItem("QueryDefinition", {
-      "ObjectID": queryObjectId, 
-      "DataExtensionTarget" : {
-        "Name" : deName,
-        "CustomerKey" : deName
-      }
-    });
-
-    } catch(e) {
-        Write(Stringify(e));
-    }
-
-var responseQuery = (Stringify(updateQuery));
-Write("<br>responseQuery: " + responseQuery);
 
 </script>
