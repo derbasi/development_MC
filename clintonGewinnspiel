@@ -68,7 +68,7 @@ var propsDE = {
     "SendableDataExtensionField": {
     "Name": "subscriberKey"
     },
-    SendableSubscriberField: {
+    "SendableSubscriberField": {
         "Name": "Subscriber Key"
     };
 };
