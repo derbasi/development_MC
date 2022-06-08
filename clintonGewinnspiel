@@ -2,12 +2,10 @@
 Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
-
 //==================================
 // Create Data Extension
 //==================================
 
-try{
 
 // define fields
 var fields = [
@@ -60,25 +58,14 @@ var fields = [
 
 ];
 
-
 var propsDE = {
     "CustomerKey": "ladida1",
     "Name": "ladida1",
-    "IsSendable": "true",
-    "Fields": fields,
-    "SendableDataExtensionField": {
-    "Name": "subscriberKey"
-    },
-    "SendableSubscriberField": {
-        "Name": "Subscriber Key"
-    };
+    "Fields": fields
 };
 
 // execute Data Extension creation
 var result = api.createItem("DataExtension", propsDE); 
 
-} catch(e) {
-    Write("error: " + e)
-}
 
 </script>
