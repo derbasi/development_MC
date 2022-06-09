@@ -25,5 +25,6 @@ while(id > 0) {
 }
 
 var result = list.join(" / ");
+Write("result: " + result)
 
 </script>
