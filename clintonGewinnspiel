@@ -2,7 +2,7 @@
 Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
-var deName = "gewTEST_DE_send"
+var deName = "gewTEST_DE_senddnde"
 
 var req = api.retrieve("DataExtension", ["ObjectID"], {
     Property: "DataExtension.CustomerKey",
