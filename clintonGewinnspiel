@@ -6,7 +6,7 @@ var api = new Script.Util.WSProxy();
 var req = api.retrieve("DataFolder", ["Name","ParentFolder.ID"], { 
         Property: "ID", 
         SimpleOperator: "equals", 
-        Value: 24443 
+        Value: 23329 
     });
 
     var name = req.Results[0].Name;
