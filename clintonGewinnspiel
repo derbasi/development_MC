@@ -58,16 +58,10 @@ var props = {
 };
 // execute folder creation
 
-try {
-
 var createResult = api.createItem("DataFolder", props); 
 // get categoryID from response
 var folderId = Platform.Function.Stringify(createResult.Results[0].NewID);
 Write("<br>new folderId: " + folderId);
-
-    } catch(e) {
-        Write("folder error: " + Stringify(e));
-    }
 
 };
 
