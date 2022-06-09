@@ -20,7 +20,7 @@ for (var i = 0; i < 1 ; i++) {
     var gewinnspielName = data[i].gewinnspielName;
     var country = data[i].country;
 
-    Write("gewinnspielName: " + gewinnspielName)
+    Write("<br>gewinnspielName: " + gewinnspielName)
 } 
 
 //check for already existing folder
