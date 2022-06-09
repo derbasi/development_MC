@@ -3,16 +3,12 @@ Platform.Load("Core", "1.1.5");
 var api = new Script.Util.WSProxy();
 
 
-var req = api.retrieve("DataFolder", ["Name","ParentFolder.ID"], { 
-        Property: "ID", 
-        SimpleOperator: "equals", 
-        Value: 23329 
-    });
+var config = {
+    "CustomerKey": "003-by-the-sea_DE_send",
+    "CategoryID": "23234"
+};
 
-    var name = req.Results[0].Name;
-    var id = req.Results[0].ParentFolder.ID;
+var result = api.updateItem("DataExtension", config);
 
-    Write("<br>name: " + name)
-    Write("<br>id: " + id)
 
 </script>
