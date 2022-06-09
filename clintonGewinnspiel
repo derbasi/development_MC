@@ -13,21 +13,17 @@ var UpdateDE = DataExtension.Init("gewinnspielName");
 var filter = { Property: "check", SimpleOperator: "equals", Value: "true" };
 var data = UpdateDE.Rows.Retrieve(filter);
 
-var data_len = data.length;
-Write("<br>rows: " + data_len);
+var data_len = data.length
+Write("<br>rows: " + data_len)
 
 for (var i = 0; i < 1 ; i++) {
     var gewinnspielName = data[i].gewinnspielName;
     var country = data[i].country;
 
-    Write("<br>gewinnspielName: " + gewinnspielName);
-};
+    Write("<br>gewinnspielName: " + gewinnspielName)
+} 
 
-
-//==================================
 //check for already existing folder
-
-
 var req = api.retrieve("DataFolder", ["ID"], {
     Property: "Name",
     SimpleOperator: "equals",
@@ -43,9 +39,9 @@ Write("<br>existing FolderId: " + existingFolderId);
 
 } else {
 
-
 //==================================
 // Create new Folder
+//==================================
 
 
 var props = {
@@ -74,12 +70,11 @@ Write("<br>folderId: " + folderId);
 
 //==================================
 // Check if Data Extension exists
-
+//==================================
 
 // set name for dataExtesion
 var deName = gewinnspielName + "_" + country + "_send"
 
-// check if data extension exists
 var req = api.retrieve("DataExtension", ["ObjectID"], {
     Property: "DataExtension.CustomerKey",
     SimpleOperator: "equals",
@@ -93,10 +88,9 @@ if (objectId) {
 
 } else {
 
-
 //==================================
 // Create Data Extension
-
+//==================================
 
 // define fields
 var fields = [
@@ -161,7 +155,7 @@ var propsDE = {
       },
       SendableSubscriberField: {
         Name: "Subscriber Key"
-      };
+      }
 
 };
 
@@ -173,7 +167,7 @@ var result = api.createItem("DataExtension", propsDE);
 
 //==================================
 // Update Query Activity 1
-
+//==================================
 
 try {
 
