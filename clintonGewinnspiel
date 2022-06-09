@@ -12,6 +12,9 @@ var req = api.retrieve("DataExtension", ["Name","CategoryID"], {
 var list = [req.Results[0].Name];
 var id = req.Results[0].CategoryID;
 
+Write("<br>list: " + list)
+Write("<br>id: " + id)
+
 while(id > 0) {
 
     var req = api.retrieve("DataFolder", ["Name","ParentFolder.ID"], { 
