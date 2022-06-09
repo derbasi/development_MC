@@ -71,6 +71,8 @@ Write("<br>new folderId: " + folderId);
 
 };
 
+Write("<br>folderId: " + folderId);
+
 
 // set name for dataExtesion
 var deName = gewinnspielName + "_" + country + "_send"
