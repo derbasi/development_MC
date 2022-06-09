@@ -55,10 +55,17 @@ var props = {
     "ContentType": "dataextension"
 };
 // execute folder creation
+
+try {
+
 var createResult = api.createItem("DataFolder", props); 
 // get categoryID from response
 var folderId = Platform.Function.Stringify(createResult.Results[0].NewID);
 Write("<br>folderId: " + folderId);
+
+    } catch(e) {
+        Write("folder error: " + Stringify(e));
+    }
 
 };
 
