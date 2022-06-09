@@ -1,3 +1,7 @@
+<script runat=server>
+Platform.Load("Core", "1.1.5");
+var api = new Script.Util.WSProxy();
+
 var customerKey = "003-by-the-sea_DE_send"
 var req = api.retrieve("DataExtension", ["Name","CategoryID"], {
     Property: "CustomerKey",
@@ -21,3 +25,5 @@ while(id > 0) {
 }
 
 var result = list.join(" / ");
+
+</script>
