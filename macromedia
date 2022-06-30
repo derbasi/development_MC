@@ -153,5 +153,6 @@ IF @subkey!="" THEN
 ENDIF
 ]%%
 
-unsub_sub: %%=v(@status)=%%
-update_sub: %%=v(@update_sub)=%%
+<br>response: %%=v(@response)=%%
+<br>unsub_sub: %%=v(@status)=%%
+<br>update_sub: %%=v(@update_sub)=%%
