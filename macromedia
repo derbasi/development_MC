@@ -1,10 +1,10 @@
 <script runat="server">
       var subkey = "0035p00003m8GxgAAE";
       var allSubscribersList = List.Init("All Subscribers - 613");
-
+      var status = allSubscribersList.Subscribers.Update(subkey,"Active");
 
       Write("<br>hallo: " + "hello WORLD!")
       Write("<br>subkey: " + subkey)
-
+      Write("<br>allSubscribersList: " + allSubscribersList)
       Write("<br>status: " + status)
       </script>
