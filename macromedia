@@ -1,12 +1,34 @@
-<script runat="server">
-      var subkey = "0035p00003m8GxgAAE";
-      var allSubscribersList = List.Init("78");
-      var status = allSubscribersList.Subscribers.Update(subkey,"Active");
+%%[
 
-      Write("<br>hallo: " + "hello WORLD!")
-      Write("<br>subkey: " + subkey)
-      Write("<br>allSubscribersList: " + allSubscribersList)
-      Write("<br>status: " + status)
-      </script>
+SET @accountId = "510004565"
+SET @subkey = "0035p00003m8GxgAAE"
 
 
+/* resubscribe */
+SET @status = "Active"
+
+/* Update the All Subscribers list */ 
+SET @ll_sub = CreateObject("Subscriber")
+SetObjectProperty(@ll_sub,"SubscriberKey", @subkey)
+
+SET @client = CreateObject("ClientID")
+SetObjectProperty(@client, "ID", @accountId)
+SetObjectProperty(@client, "IDSpecified", "true")
+SetObjectProperty(@ll_sub, "Client", @client)
+
+SetObjectProperty(@ll_sub,"Status", @status)
+SET @options = CreateObject("UpdateOptions")
+SET @save = CreateObject("SaveOption")
+SetObjectProperty(@save,"SaveAction","UpdateAdd")
+SetObjectProperty(@save,"PropertyName","Status")
+AddObjectArrayItem(@options,"SaveOptions", @save)
+     
+SET @update_sub = InvokeUpdate(@ll_sub, @update_sub_status, @update_sub_errorcode, @options)
+	
+]%%
+
+status: %%=v(@status)=%%
+<br>update_sub: %%=v(@update_sub)=%%
+<br>update_sub_status: %%=v(@update_sub_status)=%%
+<br>update_sub_errorcode: %%=v(@update_sub_errorcode)=%%
+<br>options: %%=v(@options)=%%
