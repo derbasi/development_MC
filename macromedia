@@ -124,29 +124,7 @@ IF @subkey!="" THEN
       ENDIF
    ENDIF
    
-   IF not empty(@subkey) AND not empty(@accountId) THEN 
-      /* resubscribe directly */
-      SET @resubStatus = "Active"
-
-      /* Update the All Subscribers list */ 
-      SET @ll_sub = CreateObject("Subscriber")
-      SetObjectProperty(@ll_sub,"SubscriberKey", @subkey)
-
-      SET @client = CreateObject("ClientID")
-      SetObjectProperty(@client, "ID", @accountId)
-      SetObjectProperty(@client, "IDSpecified", "true")
-      SetObjectProperty(@ll_sub, "Client", @client)
-
-      SetObjectProperty(@ll_sub,"Status", @resubStatus)
-      SET @options = CreateObject("UpdateOptions")
-      SET @save = CreateObject("SaveOption")
-      SetObjectProperty(@save,"SaveAction","UpdateAdd")
-      SetObjectProperty(@save,"PropertyName","Status")
-      AddObjectArrayItem(@options,"SaveOptions", @save)
-           
-      SET @update_sub = InvokeUpdate(@ll_sub, @update_sub_status, @update_sub_errorcode, @options)
-
-   ENDIF
+  
    /* Unsubscribe Process--end */
 
    /*Get the Unsubscribe sucess page url based on Brand and langaue from SFMC DE-UnsubscribeSuccessRedirection*/
