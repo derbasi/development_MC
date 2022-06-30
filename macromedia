@@ -1,10 +1,24 @@
-<script runat="server">
-      var subkey = "0035p00003m8GxgAAE";
-      var allSubscribersList = List.Init("All Subscribers - 613");
-      var status = allSubscribersList.Subscribers.Update(subkey,"Active");
+<script runat="server">    
+    Platform.Load("core","1.1.1");
+    
+    var subkey = "0035p00003m8GxgAAE";
+    var prox = new Script.Util.WSProxy();
 
-      Write("<br>hallo: " + "hello WORLD!")
-      Write("<br>subkey: " + subkey)
-      Write("<br>allSubscribersList: " + allSubscribersList)
-      Write("<br>status: " + status)
-      </script>
+    var sub = {
+        SubscriberKey: subkey,
+        Lists: [{
+            ID: 'All Subscribers - 613',
+            Status: 'Active'
+        }]
+    };
+    var options = { 
+        SaveOptions: [{
+          PropertyName: "*",
+          SaveAction: "Update"
+        }]
+    };
+
+    var resp = prox.createItem("Subscriber", sub, options);
+    
+    Write("Response: " + Stringify(resp));
+</script>     
