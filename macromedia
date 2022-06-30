@@ -23,7 +23,39 @@ SET @subkey=_subscriberkey
 IF @subkey=="" THEN
    SET @subkey=Requestparameter("subscriberkey")
 ENDIF
- 
+
+/* log unsub Event */
+   IF not empty(@subkey) AND not empty(@accountId) AND not empty(@jobId) THEN
+      SET @obj = CreateObject("ExecuteRequest")
+
+      /* API Property generieren und Subscriber Key als Name-Value paar hinzufügen. */
+      SetObjectProperty(@obj,"Name","LogUnsubEvent")
+      SET @obj_prop = CreateObject("APIProperty")
+      SetObjectProperty(@obj_prop, "Name", "SubscriberKey")
+      SetObjectProperty(@obj_prop, "Value", @subkey)
+      AddObjectArrayItem(@obj, "Parameters", @obj_prop)
+
+      /* child context herstellen anhand der accountId (=MID). */
+      SET @obj_prop = CreateObject("ClientID")
+      SetObjectProperty(@obj_prop, "ID", @accountId)
+      SetObjectProperty(@obj_prop, "IDSpecified", "true")
+      SetObjectProperty(@obj, "Client", @obj_prop)
+
+      /* JobiD als Name-Value paar hinzufügen. */
+      SET @obj_prop = CreateObject("APIProperty")
+      SetObjectProperty(@obj_prop, "Name", "JobID")
+      SetObjectProperty(@obj_prop, "Value", @jobId)
+      AddObjectArrayItem(@obj, "Parameters", @obj_prop)
+
+      /* intiate optout */
+      IF @environment != "test" THEN
+       SET @obj_statusCode = InvokeExecute(@obj)
+       SET @response = Row(@obj_statusCode, 1)
+       SET @status = Field(@response,"StatusMessage")
+       SET @error = Field(@response,"ErrorCode")
+      ENDIF
+   ENDIF
+
 SET @object=''
 SET @isContact = Substring(@subkey,1,3)
 /*Check if the subscriber is contact*/
@@ -91,38 +123,8 @@ IF @subkey!="" THEN
          NEXT @i
       ENDIF
    ENDIF
-
-   /* log unsub Event */
-   IF not empty(@subkey) AND not empty(@accountId) AND not empty(@jobId) THEN
-      SET @obj = CreateObject("ExecuteRequest")
-
-      /* API Property generieren und Subscriber Key als Name-Value paar hinzufügen. */
-      SetObjectProperty(@obj,"Name","LogUnsubEvent")
-      SET @obj_prop = CreateObject("APIProperty")
-      SetObjectProperty(@obj_prop, "Name", "SubscriberKey")
-      SetObjectProperty(@obj_prop, "Value", @subkey)
-      AddObjectArrayItem(@obj, "Parameters", @obj_prop)
-
-      /* child context herstellen anhand der accountId (=MID). */
-      SET @obj_prop = CreateObject("ClientID")
-      SetObjectProperty(@obj_prop, "ID", @accountId)
-      SetObjectProperty(@obj_prop, "IDSpecified", "true")
-      SetObjectProperty(@obj, "Client", @obj_prop)
-
-      /* JobiD als Name-Value paar hinzufügen. */
-      SET @obj_prop = CreateObject("APIProperty")
-      SetObjectProperty(@obj_prop, "Name", "JobID")
-      SetObjectProperty(@obj_prop, "Value", @jobId)
-      AddObjectArrayItem(@obj, "Parameters", @obj_prop)
-
-      /* intiate optout */
-      IF @environment != "test" THEN
-       SET @obj_statusCode = InvokeExecute(@obj)
-       SET @response = Row(@obj_statusCode, 1)
-       SET @status = Field(@response,"StatusMessage")
-       SET @error = Field(@response,"ErrorCode")
-      ENDIF
-      
+   
+   IF not empty(@subkey) AND not empty(@accountId) THEN 
       /* resubscribe directly */
       SET @resubStatus = "Active"
 
