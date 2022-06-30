@@ -1,5 +1,5 @@
 <script runat="server">
-      var subkey = Variable.GetValue("@subkey");
+      var subkey = "0035p00003m8GxgAAE";
       var allSubscribersList = List.Init("All Subscribers - 613");
 
 
