@@ -1,1 +1,8 @@
-hello!
+%%<script runat="server">
+      var subkey = Variable.GetValue("@subkey");
+      var allSubscribersList = List.Init("All Subscribers - 613");
+
+
+      Write("<br>hallo: " + "hello WORLD!")
+
+      </script>%%
