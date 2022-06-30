@@ -1,34 +1,156 @@
 %%[
+/*This page is to unsubscribe account or contact or lead*/
+/*Get request parameters-language and Brand for unsubscribe*/
+SET @brand=Requestparameter("Brand")
+SET @lan=Requestparameter("lan")
 
-SET @accountId = "510004565"
-SET @subkey = "0035p00003m8GxgAAE"
+/* variables for log unsub event */
+SET @accountId = Requestparameter("mid")
+SET @jobId = Requestparameter("jid")
 
+/* set default MID */
+IF @accountId == '' THEN
+   SET @accountId = "510004565"
+ENDIF
 
-/* resubscribe */
-SET @status = "Active"
+/*Default Language is DE*/
+IF @lan=="" THEN
+   SET @lan="de" 
+ENDIF
 
-/* Update the All Subscribers list */ 
-SET @ll_sub = CreateObject("Subscriber")
-SetObjectProperty(@ll_sub,"SubscriberKey", @subkey)
+/*If unsubscribe page is opened from email, it will take subscriber key to be unsubscriberd.If not, Pass the subscriber key to be unsubscribered as request parameter*/
+SET @subkey=_subscriberkey
+IF @subkey=="" THEN
+   SET @subkey=Requestparameter("subscriberkey")
+ENDIF
+ 
+SET @object=''
+SET @isContact = Substring(@subkey,1,3)
+/*Check if the subscriber is contact*/
+IF @subkey!="" THEN
+   IF @isContact=='003' THEN
+      SET @object='Contact'
+   ELSE
+   /*Check if the subscriber is account*/
+      SET @accountRows = RetrieveSalesforceObjects("Account","Id","LeadID__pc", "=",@subkey,"IsPersonAccount","=","true")
+      IF RowCount(@accountRows) > 0 THEN
+         SET @contactRow = Row(@accountRows, 1)
+         SET @Id = Field(@contactRow,"Id")
+         SET @object='Account'
+         SET @subkey=@Id
+      /*Check for converted Account-->>End*/
+      ELSE
+      /*Check for converted contact-->>Start*/
+         SET @contactRows = RetrieveSalesforceObjects("Contact","Id","LeadID__c", "=",@subkey)
+         IF RowCount(@contactRows) > 0 THEN
+            SET @contactRow = Row(@contactRows, 1)
+            SET @Id = Field(@contactRow,"Id")
+            SET @object='Contact'
+            SET @subkey=@Id 
+         ELSE
+            IF @isContact=='001' THEN
+               SET @object='Account'
+            ELSE
+               SET @leadRows = RetrieveSalesforceObjects("Lead","Id","Id", "=",@subkey)
+                  IF RowCount(@leadRows) > 0 THEN
+                     SET @leadRow = Row(@leadRows, 1)
+                     SET @Id = Field(@leadRow,"Id")
+                     SET @object='Lead'
+                  ENDIF
+            ENDIF
+               /*Check for converted contact-->>End*/
+         ENDIF     
+      ENDIF
+   ENDIF
+   outputline(concat("Object name-->",@object))
+  
+  
+   /* Unsubscribe Process--start */
+   IF @object!='' THEN
+      /*Get the list to be unsubscribed for the brand. These are available in DE-MasterSubscriptionList*/
+      SET @sublist=LookupRows("MasterSubscriptionList","Brand",@brand,"IsActive","True")
+      IF RowCount(@sublist)>0 THEN
+         FOR @i=1 to RowCount(@sublist) do
+            SET @SubscriptionId=Field(ROW(@sublist,@i),"Id")
+            SET @SubscriptionName=Field(ROW(@sublist,@i),"SubscriptionName")
+            SET @SubscriptionAPIName=Field(ROW(@sublist,@i),"SubscriptionAPIName")
+            SET @auditdate=SystemDateToLocalDate(now())
+            SET @Action='Unsubscribe'
+            SET @Source='Email'
+            SET @Comment='Unsubscribe from Email through Cloud Page'
+            IF @object=='Account' THEN
+               SET @SubscriptionAPIName=replace(@SubscriptionAPIName,"__c","__pc")
+            ENDIF
+            /*Set the values of the list one by one as false of the Brand from lead, account or contact which ever is the subscriber key*/
+            SET @result = UpdateSingleSalesforceObject(@object,@subkey,@SubscriptionAPIName,'false')
+            outputline(concat("result-->",@result))
+            IF @result>0 THEN
+            /*Insert one audit trail in sfmc DE-UnsubscribeAuditTrail*/
+               SET @ins =insertData("UnsubscribeAuditTrail","SubscriptionId",@SubscriptionId,"SubscriptionName",@SubscriptionName,"Auditdate",@auditdate,"Action",@Action,"Source",@Source,"Comment",@Comment,"SubscriberKey",@subkey)
+            ENDIF
+         NEXT @i
+      ENDIF
+   ENDIF
 
-SET @client = CreateObject("ClientID")
-SetObjectProperty(@client, "ID", @accountId)
-SetObjectProperty(@client, "IDSpecified", "true")
-SetObjectProperty(@ll_sub, "Client", @client)
+   /* log unsub Event */
+   IF not empty(@subkey) AND not empty(@accountId) AND not empty(@jobId) THEN
+      SET @obj = CreateObject("ExecuteRequest")
 
-SetObjectProperty(@ll_sub,"Status", @status)
-SET @options = CreateObject("UpdateOptions")
-SET @save = CreateObject("SaveOption")
-SetObjectProperty(@save,"SaveAction","UpdateAdd")
-SetObjectProperty(@save,"PropertyName","Status")
-AddObjectArrayItem(@options,"SaveOptions", @save)
-     
-SET @update_sub = InvokeUpdate(@ll_sub, @update_sub_status, @update_sub_errorcode, @options)
-	
+      /* API Property generieren und Subscriber Key als Name-Value paar hinzufügen. */
+      SetObjectProperty(@obj,"Name","LogUnsubEvent")
+      SET @obj_prop = CreateObject("APIProperty")
+      SetObjectProperty(@obj_prop, "Name", "SubscriberKey")
+      SetObjectProperty(@obj_prop, "Value", @subkey)
+      AddObjectArrayItem(@obj, "Parameters", @obj_prop)
+
+      /* child context herstellen anhand der accountId (=MID). */
+      SET @obj_prop = CreateObject("ClientID")
+      SetObjectProperty(@obj_prop, "ID", @accountId)
+      SetObjectProperty(@obj_prop, "IDSpecified", "true")
+      SetObjectProperty(@obj, "Client", @obj_prop)
+
+      /* JobiD als Name-Value paar hinzufügen. */
+      SET @obj_prop = CreateObject("APIProperty")
+      SetObjectProperty(@obj_prop, "Name", "JobID")
+      SetObjectProperty(@obj_prop, "Value", @jobId)
+      AddObjectArrayItem(@obj, "Parameters", @obj_prop)
+
+      /* intiate optout */
+      IF @environment != "test" THEN
+       SET @obj_statusCode = InvokeExecute(@obj)
+       SET @response = Row(@obj_statusCode, 1)
+       SET @status = Field(@response,"StatusMessage")
+       SET @error = Field(@response,"ErrorCode")
+      ENDIF
+      
+      /* set user back to active on All Subscriber List */
+      SET @status = "Active"
+      SET @ll_sub = CreateObject("Subscriber")
+      SetObjectProperty(@ll_sub,"SubscriberKey", @subkey)
+
+      SET @client = CreateObject("ClientID")
+      SetObjectProperty(@client, "ID", @accountId)
+      SetObjectProperty(@client, "IDSpecified", "true")
+      SetObjectProperty(@ll_sub, "Client", @client)
+
+      SetObjectProperty(@ll_sub,"Status", @status)
+      SET @options = CreateObject("UpdateOptions")
+      SET @save = CreateObject("SaveOption")
+      SetObjectProperty(@save,"SaveAction","UpdateAdd")
+      SetObjectProperty(@save,"PropertyName","Status")
+      AddObjectArrayItem(@options,"SaveOptions", @save)
+           
+      SET @update_sub = InvokeUpdate(@ll_sub, @update_sub_status, @update_sub_errorcode, @options)
+
+   ENDIF
+   /* Unsubscribe Process--end */
+
+   /*Get the Unsubscribe sucess page url based on Brand and langaue from SFMC DE-UnsubscribeSuccessRedirection*/
+   SET @urlRedirection=LookupRows("UnsubscribeSuccessRedirection","Brand",@brand,"lan",@lan)
+   IF RowCount(@urlRedirection)>0 THEN
+      SET @url=Field(ROW(@urlRedirection,1),"RedirectURL")
+      Redirect(@url)
+   ENDIF
+
+ENDIF
 ]%%
-
-status: %%=v(@status)=%%
-<br>update_sub: %%=v(@update_sub)=%%
-<br>update_sub_status: %%=v(@update_sub_status)=%%
-<br>update_sub_errorcode: %%=v(@update_sub_errorcode)=%%
-<br>options: %%=v(@options)=%%
