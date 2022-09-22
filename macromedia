@@ -1,13 +1,13 @@
-Wir freuen uns, dass du einen Beratungstermin bei uns gebucht hast.\
-\Wann: %%=Format(DateAdd(AttributeValue('Event:StartDateTime'),2,"H"),"dd.MM.yyy hh:mm","Date","de-DE")=%% - %%=Format(DateAdd(AttributeValue('Event:EndDateTime'),2,"H"),"hh:mm","Date","de-DE")=%% Uhr
-\Wo:%%[
-set @variable = AttributeValue('Event:Appointment_Type__c')
-IF @variable == 'People' THEN 
-SET @value = "Am Campus"
-ELSE
-SET @value = "Telefonisch mit unseren Beratern"
-ENDIF
-]%% %%=v(@value)=%% %%=v(@location)=%%
+%%[
+   set @location = AttributeValue("Event:Location_for_Reporting__c")
+   set @assignedTo = AttributeValue("Event:Name_Assigned_To__c")
+   set @email = AttributeValue("Event:Location_Email__c")
+   set @phone = AttributeValue("Event:Location_Phone__c")
+
+]%%
+
+
+%%=v(@value)=%% %%=v(@location)=%%
 \Wir freuen uns auf dich.
 
 \\%%=v(@assignedTo)=%%
