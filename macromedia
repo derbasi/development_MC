@@ -7,10 +7,4 @@
 
 ]%%
 
-%%=v(@sk)=%% 
-<br>%%=v(@value)=%% 
-<br>%%=v(@location)=%%
-<br>%%=v(@assignedTo)=%%
-<br>%%=v(@location)=%%
-<br>%%=v(@email)=%%
-<br>%%=v(@phone)=%%
+%%=v(@sk)=%%
