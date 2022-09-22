@@ -1,10 +1,1 @@
-%%[
-   /* set @location = AttributeValue("Event:Location_for_Reporting__c")
-   set @assignedTo = AttributeValue("Event:Name_Assigned_To__c")
-   set @email = AttributeValue("Event:Location_Email__c")
-   set @phone = AttributeValue("Event:Location_Phone__c") */
-   set @sk = _subscriberKey
-
-]%%
-
-%%=v(@sk)=%%
+hello
