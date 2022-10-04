@@ -2,7 +2,7 @@ hello
 
 %%[
    set @subscriberKey = _subscriberKey
-   set @startDateTime = AttributeValue('Event:StartDateTime')
+
 ]%%
 
 <br>subscriberKey: %%=v(@subscriberKey)=%%
