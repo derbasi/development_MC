@@ -1,9 +1,1 @@
 hello
-
-%%[
-   set @subscriberKey = _subscriberKey
-
-]%%
-
-<br>subscriberKey: %%=v(@subscriberKey)=%%
-<br>startDateTime: %%=v(@startDateTime)=%%
