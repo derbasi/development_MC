@@ -22,6 +22,10 @@ SUMMARY:Beratungstermin Macromedia
 DESCRIPTION:Wir freuen uns, dass du einen Beratungstermin bei uns gebucht hast.\n\nWann: %%=Format(DateAdd(AttributeValue('Event:StartDateTime'),2,"H"),"dd.MM.yyy hh:mm","Date","de-DE")=%% - %%=Format(DateAdd(AttributeValue('Event:EndDateTime'),2,"H"),"hh:mm","Date","de-DE")=%% Uhr\nWo:%%[ set @variable = AttributeValue('Event:Appointment_Type__c') IF @variable == 'People' THEN SET @value = "Am Campus" ELSE SET @value = "Telefonisch mit unseren Beratern" ENDIF ]%% %%=v(@value)=%% %%=v(@location)=%%\n\nWir freuen uns auf dich.\n\n %%=v(@assignedTo)=%%\nBeratung %%=v(@location)=%%\n%%=v(@email)=%%\nTel. %%=v(@phone)=%%
 LOCATION:
 STATUS:CONFIRMED
-BEGIN:VALARM TRIGGER:-PT3H ACTION:DISPLAY END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT180M
+ACTION:DISPLAY
+DESCRIPTION:Reminder
+END:VALARM
 END:VEVENT
 END:VCALENDAR
