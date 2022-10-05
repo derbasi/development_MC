@@ -1,20 +1,14 @@
-%%[
+<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=BeratungsterminMacromedia.ics");</script>%%[
 set @location = AttributeValue("Event:Location_for_Reporting__c") 
 set @assignedTo = AttributeValue("Event:Name_Assigned_To__c") 
 set @email = AttributeValue("Event:Location_Email__c") 
 set @phone = AttributeValue("Event:Location_Phone__c")
 set @startDate = AttributeValue('Event:StartDateTime')
-set @formattedstartDate = Format(@date,"yyyyMMdd'T'HHmmss")
+set @formattedstartDate = Format(@startDate,"yyyyMMdd'T'HHmmss")
 set @endDate = AttributeValue('Event:EndDateTime')
-set @formattedendDate = Format(@date,"yyyyMMdd'T'HHmmss")
+set @formattedendDate = Format(@endDate,"yyyyMMdd'T'HHmmss")
 set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
-]%%
-<br>startDate: %%=v(@startDate)=%%
-<br>endDate: %%=v(@endDate)=%%
-<br>formattedstartDate: %%=v(@formattedstartDate)=%%
-<br>formattedendDate: %%=v(@formattedendDate)=%%
-<br><br>
-BEGIN:VCALENDAR
+]%%BEGIN:VCALENDAR
 PRODID:-//Macromedia//DE
 VERSION:2.0
 CALSCALE:GREGORIAN
