@@ -9,8 +9,11 @@ set @endDate = AttributeValue('Event:EndDateTime')
 set @formattedendDate = Format(@date,"yyyyMMdd'T'HHmmss")
 set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
 ]%%
-%%=v(@startDate)=%%
-%%=v(@endDate)=%%
+<br>startDate: %%=v(@startDate)=%%
+<br>endDate: %%=v(@endDate)=%%
+<br>formattedstartDate: %%=v(@formattedstartDate)=%%
+<br>formattedendDate: %%=v(@formattedendDate)=%%
+<br><br>
 BEGIN:VCALENDAR
 PRODID:-//Macromedia//DE
 VERSION:2.0
