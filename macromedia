@@ -1,4 +1,8 @@
-<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=calVariables.ics");</script>%%[set @location = AttributeValue("Event:Location_for_Reporting__c") set @assignedTo = AttributeValue("Event:Name_Assigned_To__c") set @email = AttributeValue("Event:Location_Email__c") set @phone = AttributeValue("Event:Location_Phone__c")]%%BEGIN:VCALENDAR
+<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=calVariables.ics");</script>%%[
+set @location = AttributeValue("Event:Location_for_Reporting__c") 
+set @assignedTo = AttributeValue("Event:Name_Assigned_To__c") 
+set @email = AttributeValue("Event:Location_Email__c") 
+set @phone = AttributeValue("Event:Location_Phone__c")]%%BEGIN:VCALENDAR
 PRODID:-//Macromedia//DE
 VERSION:2.0
 CALSCALE:GREGORIAN
@@ -20,7 +24,6 @@ SET @value = "Telefonisch mit unseren Beratern"
 ENDIF
 ]%% %%=v(@value)=%% %%=v(@location)=%%
 \Wir freuen uns auf dich.
-
 \\%%=v(@assignedTo)=%%
 \Beratung %%=v(@location)=%%
 \%%=v(@email)=%%
