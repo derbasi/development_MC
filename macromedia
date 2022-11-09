@@ -1,5 +1,5 @@
-
-%%CampaignMember:Event_Name__c%%
-%%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%%
-%%CampaignMember:Event_Time__c%%
-%%CampaignMember:Event_Name__c%%
+<br>%%CampaignMember:Event_Name__c%%
+<br>%%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%%
+<br>%%CampaignMember:Event_Time__c%%
+<br>%%CampaignMember:Event_Name__c%%
+<br>%%CampaignMember:Salutation_custom_informal__c%%
