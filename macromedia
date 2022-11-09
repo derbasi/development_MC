@@ -3,4 +3,15 @@
 <br>%%CampaignMember:Event_Time__c%%
 <br>%%CampaignMember:Event_Name__c%%
 
-<br>%%[ set @variable = AttributeValue('CampaignMember:Event_Type__c') IF @variable == 'Vor Ort' THEN  SET @value = "vor Ort am Campus %%CampaignMember:Standort_Ort__c%% stattfinden. \nAnfahrtsbeschreibung: Anfahrtsbeschreibungen" IF @variable == 'Virtuell' THEN  SET @value = "virtuell stattfinden.\nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%" ELSE SET @value = "virtuell und vor Ort stattfinden. \nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%. Anfahrtsbeschreibung: Anfahrtsbeschreibungen" ENDIF ]%%
+<br>
+%%[ 
+set @variable = AttributeValue('CampaignMember:Event_Type__c') 
+if @variable == 'Vor Ort' then  
+	set @value = "vor Ort am Campus %%CampaignMember:Standort_Ort__c%% stattfinden. \nAnfahrtsbeschreibung: Anfahrtsbeschreibungen" 
+	if @variable == 'Virtuell' then  
+		set @value = "virtuell stattfinden.\nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%" 
+	else 
+		set @value = "virtuell und vor Ort stattfinden. \nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%. Anfahrtsbeschreibung: Anfahrtsbeschreibungen" 
+	endif
+endif
+	]%%
