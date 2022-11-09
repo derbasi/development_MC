@@ -1,13 +1,9 @@
 %%[
-set @startDate = AttributeValue('Event:StartDateTime')
-set @formattedstartDate = Format(DateAdd(@startDate,2,"H"),"yyyyMMdd'T'HHmmss")
-set @endDate = AttributeValue('Event:EndDateTime')
-set @formattedEndDate = Format(DateAdd(@endDate,2,"H"),"yyyyMMdd'T'HHmmss")
-set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
+
+set @startDate = AttributeValue('CampaignMember:Event_Date__c')
+set @startTime = AttributeValue('CampaignMember:Event_Time__c')
+
 ]%%
 
 <br>startDate: %%=v(@startDate)=%%
-<br>formattedstartDate: %%=v(@formattedstartDate)=%%
-<br>endDate: %%=v(@endDate)=%%
-<br>formattedEndDate: %%=v(@formattedEndDate)=%%
-<br>formattedDateNow: %%=v(@formattedDateNow)=%%
+<br>startTime: %%=v(@startTime)=%%
