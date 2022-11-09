@@ -1,12 +1,8 @@
-<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=BeratungsterminMacromedia.ics");</script>%%[
-set @location = AttributeValue("Event:Location_for_Reporting__c") 
-set @assignedTo = AttributeValue("Event:Name_Assigned_To__c") 
-set @email = AttributeValue("Event:Location_Email__c") 
-set @phone = AttributeValue("Event:Location_Phone__c")
+<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=EinladungMacromedia.ics");</script>%%[
 set @startDate = AttributeValue('Event:StartDateTime')
 set @formattedstartDate = Format(DateAdd(@startDate,2,"H"),"yyyyMMdd'T'HHmmss")
 set @endDate = AttributeValue('Event:EndDateTime')
-set @formattedstartDate = Format(DateAdd(@endDate,2,"H"),"yyyyMMdd'T'HHmmss")
+set @formattedEndDate = Format(DateAdd(@endDate,2,"H"),"yyyyMMdd'T'HHmmss")
 set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
 ]%%BEGIN:VCALENDAR
 PRODID:-//Macromedia//DE
@@ -15,15 +11,15 @@ CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
 DTSTART:%%=v(@formattedstartDate)=%%
-DTEND:%%=v(@formattedendDate)=%%
+DTEND:%%=v(@formattedEndDate)=%%
 DTSTAMP:%%=v(@formattedDateNow)=%%
 CREATED:%%=v(@formattedDateNow)=%%
-SUMMARY:Beratungstermin Macromedia
-DESCRIPTION:Wir freuen uns, dass du einen Beratungstermin bei uns gebucht hast.\n\nWann: %%=Format(DateAdd(AttributeValue('Event:StartDateTime'),2,"H"),"dd.MM.yyy HH:mm","Date","de-DE")=%% - %%=Format(DateAdd(AttributeValue('Event:EndDateTime'),2,"H"),"HH:mm","Date","de-DE")=%% Uhr\nWo:%%[ set @variable = AttributeValue('Event:Appointment_Type__c') IF @variable == 'People' THEN SET @value = "Am Campus" ELSE SET @value = "Telefonisch mit unseren Beratern" ENDIF ]%% %%=v(@value)=%% %%=v(@location)=%%\n\nWir freuen uns auf dich.\n\n %%=v(@assignedTo)=%%\nBeratung %%=v(@location)=%%\n%%=v(@email)=%%\nTel. %%=v(@phone)=%%
-LOCATION:
+SUMMARY:%%CampaignMember:Event_Name__c%%
+DESCRIPTION:Vielen Dank für deine Anmeldung zu unserem Event "%%CampaignMember:Event_Name__c%%" am %%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%% um %%CampaignMember:Event_Time__c%%.\n\nUnser Event "%%CampaignMember:Event_Name__c%%" wird %%[ set @variable = AttributeValue('CampaignMember:Event_Type__c') IF @variable == 'Vor Ort' THEN  SET @value = "vor Ort am Campus %%CampaignMember:Standort_Ort__c%% stattfinden. \nAnfahrtsbeschreibung: Anfahrtsbeschreibungen" IF @variable == 'Virtuell' THEN  SET @value = "virtuell stattfinden.\nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%" ELSE SET @value = "virtuell und vor Ort stattfinden. \nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%. Anfahrtsbeschreibung: Anfahrtsbeschreibungen" ENDIF ]%% \nWir freuen uns auf dich.
+LOCATION:AttributeValue("Event:Location_for_Reporting__c")
 STATUS:CONFIRMED
 BEGIN:VALARM
-TRIGGER:-PT180M
+TRIGGER:-PT60M
 ACTION:DISPLAY
 DESCRIPTION:Reminder
 END:VALARM
