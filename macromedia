@@ -2,6 +2,7 @@
 
 set @startDate = AttributeValue('CampaignMember:Event_Date__c')
 set @startTime = AttributeValue('CampaignMember:Event_Time__c')
+set @startDAteConcat = concat(@startDate,@startTime)
 
 ]%%
 
