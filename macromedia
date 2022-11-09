@@ -1,11 +1,5 @@
 
-DESCRIPTION:Vielen Dank für deine Anmeldung zu unserem Event "%%CampaignMember:Event_Name__c%%" am %%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%% um %%CampaignMember:Event_Time__c%%.\n\nUnser Event "%%CampaignMember:Event_Name__c%%" wird %%[ set @variable = AttributeValue('CampaignMember:Event_Type__c') IF @variable == 'Vor Ort' THEN  SET @value = "vor Ort am Campus %%CampaignMember:Standort_Ort__c%% stattfinden. \nAnfahrtsbeschreibung: Anfahrtsbeschreibungen" IF @variable == 'Virtuell' THEN  SET @value = "virtuell stattfinden.\nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%" ELSE SET @value = "virtuell und vor Ort stattfinden. \nDein Teilnahmelink: %%CampaignMember:Teilnahmelink__c%%. Anfahrtsbeschreibung: Anfahrtsbeschreibungen" ENDIF ]%% \nWir freuen uns auf dich.
-LOCATION:
-STATUS:CONFIRMED
-BEGIN:VALARM
-TRIGGER:-PT60M
-ACTION:DISPLAY
-DESCRIPTION:Reminder
-END:VALARM
-END:VEVENT
-END:VCALENDAR
+%%CampaignMember:Event_Name__c%%
+%%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%%
+%%CampaignMember:Event_Time__c%%
+%%CampaignMember:Event_Name__c%%
