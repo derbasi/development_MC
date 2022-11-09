@@ -1,5 +1,5 @@
 %%[
-	set @meetingURL = AttributeValue('CampaignMember:Teilnahmelink__c')
+	set @meetingURL = "www.teilnahmelink.de"
 ]%%
 <br>%%CampaignMember:Event_Name__c%%
 <br>%%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%%
