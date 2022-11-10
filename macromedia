@@ -1,9 +1,12 @@
 %%[
 	set @startDate = AttributeValue('CampaignMember:Event_Date__c')
     set @startTime = AttributeValue('CampaignMember:Event_Time__c') 
-    set @startTimeFormatted = Format(@startDate,"yyyyMMdd")
-    set @startTimeTrim = Replace(Concat(Substring(@startTime,1, Subtract(IndexOf(@startTime," "),1)),":00"),":","")
-    set @startDateTime = Concat(@startTimeFormatted,"T",@startTimeTrim)
+
+    set @startTimeRebuild = Format(@startDate,"MM'/'dd'/'yyyy")
+    set @startTimeTrim = Concat(Substring(@startTime,1, Subtract(IndexOf(@startTime," "),1)),":00")
+    set @startDateTimeStamp = Concat(@startTimeRebuild," ",@startTimeTrim)
+    set @startTimeFormatted = Format(@startDateTimeStamp,"yyyyMMdd'T'HHmmss")
+    set @endDateFormatted = Format(DateAdd(@startDateTimeStamp,90,"MI"),"yyyyMMdd'T'HHmmss")
     set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
 	set @meetingURL = AttributeValue('CampaignMember:Teilnahmelink__c')
 ]%%BEGIN:VCALENDAR
@@ -12,8 +15,8 @@ VERSION:2.0
 CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
-DTSTART:%%=v(@startDateTime)=%%
-DTEND: --> ?????
+DTSTART:%%=v(@startTimeFormatted)=%%
+DTEND:%%=v(@endDateFormatted)=%%
 DTSTAMP:%%=v(@formattedDateNow)=%%
 CREATED:%%=v(@formattedDateNow)=%%
 SUMMARY:%%CampaignMember:Event_Name__c%%
