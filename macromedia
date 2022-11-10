@@ -9,6 +9,7 @@
     set @endDateFormatted = Format(DateAdd(@startDateTimeStamp,90,"MI"),"yyyyMMdd'T'HHmmss")
     set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
 	set @anfahrtsBeschreibung = AttributeValue('CampaignMember:Anfahrtsbeschreibung_DE__c')
+    set @standort = AttributeValue('CampaignMember:Standort_Ort__c')
     set @meetingURL = AttributeValue('CampaignMember:Teilnahmelink__c')
 ]%%BEGIN:VCALENDAR
 PRODID:-//Macromedia//DE
@@ -21,7 +22,7 @@ DTEND:%%=v(@endDateFormatted)=%%
 DTSTAMP:%%=v(@formattedDateNow)=%%
 CREATED:%%=v(@formattedDateNow)=%%
 SUMMARY:%%CampaignMember:Event_Name__c%%
-DESCRIPTION:Vielen Dank für deine Anmeldung zu unserem Event "%%CampaignMember:Event_Name__c%%" am %%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%% um %%CampaignMember:Event_Time__c%%.\n\nUnser Event "%%CampaignMember:Event_Name__c%%" wird %%[ set @variable = AttributeValue('CampaignMember:Event_Type__c') IF @variable == 'Vor Ort' THEN  SET @value = "vor Ort am Campus %%CampaignMember:Standort_Ort__c%% stattfinden. \nAnfahrtsbeschreibung: Anfahrtsbeschreibungen" IF @variable == 'Virtuell' THEN  SET @value = Concat("virtuell stattfinden.\nDein Teilnahmelink:\n",@meetingURL) ELSE SET @value = Concat("virtuell und vor Ort stattfinden. \nDein Teilnahmelink:\n",@meetingURL,". ","Anfahrtsbeschreibung: %%CampaignMember:Anfahrtsbeschreibung_DE__c%%") ENDIF ENDIF]%% %%=v(@value)=%% \nWir freuen uns auf dich.
+DESCRIPTION:Vielen Dank für deine Anmeldung zu unserem Event "%%CampaignMember:Event_Name__c%%" am %%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%% um %%CampaignMember:Event_Time__c%%.\n\nUnser Event "%%CampaignMember:Event_Name__c%%" wird %%[ set @variable = AttributeValue('CampaignMember:Event_Type__c') IF @variable == 'Vor Ort' THEN  SET @value = Concat("vor Ort am Campus ", @standort , " stattfinden. \nAnfahrtsbeschreibung:\n",@anfahrtsBeschreibung) IF @variable == 'Virtuell' THEN  SET @value = Concat("virtuell stattfinden.\nDein Teilnahmelink:\n",@meetingURL) ELSE SET @value = Concat("virtuell und vor Ort stattfinden. \nDein Teilnahmelink:\n",@meetingURL,". ","Anfahrtsbeschreibung:\n",@anfahrtsBeschreibung) ENDIF ENDIF]%% %%=v(@value)=%% \nWir freuen uns auf dich.
 STATUS:CONFIRMED
 BEGIN:VALARM
 TRIGGER:-PT60M
