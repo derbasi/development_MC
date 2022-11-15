@@ -37,12 +37,5 @@ response: %%=v(@response)=%%
 
   Platform.Load("Core","1");
   var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
-  logDE.Rows.Add({errormsg: "js start"});
-  /* get the necessary AMPScript variables from surrounding endpoint. */
-  var restEndpoint = Variable.GetValue("@restEndpoint");
-  var subscriberKey = Variable.GetValue("@subscriberKey");
-  var email = Variable.GetValue("@email");
-  var source = Variable.GetValue("@source");
-  var log = Variable.GetValue("@errorLogDE");
-  var logDE = DataExtension.Init(log);
- </script>
+  
+  </script>
