@@ -14,7 +14,7 @@
 	
 	if not empty(@subscriberKey) and not empty(@marketingAction) then
 		/* save answer in affinities */
-		set @insertIntoAffinities = InsertData(@deForInsert,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState',@affinityState,'affinityValue',@response,'submissionSetKey',@submissionSetKey)
+		set @insertIntoAffinities = UpsertData(@deForInsert,1,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState',@affinityState,'affinityValue',@response,'submissionSetKey',@submissionSetKey)
 	
 		/* get process base name to set correct eventDefinitionKey */ 	
 	    set @getTitleFromMA = Lookup('ent.marketingActionSynch', 'title', 'Name', @marketingAction)
