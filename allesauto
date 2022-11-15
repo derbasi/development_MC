@@ -7,6 +7,7 @@
   // set @subscriberKey = _subscriberKey
   set @subscriberKey = 'testSHfeedback'
   set @email = 'sebastian.heilmeier+feedbackDoneTest@fluentcx.com'
+  set @caseId = 'tbd001'
   set @deForInsert = 'ent.LIVE_affinities'
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @submissionSetKey = GUID()
@@ -43,6 +44,7 @@ response: %%=v(@response)=%%
   var restEndpoint = Variable.GetValue("@restEndpoint");
   var subscriberKey = Variable.GetValue("@subscriberKey");
   var email = Variable.GetValue("@email");
+  var caseId = Variable.GetValue("@caseId");
   var log = Variable.GetValue("@errorLogDE");
   var logDE = DataExtension.Init(log);
   logDE.Rows.Add({errormsg: "variables: " + "eventDefinitionKey: ", eventDefinitionKey + "| restEndpoint: ", restEndpoint + "| subscriberKey: " + subscriberKey + "| email: " email});
@@ -59,6 +61,7 @@ response: %%=v(@response)=%%
     ,"EventDefinitionKey": eventDefinitionKey
     ,"Data": {
       "subscriberKey": subscriberKey
+      ,"caseId": caseId
       ,"email": email
     }
   });
