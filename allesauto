@@ -10,6 +10,7 @@
 	set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
 	set @submissionSetKey = GUID()
 	set @affinityState = 'active'
+  set @businessUnit = '536001604'
 
 	
 	if not empty(@subscriberKey) and not empty(@marketingAction) then
