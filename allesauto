@@ -38,3 +38,21 @@ response: %%=v(@response)=%%
 <br>error: %%=v(@error)=%%
 <br>restEndpoint: %%=v(@restEndpoint)=%%
 
+
+<script runat="server" type="text/javascript">
+
+  Platform.Load("Core","1");
+  var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
+  var restEndpoint = Variable.GetValue("@restEndpoint");
+  var subscriberKey = Variable.GetValue("@subscriberKey");
+  var email = Variable.GetValue("@email");
+  var caseId = Variable.GetValue("@caseId");
+  var log = Variable.GetValue("@errorLogDE");
+  var logDE = DataExtension.Init(log);
+  logDE.Rows.Add({errormsg: "variables: " + "eventDefinitionKey: " + eventDefinitionKey + "| restEndpoint: " + restEndpoint + "| subscriberKey: " + subscriberKey + "| email: " email});
+  
+  /* get access token*/
+  accessToken = Platform.Function.ContentBlockByKey("getToken");
+  logDE.Rows.Add({errormsg: "accessToken " + accessToken});
+
+</script>
