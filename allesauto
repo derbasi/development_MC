@@ -16,21 +16,7 @@
 		/* save answer in affinities */
 		set @insertIntoAffinities = UpsertData(@deForInsert,1,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState',@affinityState,'affinityValue',@response,'submissionSetKey',@submissionSetKey)
 	
-		/* get process base name to set correct eventDefinitionKey */ 	
-	    set @getTitleFromMA = Lookup('ent.marketingActionSynch', 'title', 'Name', @marketingAction)
-	    set @titleBaseName = Substring(@getTitleFromMA,1, Subtract(IndexOf(@getTitleFromMA,"feedback"),1))
-	    
-	    /* set correct eventDefinitionKey */
-		if @response == 'true' then
-			set @eventDefinitionKey = Concat(@titleBaseName,'Done')
-		elseif @response =='false' then
-			set @eventDefinitionKey = Concat(@titleBaseName,'FeedbackCancelled')
-		else
-			set @error = 'someting went wrong'
-		endif
-	else
-		set @error = 'no subscriberKey or no marketingAction'
-	endif
+		set @eventDefinitionKey = lookup('ent.cxSwitcher','textContent','businessUnit',@businessUnit,'context','de_DE','textClass',@marketingAction,'textSubClass',@response,'textId','eventDefinitionKey')
 
 	
 	/* trigger feedback mail with ssjs */
