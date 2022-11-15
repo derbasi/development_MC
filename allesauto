@@ -43,5 +43,6 @@ response: %%=v(@response)=%%
   var source = Variable.GetValue("@source");
   var log = Variable.GetValue("@errorLogDE");
   var logDE = DataExtension.Init(log);
+  logDE.Rows.Add({errormsg: "js start"});
 
-   </script>
+</script>
