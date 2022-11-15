@@ -36,15 +36,3 @@ response: %%=v(@response)=%%
 <br>eventDefinitionKey: %%=v(@eventDefinitionKey)=%%
 <br>error: %%=v(@error)=%%
 
-
-<script runat="server" type="text/javascript">
-
-  Platform.Load("Core","1");
-  var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
-
- 
-
- 
-
- 
-</script>
