@@ -69,6 +69,7 @@ response: %%=v(@response)=%%
   });
 
   logDE.Rows.Add({errormsg: "payload done: " + payload});
+
   var req = new Script.Util.HttpRequest(url);
   req.emptyContentHandling = 0;
   req.retries = 0;
@@ -79,18 +80,19 @@ response: %%=v(@response)=%%
   req.postData = payload;
 
   try {
-    logDE.Rows.Add({errormsg: "try start"});
-    var response = req.send(); 
-    var responseContent = Platform.Function.ParseJSON(String(response.content));
-    logDE.Rows.Add({errormsg: "response " + responseContent,});
-   
-  }
-  catch (err)  
-  {
-    Variable.SetValue("@additionalStatus","invalidToken");
-    logDE.Rows.Add({errormsg: "catch: " + err});
-
-  }
-  logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent + " " + payload,timezoneOffset: timezoneOffset});  
+      var response = req.send(); 
+      var responseContent = Platform.Function.ParseJSON(String(response.content));
+      var statusCode = response.statusCode;
+      if (statusCode == 200 || statusCode == 201) {
+        Variable.SetValue("@additionalStatus","success"); 
+        logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent,timezoneOffset: timezoneOffset});
+      } else {
+        Variable.SetValue("@additionalStatus","successNoSendout")
+      }
+    };
+    catch (err);  
+    {
+      Variable.SetValue("@additionalStatus","invalidToken");
+    };
 
 </script>
