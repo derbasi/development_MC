@@ -53,19 +53,7 @@ response: %%=v(@response)=%%
   accessToken = Platform.Function.ContentBlockByKey("getToken");
   logDE.Rows.Add({errormsg: "accessToken " + accessToken});
 
-  /* api call */
-  var url = restEndpoint + 'interaction/v1/events';
-  var contentType = 'application/json; charset=UTF-8';
-  var payload = Stringify({
-    "ContactKey": subscriberKey
-    ,"EventDefinitionKey": eventDefinitionKey
-    ,"Data": {
-      "subscriberKey": subscriberKey
-      ,"caseId": caseId
-      ,"email": email
-    }
-  });
-
+ 
 
  
 </script>
