@@ -79,20 +79,5 @@ response: %%=v(@response)=%%
   req.method = "POST";       
   req.postData = payload;
 
-  try {
-      var response = req.send(); 
-      var responseContent = Platform.Function.ParseJSON(String(response.content));
-      var statusCode = response.statusCode;
-      if (statusCode == 200 || statusCode == 201) {
-        Variable.SetValue("@additionalStatus","success"); 
-        logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent,timezoneOffset: timezoneOffset});
-      } else {
-        Variable.SetValue("@additionalStatus","successNoSendout")
-      }
-    };
-    catch (err);  
-    {
-      Variable.SetValue("@additionalStatus","invalidToken");
-    };
 
 </script>
