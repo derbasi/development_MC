@@ -45,10 +45,6 @@ response: %%=v(@response)=%%
   var subscriberKey = Variable.GetValue("@subscriberKey");
   var email = Variable.GetValue("@email");
  
-  
-  /* get access token*/
-  accessToken = Platform.Function.ContentBlockByKey("getToken");
-  logDE.Rows.Add({errormsg: "accessToken " + accessToken});
 
  
 
