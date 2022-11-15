@@ -1,1 +1,45 @@
-hello
+%%[
+	/* set variables */
+	// set @response = AttributeValue('response')
+  set @response = 'true'
+	// set @marketingAction = AttributeValue('ma')
+  set @marketingAction = 'MA00000024'
+	// set @subscriberKey = _subscriberKey
+  set @subscriberKey = 'testSHfeedback'
+	set @deForInsert = 'LIVE_affinities'
+	set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
+	set @submissionSetKey = GUID()
+	set @affinityState = 'active'
+
+	
+	if not empty(@subscriberKey) and not empty(@marketingAction) then
+		/* save answer in affinities */
+		set @insertIntoAffinities = InsertData(@deForInsert,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState',@affinityState,'affinityValue',@response,'submissionSetKey',@submissionSetKey)
+	
+		/* get process base name to set correct eventDefinitionKey */ 	
+	    set @getTitleFromMA = Lookup('ent.marketingActionSynch', 'title', 'Name', @marketingAction)
+	    set @titleBaseName = Substring(@getTitleFromMA,1, Subtract(IndexOf(@getTitleFromMA,"feedback"),1))
+	    
+	    /* set correct eventDefinitionKey */
+		if @response == 'true' then
+			set @eventDefinitionKey = Concat(@titleBaseName,'Done')
+		elseif @response =='false' then
+			set @eventDefinitionKey = Concat(@titleBaseName,'FeedbackCancelled')
+		else
+			set @error = 'someting went wrong'
+		endif
+	else
+		set @error = 'no subscriberKey or no marketingAction'
+	endif
+
+	
+	/* trigger feedback mail with ssjs */
+	
+]%%
+response: %%=v(@response)=%%
+<br>getTitleFromMA: %%=v(@getTitleFromMA)=%%
+<br>titleBaseName: %%=v(@titleBaseName)=%%
+<br>eventDefinitionKey: %%=v(@eventDefinitionKey)=%%
+<br>error: %%=v(@error)=%%
+
+%%
