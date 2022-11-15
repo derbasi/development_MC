@@ -25,7 +25,7 @@
   endif
   /* trigger feedback mail with ssjs */
 
-    SET @restEndpoint = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','restEndpoint')
+
 
 
   
