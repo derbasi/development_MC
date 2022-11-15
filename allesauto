@@ -20,14 +20,7 @@
 	    set @getTitleFromMA = Lookup('ent.marketingActionSynch', 'title', 'Name', @marketingAction)
 	    set @titleBaseName = Substring(@getTitleFromMA,1, Subtract(IndexOf(@getTitleFromMA,"feedback"),1))
 	    
-	    /* set correct eventDefinitionKey */
-		if @response == 'true' then
-			set @eventDefinitionKey = Concat(@titleBaseName,'Done')
-		elseif @response =='false' then
-			set @eventDefinitionKey = Concat(@titleBaseName,'FeedbackCancelled')
-		else
-			set @error = 'someting went wrong'
-		endif
+
 	else
 		set @error = 'no subscriberKey or no marketingAction'
 	endif
