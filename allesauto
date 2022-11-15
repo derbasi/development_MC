@@ -66,6 +66,6 @@ response: %%=v(@response)=%%
     }
   });
 
-  logDE.Rows.Add({errormsg: "payload done: " + payload});
+
  
 </script>
