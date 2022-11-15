@@ -1,27 +1,27 @@
 %%[
-	/* set variables */
-	// set @response = AttributeValue('response')
+  /* set variables */
+  // set @response = AttributeValue('response')
   set @response = 'true'
-	// set @marketingAction = AttributeValue('ma')
+  // set @marketingAction = AttributeValue('ma')
   set @marketingAction = 'MA00000024'
-	// set @subscriberKey = _subscriberKey
+  // set @subscriberKey = _subscriberKey
   set @subscriberKey = 'testSHfeedback'
-	set @deForInsert = 'ent.LIVE_affinities'
-	set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
-	set @submissionSetKey = GUID()
-	set @affinityState = 'active'
+  set @deForInsert = 'ent.LIVE_affinities'
+  set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
+  set @submissionSetKey = GUID()
+  set @affinityState = 'active'
   set @businessUnit = '536001604'
 
-	
-	if not empty(@subscriberKey) and not empty(@marketingAction) then
-		/* save answer in affinities */
-		set @insertIntoAffinities = UpsertData(@deForInsert,1,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState',@affinityState,'affinityValue',@response,'submissionSetKey',@submissionSetKey)
-	
-		set @eventDefinitionKey = lookup('ent.cxSwitcher','textContent','businessUnit',@businessUnit,'context','de_DE','textClass',@marketingAction,'textSubClass',@response,'textId','eventDefinitionKey')
+  
+  if not empty(@subscriberKey) and not empty(@marketingAction) then
+    /* save answer in affinities */
+    set @insertIntoAffinities = UpsertData(@deForInsert,1,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState',@affinityState,'affinityValue',@response,'submissionSetKey',@submissionSetKey)
+  
+    set @eventDefinitionKey = lookup('ent.cxSwitcher','textContent','businessUnit',@businessUnit,'context','de_DE','textClass',@marketingAction,'textSubClass',@response,'textId','eventDefinitionKey')
 
-	endif
-	/* trigger feedback mail with ssjs */
-	
+  endif
+  /* trigger feedback mail with ssjs */
+  
 ]%%
 response: %%=v(@response)=%%
 <br>getTitleFromMA: %%=v(@getTitleFromMA)=%%
@@ -29,3 +29,66 @@ response: %%=v(@response)=%%
 <br>eventDefinitionKey: %%=v(@eventDefinitionKey)=%%
 <br>error: %%=v(@error)=%%
 
+
+
+
+<script runat="server" type="text/javascript">
+
+  Platform.Load("Core","1");
+  var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
+
+  /* get the necessary AMPScript variables from surrounding endpoint. */
+  var restEndpoint = Variable.GetValue("@restEndpoint");
+  var subscriberKey = Variable.GetValue("@subscriberKey");
+  var email = Variable.GetValue("@email");
+  var source = Variable.GetValue("@source");
+  var log = Variable.GetValue("@doiLogDE");
+  var logDE = DataExtension.Init(log);
+  
+  /* get access token*/
+  accessToken = Platform.Function.ContentBlockByKey("getToken");
+
+  /* api call */
+  var url = restEndpoint + 'interaction/v1/events';
+  var contentType = 'application/json; charset=UTF-8';
+  var payload = Stringify({
+    "ContactKey": subscriberKey
+    ,"EventDefinitionKey": eventDefinitionKey
+    ,"Data": {
+      "subscriberKey": subscriberKey
+      ,"email": email
+      ,"source": source
+    }
+  });
+
+  var req = new Script.Util.HttpRequest(url);
+  req.emptyContentHandling = 0;
+  req.retries = 0;
+  req.continueOnError = true;
+  req.contentType = contentType;
+  req.setHeader("Authorization", "Bearer " + accessToken);
+  req.method = "POST";       
+  req.postData = payload;
+
+  try {
+    //logDE.Rows.Add({errormsg: "intry ",timezoneOffset: timezoneOffset});
+    var response = req.send(); 
+    var responseContent = Platform.Function.ParseJSON(String(response.content));
+    //logDE.Rows.Add({errormsg: "intry2 " + responseContent,timezoneOffset: timezoneOffset});
+    var statusCode = response.statusCode;
+    if (statusCode == 200 || statusCode == 201) {
+      Variable.SetValue("@additionalStatus","success"); 
+      logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent,timezoneOffset: timezoneOffset});
+    } else {
+      Variable.SetValue("@additionalStatus","successNoSendout")
+    }
+  }
+  catch (err)  
+  {
+    // error: "no token" >> invalid credentials
+    Variable.SetValue("@additionalStatus","invalidToken");
+    //logDE.Rows.Add({errormsg: "catch: " + err,timezoneOffset: timezoneOffset});
+
+  }
+  //logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent + " " + payload,timezoneOffset: timezoneOffset});  
+  </script>
