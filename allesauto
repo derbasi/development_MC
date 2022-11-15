@@ -87,6 +87,7 @@ response: %%=v(@response)=%%
       var responseContent = Platform.Function.ParseJSON(String(response.content));
       var statusCode = response.statusCode;
       logDE.Rows.Add({errormsg: "statusCode: " + statusCode});
+      logDE.Rows.Add({errormsg: "response: " + responseContent});
       if (statusCode == 200 || statusCode == 201) {
         Variable.SetValue("@additionalStatus","success"); 
         logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent});
