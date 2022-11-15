@@ -41,9 +41,7 @@ response: %%=v(@response)=%%
 
   Platform.Load("Core","1");
   var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
-  var restEndpoint = Variable.GetValue("@restEndpoint");
-  var subscriberKey = Variable.GetValue("@subscriberKey");
-  var email = Variable.GetValue("@email");
+
  
 
  
