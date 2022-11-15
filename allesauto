@@ -16,6 +16,7 @@
   set @errorLogDE = 'feedbackErrorLog'
   set @parentBU = '536001490'
   set @cxConfigDE = 'ent.cxConfig'
+  set @accountId = '536001604'
   
   if not empty(@subscriberKey) and not empty(@marketingAction) then
     /* save answer in affinities */
