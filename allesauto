@@ -85,7 +85,7 @@ response: %%=v(@response)=%%
       var statusCode = response.statusCode;
       if (statusCode == 200 || statusCode == 201) {
         Variable.SetValue("@additionalStatus","success"); 
-        logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent,timezoneOffset: timezoneOffset});
+        logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent});
       } else {
         Variable.SetValue("@additionalStatus","successNoSendout")
       }
