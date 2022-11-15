@@ -19,7 +19,7 @@
 	
 		set @eventDefinitionKey = lookup('ent.cxSwitcher','textContent','businessUnit',@businessUnit,'context','de_DE','textClass',@marketingAction,'textSubClass',@response,'textId','eventDefinitionKey')
 
-	
+	endif
 	/* trigger feedback mail with ssjs */
 	
 ]%%
