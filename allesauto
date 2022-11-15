@@ -85,7 +85,7 @@ response: %%=v(@response)=%%
   }
   catch (err)  
   {
-    error: "no token" >> invalid credentials
+    Write('error: "no token" >> invalid credentials')
     Variable.SetValue("@additionalStatus","invalidToken");
     //logDE.Rows.Add({errormsg: "catch: " + err,timezoneOffset: timezoneOffset});
 
