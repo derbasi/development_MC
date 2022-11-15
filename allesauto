@@ -81,6 +81,7 @@ response: %%=v(@response)=%%
 
   logDE.Rows.Add({errormsg: "before call"});
 
+
   try {
       var response = req.send(); 
       var responseContent = Platform.Function.ParseJSON(String(response.content));
@@ -91,11 +92,9 @@ response: %%=v(@response)=%%
       } else {
         Variable.SetValue("@additionalStatus","successNoSendout")
       };
-    }
-    catch (err);  
-    {
+    } catch(err); {
       logDE.Rows.Add({errormsg: "error: " + err});
-    };
+    }
 
   logDE.Rows.Add({errormsg: "after call"});
 
