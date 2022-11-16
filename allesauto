@@ -53,7 +53,7 @@
     accessToken = Platform.Function.ContentBlockByKey("getToken");
 
     /* api call */
-    var url = restEndpoint + 'interaction/v1/events';
+    var url = restEndpoint + '/messaging/v1/email/messages/' + caseId;
     var contentType = 'application/json; charset=UTF-8';
     var payload = Stringify({
       "ContactKey": subscriberKey
@@ -104,13 +104,3 @@
   Redirect(@followUpPage)
 
 ]%%
-
-response: %%=v(@response)=%%
-<br>getTitleFromMA: %%=v(@getTitleFromMA)=%%
-<br>titleBaseName: %%=v(@titleBaseName)=%%
-<br>eventDefinitionKey: %%=v(@eventDefinitionKey)=%%
-<br>error: %%=v(@error)=%%
-<br>insertIntoAffinities: %%=v(@insertIntoAffinities)=%%
-<br>additionalStatus: %%=v(@additionalStatus)=%%
-<br>restEndpoint: %%=v(@restEndpoint)=%%
-<br>followUpPage: %%=v(@followUpPage)=%%
