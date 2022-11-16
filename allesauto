@@ -11,8 +11,8 @@
 
   /* set variables from sendout context */
   set @response = AttributeValue('response')
-  set @caseId = AttributeValue('cid')
-  set @marketingAction = AttributeValue('ma')
+  set @caseId = AttributeValue('caseId')
+  set @marketingAction = AttributeValue('marketingAction')
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = _subscriberKey
   set @email = emailaddr
@@ -101,6 +101,12 @@
     set @followUpPage = @errorPage
   endif
 
-  Redirect(@followUpPage)
-
 ]%%
+
+
+<br>response: %%=v(@response)=%%
+<br>caseId: %%=v(@caseId)=%%
+<br>marketingAction: %%=v(@marketingAction)=%%
+<br>affinityKey: %%=v(@affinityKey)=%%
+<br>subscriberKey: %%=v(@subscriberKey)=%%
+<br>email: %%=v(@email)=%%
