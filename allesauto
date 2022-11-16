@@ -1,22 +1,23 @@
 %%[
   
-  /* test Variables 
+  /* test Variables */
   set @response = 'true'
-  set @caseId = 'case042'
+  set @caseId = 'case044'
   set @marketingAction = 'MA00000024'
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
-  set @subscriberKey = 'test00002'
-  set @email = 'sebastian.heilmeier+2@fluentcx.com'
-  */
+  set @subscriberKey = 'test00004'
+  set @email = 'sebastian.heilmeier+4@fluentcx.com'
+  
 
-  /* set variables from sendout context */
+  /* set variables from sendout context 
   set @response = RequestParameter('response')
   set @caseId = AttributeValue('caseId')
   set @marketingAction = RequestParameter('marketingAction')
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = _subscriberKey
   set @email = emailaddr
-  
+  */
+
   /* set correct Data Extensions */
   set @deForInsert = 'ent.LIVE_affinities'
   set @cxConfigDE = 'ent.cxConfig'
@@ -55,7 +56,7 @@
     /* api call */
     var url = restEndpoint + '/messaging/v1/email/messages/' + caseId;
     Variable.SetValue("@url",url); 
-    var contentType = 'application/json; charset=UTF-8';
+    var contentType = 'application/json';
 
     var payload = {
       "definitionKey": eventDefinitionKey,
@@ -71,9 +72,6 @@
     logDE.Rows.Add({errormsg: "payload: " + Stringify(payload)});
 
     var req = new Script.Util.HttpRequest(url);
-    req.emptyContentHandling = 0;
-    req.retries = 0;
-    req.continueOnError = true;
     req.contentType = contentType;
     req.setHeader("Authorization", "Bearer " + accessToken);
     req.method = "POST";       
