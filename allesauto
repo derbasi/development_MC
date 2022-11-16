@@ -2,11 +2,11 @@
   
   /* test Variables */
   set @response = 'true'
-  set @caseId = 'case044'
+  set @caseId = 'case042'
   set @marketingAction = 'MA00000024'
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
-  set @subscriberKey = 'test00004'
-  set @email = 'sebastian.heilmeier+4@fluentcx.com'
+  set @subscriberKey = 'test00002'
+  set @email = 'sebastian.heilmeier+2@fluentcx.com'
   
 
   /* set variables from sendout context 
@@ -17,7 +17,7 @@
   set @subscriberKey = _subscriberKey
   set @email = emailaddr
   */
-
+  
   /* set correct Data Extensions */
   set @deForInsert = 'ent.LIVE_affinities'
   set @cxConfigDE = 'ent.cxConfig'
@@ -72,6 +72,9 @@
     logDE.Rows.Add({errormsg: "payload: " + Stringify(payload)});
 
     var req = new Script.Util.HttpRequest(url);
+    req.emptyContentHandling = 0;
+    req.retries = 0;
+    req.continueOnError = true;
     req.contentType = contentType;
     req.setHeader("Authorization", "Bearer " + accessToken);
     req.method = "POST";       
