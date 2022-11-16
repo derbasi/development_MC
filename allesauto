@@ -54,6 +54,7 @@
 
     /* api call */
     var url = restEndpoint + '/messaging/v1/email/messages/' + caseId;
+    Variable.SetValue("@url",url); 
     var contentType = 'application/json; charset=UTF-8';
 
     var payload = {
@@ -67,6 +68,7 @@
           }
       }
     };
+    logDE.Rows.Add({errormsg: "payload: " + payload});
 
     var req = new Script.Util.HttpRequest(url);
     req.emptyContentHandling = 0;
@@ -113,3 +115,5 @@
 <br>affinityKey: %%=v(@affinityKey)=%%
 <br>subscriberKey: %%=v(@subscriberKey)=%%
 <br>email: %%=v(@email)=%%
+<br>url: %%=v(@url)=%%
+<br>additionalStatus: %%=v(@additionalStatus)=%%
