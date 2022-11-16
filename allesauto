@@ -68,7 +68,7 @@
           }
       }
     };
-    logDE.Rows.Add({errormsg: "payload: " + payload});
+    logDE.Rows.Add({errormsg: "payload: " + Stringify(payload)});
 
     var req = new Script.Util.HttpRequest(url);
     req.emptyContentHandling = 0;
