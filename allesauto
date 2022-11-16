@@ -1,22 +1,22 @@
 %%[
   
-  /* test Variables */
+  /* test Variables
   set @response = 'true'
   set @caseId = 'case042'
   set @marketingAction = 'MA00000024'
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = 'test00002'
   set @email = 'sebastian.heilmeier+2@fluentcx.com'
-  
+   */
 
-  /* set variables from sendout context 
+  /* set variables from sendout context */
   set @response = RequestParameter('response')
   set @caseId = AttributeValue('caseId')
   set @marketingAction = RequestParameter('marketingAction')
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = _subscriberKey
   set @email = emailaddr
-  */
+
 
   /* set correct Data Extensions */
   set @deForInsert = 'ent.LIVE_affinities'
@@ -53,13 +53,13 @@
     /* get access token */
     accessToken = Platform.Function.ContentBlockByKey("getToken");
 
-
+    /* build API call */
     var headerNames = ["Authorization"];
     var headerValues = ["Bearer " + accessToken];
     var jsonBody = {
           "definitionKey": eventDefinitionKey,
           "recipient": {
-                "contactKey": email,
+                "contactKey": subscriberKey,
                 "to": email,
                 "attributes": {
                   "caseId": caseId
@@ -71,22 +71,21 @@
     var fireEmail = HTTP.Post(requestUrl, contentType, Stringify(jsonBody), headerNames, headerValues);
    
     if (fireEmail.StatusCode == 202) {
-    var finalResponse = Platform.Function.ParseJSON(fireEmail.Response[0]);
-    var requestId = finalResponse.requestId
-    var errorcode = finalResponse.errorcode
-    var responses = finalResponse.responses[0].messageKey
-    var message = finalResponse.message
-    Variable.SetValue("@errorcode",errorcode); 
-    Variable.SetValue("@responses",responses); 
-    Variable.SetValue("@message",message); 
-      }
+      var finalResponse = Platform.Function.ParseJSON(fireEmail.Response[0]);
+      var requestId = finalResponse.requestId
+      var errorcode = finalResponse.errorcode
+      var responses = finalResponse.responses[0].messageKey
+      var message = finalResponse.message
+      Variable.SetValue("@errorcode",errorcode); 
+      Variable.SetValue("@responses",responses); 
+      Variable.SetValue("@message",message); 
+    }
     
     };
 } catch (error) {
  Write(Stringify(error));
-    Write("Error");
+    logDE.Rows.Add({errormsg: "error: " + error});
 }
-
 
 </script>%%[
 
