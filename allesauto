@@ -10,9 +10,9 @@
   */
 
   /* set variables from sendout context */
-  set @response = AttributeValue('response')
+  set @response = RequestParameter('response')
   set @caseId = AttributeValue('caseId')
-  set @marketingAction = AttributeValue('marketingAction')
+  set @marketingAction = RequestParameter('marketingAction')
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = _subscriberKey
   set @email = emailaddr
