@@ -65,7 +65,6 @@
           "to": email,
           "attributes": {
             "caseId": caseId
-            ,"email": email 
           }
       }
     };
