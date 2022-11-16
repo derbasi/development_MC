@@ -84,7 +84,7 @@
     var responseContent = Platform.Function.ParseJSON(String(response.content));
     var statusCode = response.statusCode;
     Variable.SetValue("@statusCode", statusCode)
-    Variable.SetValue("@responseContent", Stringify(responseContent)
+    Variable.SetValue("@responseContent", Stringify(responseContent))
     if (statusCode == 200 || statusCode == 201) {
       Variable.SetValue("@additionalStatus","success");        
     } else {
