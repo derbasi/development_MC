@@ -2,7 +2,7 @@
   
   /* test Variables */
   set @response = 'true'
-  set @caseId = 'case040'
+  set @caseId = 'case041'
   set @marketingAction = 'MA00000024'
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = 'test00001'
