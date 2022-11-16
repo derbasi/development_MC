@@ -53,43 +53,40 @@
     /* get access token */
     accessToken = Platform.Function.ContentBlockByKey("getToken");
 
-    /* api call */
-    var url = restEndpoint + 'messaging/v1/email/messages/' + caseId;
-    Variable.SetValue("@url",url); 
-    var contentType = 'application/json';
 
-    var payload = {
-      "definitionKey": eventDefinitionKey,
-      "recipient": {
-          "contactKey": subscriberKey,
-          "to": email,
-          "attributes": {
-            "caseID": caseId
-          }
+    var headerNames = ["Authorization"];
+    var headerValues = ["Bearer " + accessToken];
+    var jsonBody = {
+          "definitionKey": eventDefinitionKey,
+          "recipient": {
+                "contactKey": email,
+                "to": email,
+                "attributes": {
+                  "caseId": caseId
+              }
+            }
+        };
+
+    var requestUrl = restEndpoint + "/messaging/v1/email/messages/"+caseId;
+    var fireEmail = HTTP.Post(requestUrl, contentType, Stringify(jsonBody), headerNames, headerValues);
+   
+    if (fireEmail.StatusCode == 202) {
+    var finalResponse = Platform.Function.ParseJSON(fireEmail.Response[0]);
+    var requestId = finalResponse.requestId
+    var errorcode = finalResponse.errorcode
+    var responses = finalResponse.responses[0].messageKey
+    var message = finalResponse.message
+    Variable.SetValue("@errorcode",errorcode); 
+    Variable.SetValue("@responses",responses); 
+    Variable.SetValue("@message",message); 
       }
+    
     };
-    logDE.Rows.Add({errormsg: "payload: " + Stringify(payload)});
+} catch (error) {
+ Write(Stringify(error));
+    Write("Error");
+}
 
-    var req = new Script.Util.HttpRequest(url);
-    req.emptyContentHandling = 0;
-    req.retries = 0;
-    req.continueOnError = true;
-    req.contentType = contentType;
-    req.setHeader("Authorization", "Bearer " + accessToken);
-    req.method = "POST";       
-    req.postData = payload;
-
-    var response = req.send(); 
-    var responseContent = Platform.Function.ParseJSON(String(response.content));
-    var statusCode = response.statusCode;
-    Variable.SetValue("@statusCode", statusCode)
-    Variable.SetValue("@responseContent", Stringify(responseContent))
-    if (statusCode == 200 || statusCode == 201) {
-      Variable.SetValue("@additionalStatus","success");        
-    } else {
-      Variable.SetValue("@additionalStatus","successNoSendout")
-      logDE.Rows.Add({errormsg: statusCode + " _ " + responseContent});
-    };
 
 </script>%%[
 
@@ -121,3 +118,6 @@
 <br>additionalStatus: %%=v(@additionalStatus)=%%
 <br>statusCode: %%=v(@statusCode)=%%
 <br>responseContent: %%=v(@responseContent)=%%
+<br>errorcode: %%=v(@errorcode)
+<br>responses: %%=v(@responses)
+<br>message: %%=v(@message)
