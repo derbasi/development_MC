@@ -74,8 +74,6 @@
     req.method = "POST";       
     req.postData = payload;
 
-    logDE.Rows.Add({errormsg: "before call"});
-
     var response = req.send(); 
     var responseContent = Platform.Function.ParseJSON(String(response.content));
     var statusCode = response.statusCode;
