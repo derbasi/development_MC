@@ -117,6 +117,6 @@
 <br>additionalStatus: %%=v(@additionalStatus)=%%
 <br>statusCode: %%=v(@statusCode)=%%
 <br>responseContent: %%=v(@responseContent)=%%
-<br>errorcode: %%=v(@errorcode)
-<br>responses: %%=v(@responses)
-<br>message: %%=v(@message)
+<br>errorcode: %%=v(@errorcode)=%%
+<br>responses: %%=v(@responses)=%%
+<br>message: %%=v(@message)=%%
