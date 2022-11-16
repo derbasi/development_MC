@@ -1,22 +1,22 @@
 %%[
   
-  /* test Variables */
+  /* test Variables 
   set @response = 'true'
   set @caseId = 'case042'
   set @marketingAction = 'MA00000024'
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = 'test00002'
   set @email = 'sebastian.heilmeier+2@fluentcx.com'
+  */
 
-  /* set variables from sendout context 
+  /* set variables from sendout context */
   set @response = AttributeValue('response')
   set @caseId = AttributeValue('cid')
   set @marketingAction = AttributeValue('ma')
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = _subscriberKey
   set @email = emailaddr
-  */
-
+  
   /* set correct Data Extensions */
   set @deForInsert = 'ent.LIVE_affinities'
   set @cxConfigDE = 'ent.cxConfig'
