@@ -55,15 +55,18 @@
     /* api call */
     var url = restEndpoint + '/messaging/v1/email/messages/' + caseId;
     var contentType = 'application/json; charset=UTF-8';
-    var payload = Stringify({
-      "ContactKey": subscriberKey
-      ,"EventDefinitionKey": eventDefinitionKey
-      ,"Data": {
-        "subscriberKey": subscriberKey
-        ,"caseId": caseId
-        ,"email": email
+
+    var payload = {
+      "definitionKey": eventDefinitionKey,
+      "recipient": {
+          "contactKey": subscriberKey,
+          "to": email,
+          "attributes": {
+            "caseId": caseId
+            ,"email": email 
+          }
       }
-    });
+    };
 
     var req = new Script.Util.HttpRequest(url);
     req.emptyContentHandling = 0;
