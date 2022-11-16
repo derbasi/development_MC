@@ -54,7 +54,7 @@
     accessToken = Platform.Function.ContentBlockByKey("getToken");
 
     /* api call */
-    var url = restEndpoint + '/messaging/v1/email/messages/' + caseId;
+    var url = restEndpoint + 'messaging/v1/email/messages/' + caseId;
     Variable.SetValue("@url",url); 
     var contentType = 'application/json';
 
@@ -64,7 +64,7 @@
           "contactKey": subscriberKey,
           "to": email,
           "attributes": {
-            "caseId": caseId
+            "caseID": caseId
           }
       }
     };
