@@ -3,7 +3,7 @@
 ]%%<script language="javascript" runat="server">
 Platform.Load("Core","1.1.1");
 var eventName = Variable.GetValue("@eventName");
-var disposition = "attachment; filename=EinladungMacromedia.ics";
+var disposition = Concat("attachment; filename="+"EinladungMacromedia"+".ics");
 HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");
 HTTPHeader.SetValue("Content-Disposition",disposition);
 </script>%%[
