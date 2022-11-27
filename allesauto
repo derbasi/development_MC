@@ -12,6 +12,9 @@
   /* set variables from sendout context */
   set @response = RequestParameter('response')
   set @caseId = AttributeValue('caseId')
+  set @firstName = AttributeValue('firstName')
+  set @firstName = AttributeValue('lastName')
+  set @dealerName = AttributeValue('dealerName')
   set @marketingAction = RequestParameter('marketingAction')
   set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
   set @subscriberKey = _subscriberKey
@@ -45,6 +48,9 @@
     var restEndpoint = Variable.GetValue("@restEndpoint");
     var subscriberKey = Variable.GetValue("@subscriberKey");
     var email = Variable.GetValue("@email");
+    var firstName = Variable.GetValue("@firstName");
+    var lastName = Variable.GetValue("@lastName");
+    var dealerName = Variable.GetValue("@dealerName");
     var caseId = Variable.GetValue("@caseId");
     var log = Variable.GetValue("@errorLogDE");
     var logDE = DataExtension.Init(log);
@@ -62,7 +68,10 @@
                 "contactKey": subscriberKey,
                 "to": email,
                 "attributes": {
-                  "caseId": caseId
+                  "caseId": caseId,
+                  "firstName": firstname,
+                  "lastName": lastName,
+                  "dealerName": dealerName
               }
             }
         };
