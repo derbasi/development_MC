@@ -104,7 +104,6 @@
     set @followUpPage = @errorPage
   endif
 
-Redirect(@followUpPage)
 
 ]%%
 
@@ -116,7 +115,7 @@ Redirect(@followUpPage)
 <br>subscriberKey: %%=v(@subscriberKey)=%%
 <br>email: %%=v(@email)=%%
 <br>eventDefinitionKey: %%=v(@eventDefinitionKey)=%%
-<br>url: %%=v(@url)=%%
+<br>followUpPage: %%=v(@followUpPage)=%%
 <br>additionalStatus: %%=v(@additionalStatus)=%%
 <br>statusCode: %%=v(@statusCode)=%%
 <br>responseContent: %%=v(@responseContent)=%%
