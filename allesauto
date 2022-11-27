@@ -38,7 +38,57 @@
     set @eventDefinitionKey = lookup('ent.cxSwitcher','textContent','businessUnit',@accountId,'context','de_DE','textClass',@marketingAction,'textSubClass',@response,'textId','eventDefinitionKey')
 
     /* trigger feedback mail with ssjs */
- 
+  
+]%%<script runat="server" type="text/javascript">
+    Platform.Load("Core","1");
+    var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
+    var restEndpoint = Variable.GetValue("@restEndpoint");
+    var subscriberKey = Variable.GetValue("@subscriberKey");
+    var email = Variable.GetValue("@email");
+    var caseId = Variable.GetValue("@caseId");
+    var log = Variable.GetValue("@errorLogDE");
+    var logDE = DataExtension.Init(log);
+    // logDE.Rows.Add({errormsg: "variables: " + "eventDefinitionKey: " + eventDefinitionKey + "| restEndpoint: " + restEndpoint + "| subscriberKey: " + subscriberKey + "| email: " + email});
+    
+    /* get access token */
+    accessToken = Platform.Function.ContentBlockByKey("getToken");
+
+    /* build API call */
+    var headerNames = ["Authorization"];
+    var headerValues = ["Bearer " + accessToken];
+    var jsonBody = {
+          "definitionKey": eventDefinitionKey,
+          "recipient": {
+                "contactKey": subscriberKey,
+                "to": email,
+                "attributes": {
+                  "caseId": caseId
+              }
+            }
+        };
+
+    var requestUrl = restEndpoint + "/messaging/v1/email/messages/"+caseId;
+    var fireEmail = HTTP.Post(requestUrl, contentType, Stringify(jsonBody), headerNames, headerValues);
+   
+    if (fireEmail.StatusCode == 202) {
+      var finalResponse = Platform.Function.ParseJSON(fireEmail.Response[0]);
+      var requestId = finalResponse.requestId
+      var errorcode = finalResponse.errorcode
+      var responses = finalResponse.responses[0].messageKey
+      var message = finalResponse.message
+      Variable.SetValue("@errorcode",errorcode); 
+      Variable.SetValue("@responses",responses); 
+      Variable.SetValue("@message",message); 
+    }
+    
+    };
+} catch (error) {
+ Write(Stringify(error));
+    logDE.Rows.Add({errormsg: "error: " + error});
+}
+
+</script>%%[
+
     if @insertIntoAffinities > 0 and @additionalStatus == 'success' then
       set @followUpPage = @successPage
     elseif @insertIntoAffinities > 0 and @additionalStatus != 'success' then
@@ -54,7 +104,7 @@
     set @followUpPage = @errorPage
   endif
 
-
+Redirect(@followUpPage)
 
 ]%%
 
@@ -65,6 +115,7 @@
 <br>affinityKey: %%=v(@affinityKey)=%%
 <br>subscriberKey: %%=v(@subscriberKey)=%%
 <br>email: %%=v(@email)=%%
+<br>eventDefinitionKey: %%=v(@eventDefinitionKey)=%%
 <br>url: %%=v(@url)=%%
 <br>additionalStatus: %%=v(@additionalStatus)=%%
 <br>statusCode: %%=v(@statusCode)=%%
