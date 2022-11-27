@@ -62,7 +62,7 @@
                 "contactKey": subscriberKey,
                 "to": email,
                 "attributes": {
-                  "caseId": caseId
+                  "caseId": Platform.Function.GUID();
               }
             }
         };
