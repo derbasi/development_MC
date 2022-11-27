@@ -62,12 +62,12 @@
                 "contactKey": subscriberKey,
                 "to": email,
                 "attributes": {
-                  "caseId": Platform.Function.GUID();
+                  "caseId": caseId
               }
             }
         };
 
-    var requestUrl = restEndpoint + "/messaging/v1/email/messages/"+caseId;
+    var requestUrl = restEndpoint + "/messaging/v1/email/messages/"+caseId+01;
     var fireEmail = HTTP.Post(requestUrl, contentType, Stringify(jsonBody), headerNames, headerValues);
    
     if (fireEmail.StatusCode == 202) {
