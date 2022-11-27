@@ -1,1 +1,124 @@
-hallo
+%%[
+  
+  /* test Variables
+  set @response = 'true'
+  set @caseId = 'case042'
+  set @marketingAction = 'MA00000024'
+  set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
+  set @subscriberKey = 'test00002'
+  set @email = 'sebastian.heilmeier+2@fluentcx.com'
+   */
+
+  /* set variables from sendout context */
+  set @response = RequestParameter('response')
+  set @caseId = AttributeValue('caseId')
+  set @marketingAction = RequestParameter('marketingAction')
+  set @affinityKey = Concat(@marketingAction,'Responded__sfmc') 
+  set @subscriberKey = _subscriberKey
+  set @email = emailaddr
+
+
+  /* set correct Data Extensions */
+  set @deForInsert = 'ent.LIVE_affinities'
+  set @cxConfigDE = 'ent.cxConfig'
+  set @errorLogDE = 'feedbackErrorLog'
+
+  set @parentBU = '536001490'
+  set @accountId = '536001604'
+  set @submissionSetKey = GUID()
+  set @restEndpoint = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','restEndpoint')
+  set @successPage = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','feedbackSuccessPage')
+  set @errorPage = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','feedbackErrorPage')
+  
+  if not empty(@subscriberKey) and not empty(@marketingAction) then
+    /* save answer in affinities */
+    set @insertIntoAffinities = UpsertData(@deForInsert,1,'subscriberKey',@subscriberKey,'affinityKey',@affinityKey,'affinitySource',@marketingAction,'affinityState','active','affinityValue',@response,'submissionSetKey',@submissionSetKey)
+
+    /* set event Difinition Key (lookup in cxSwitcher) */
+    set @eventDefinitionKey = lookup('ent.cxSwitcher','textContent','businessUnit',@accountId,'context','de_DE','textClass',@marketingAction,'textSubClass',@response,'textId','eventDefinitionKey')
+
+    /* trigger feedback mail with ssjs */
+  
+]%%<script runat="server" type="text/javascript">
+    Platform.Load("Core","1");
+    var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
+    var restEndpoint = Variable.GetValue("@restEndpoint");
+    var subscriberKey = Variable.GetValue("@subscriberKey");
+    var email = Variable.GetValue("@email");
+    var caseId = Variable.GetValue("@caseId");
+    var log = Variable.GetValue("@errorLogDE");
+    var logDE = DataExtension.Init(log);
+    // logDE.Rows.Add({errormsg: "variables: " + "eventDefinitionKey: " + eventDefinitionKey + "| restEndpoint: " + restEndpoint + "| subscriberKey: " + subscriberKey + "| email: " + email});
+    
+    /* get access token */
+    accessToken = Platform.Function.ContentBlockByKey("getToken");
+
+    /* build API call */
+    var headerNames = ["Authorization"];
+    var headerValues = ["Bearer " + accessToken];
+    var jsonBody = {
+          "definitionKey": eventDefinitionKey,
+          "recipient": {
+                "contactKey": subscriberKey,
+                "to": email,
+                "attributes": {
+                  "caseId": caseId
+              }
+            }
+        };
+
+    var requestUrl = restEndpoint + "/messaging/v1/email/messages/"+caseId;
+    var fireEmail = HTTP.Post(requestUrl, contentType, Stringify(jsonBody), headerNames, headerValues);
+   
+    if (fireEmail.StatusCode == 202) {
+      var finalResponse = Platform.Function.ParseJSON(fireEmail.Response[0]);
+      var requestId = finalResponse.requestId
+      var errorcode = finalResponse.errorcode
+      var responses = finalResponse.responses[0].messageKey
+      var message = finalResponse.message
+      Variable.SetValue("@errorcode",errorcode); 
+      Variable.SetValue("@responses",responses); 
+      Variable.SetValue("@message",message); 
+    }
+    
+    };
+} catch (error) {
+ Write(Stringify(error));
+    logDE.Rows.Add({errormsg: "error: " + error});
+}
+
+</script>%%[
+
+    if @insertIntoAffinities > 0 and @additionalStatus == 'success' then
+      set @followUpPage = @successPage
+    elseif @insertIntoAffinities > 0 and @additionalStatus != 'success' then
+      set @addToErroLog = InsertData(@errorLogDE,'errormsg','data was inserted into affinities but followup mail was not sent')
+      set @followUpPage = @successPage
+    else
+      set @addToErroLog = InsertData(@errorLogDE,'errormsg','data was NOT inserted into affinities and also follow up mail was NOT sent')
+      set @followUpPage = @errorPage
+    endif
+
+  else
+    set @addToErroLog = InsertData(@errorLogDE,'errormsg','subscriberKey or marketingAction is missing')
+    set @followUpPage = @errorPage
+  endif
+
+
+
+]%%
+
+
+<br>response: %%=v(@response)=%%
+<br>caseId: %%=v(@caseId)=%%
+<br>marketingAction: %%=v(@marketingAction)=%%
+<br>affinityKey: %%=v(@affinityKey)=%%
+<br>subscriberKey: %%=v(@subscriberKey)=%%
+<br>email: %%=v(@email)=%%
+<br>url: %%=v(@url)=%%
+<br>additionalStatus: %%=v(@additionalStatus)=%%
+<br>statusCode: %%=v(@statusCode)=%%
+<br>responseContent: %%=v(@responseContent)=%%
+<br>errorcode: %%=v(@errorcode)=%%
+<br>responses: %%=v(@responses)=%%
+<br>message: %%=v(@message)=%%
