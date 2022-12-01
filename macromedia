@@ -3,6 +3,7 @@
 ]%%%%[
  set @startDate = AttributeValue('CampaignMember:Event_Date__c')
     set @startTime = AttributeValue('CampaignMember:Event_Time__c') 
+    set @startTimeRebuild = Format(@startDate,"MM'/'dd'/'yyyy")
     
     set @anfahrtsBeschreibung = AttributeValue('CampaignMember:Anfahrtsbeschreibung_DE__c')
     set @standort = AttributeValue('CampaignMember:Standort_Ort__c')
