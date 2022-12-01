@@ -1,13 +1,7 @@
 %%[
     set @eventName = AttributeValue('CampaignMember:Event_Name__c')
-]%%<script language="javascript" runat="server">
-Platform.Load("Core","1.1.1");
-var eventName = Variable.GetValue("@eventName");
-var disposition = "attachment; filename=" + eventName + ".ics";
-HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");
-HTTPHeader.SetValue("Content-Disposition",disposition);
-</script>%%[
-	set @startDate = AttributeValue('CampaignMember:Event_Date__c')
+]%%%%[
+ set @startDate = AttributeValue('CampaignMember:Event_Date__c')
     set @startTime = AttributeValue('CampaignMember:Event_Time__c') 
 
     set @startTimeRebuild = Format(@startDate,"MM'/'dd'/'yyyy")
@@ -16,7 +10,7 @@ HTTPHeader.SetValue("Content-Disposition",disposition);
     set @startTimeFormatted = Format(@startDateTimeStamp,"yyyyMMdd'T'HHmmss")
     set @endDateFormatted = Format(DateAdd(@startDateTimeStamp,90,"MI"),"yyyyMMdd'T'HHmmss")
     set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
-	set @anfahrtsBeschreibung = AttributeValue('CampaignMember:Anfahrtsbeschreibung_DE__c')
+ set @anfahrtsBeschreibung = AttributeValue('CampaignMember:Anfahrtsbeschreibung_DE__c')
     set @standort = AttributeValue('CampaignMember:Standort_Ort__c')
     set @meetingURL = AttributeValue('CampaignMember:Teilnahmelink__c')
 ]%%BEGIN:VCALENDAR
