@@ -24,8 +24,7 @@ DTEND:%%=v(@endDateFormatted)=%%
 DTSTAMP:%%=v(@formattedDateNow)=%%
 CREATED:%%=v(@formattedDateNow)=%%
 SUMMARY:%%CampaignMember:Event_Name__c%%
-DESCRIPTION:Vielen Dank für deine Anmeldung zu unserem Event "%%CampaignMember:Event_Name__c%%" am %%=Format(AttributeValue('CampaignMember:Event_Date__c'),"dd.MM.yyyy")=%% um %%CampaignMember:Event_Time__c%%.\n\nUnser Event "%%CampaignMember:Event_Name__c%%" wird %%[ set @variable = AttributeValue('CampaignMember:Event_Type__c') IF @variable == 'Vor Ort' THEN SET @value = Concat("vor Ort am Campus ", @standort , " stattfinden. \nAnfahrtsbeschreibung:\n",@anfahrtsBeschreibung) ELSEIF @variable == 'Virtuell' THEN SET @value = Concat("virtuell stattfinden.\nDein Teilnahmelink:\n",@meetingURL) ELSE SET @value = Concat("virtuell und vor Ort stattfinden. \nDein Teilnahmelink:\n",@meetingURL,"\nAnfahrtsbeschreibung:\n",@anfahrtsBeschreibung) ENDIF]%% %%=v(@value)=%% \nWir freuen uns auf dich.
-STATUS:CONFIRMED
+
 BEGIN:VALARM
 TRIGGER:-PT60M
 ACTION:DISPLAY
