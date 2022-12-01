@@ -8,3 +8,15 @@
     set @standort = AttributeValue('CampaignMember:Standort_Ort__c')
     set @meetingURL = AttributeValue('CampaignMember:Teilnahmelink__c')
 ]%%
+
+startTime: %%=v(@startTime)=%%
+<br> startTime: %%=v(@startTime)=%%
+<br> startTimeRebuild: %%=v(@startTimeRebuild)=%%
+<br> startTimeTrim: %%=v(@startTimeTrim)=%%
+<br> startDateTimeStamp: %%=v(@startDateTimeStamp)=%%
+<br> startTimeFormatted: %%=v(@startTimeFormatted)=%%
+<br> formattedDateNow: %%=v(@formattedDateNow)=%%
+
+<br> anfahrtsBeschreibung: %%=v(@anfahrtsBeschreibung)=%%
+<br> standort: %%=v(@standort)=%%
+<br> meetingURL: %%=v(@meetingURL)=%%
