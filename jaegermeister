@@ -2,8 +2,8 @@
 Platform.Load("Core",1)
 
 var dataRows = "";
-var dataExtension = "shopifyLog";
-var targetDE = "shopifyPersonId"
+var dataExtension = "shopifyOrders2Permissions";
+var targetDE = "shopifyLog"
 
 dataRows = Platform.Function.LookupOrderedRows(dataExtension,50000,'CreatedDate ASC','processed','false');
 
