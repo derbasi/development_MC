@@ -9,6 +9,7 @@ dataRows = Platform.Function.LookupOrderedRows(dataExtension,10000,'CreatedDate 
 } catch (e1) {
         Write("<br>error1: " + e1)
     }
+Write("rows: " + dataRows.length)
 if (dataRows.length > 0) {
  for (var x = 0; x < dataRows.length; x++) {
   var item = dataRows[x];
