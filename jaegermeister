@@ -1,1 +1,42 @@
-hallo
+<script type="javascript" runat="server">
+Platform.Load("Core",1)
+
+var dataRows = "";
+var dataExtension = "shopifyLog";
+var targetDE = "shopifyPersonId"
+
+dataRows = Platform.Function.LookupOrderedRows(dataExtension,50000,'CreatedDate ASC','processed','false');
+
+if (dataRows.length > 0) {
+ for (var x = 0; x < dataRows.length; x++) {
+  var item = dataRows[x];
+  var info = Platform.Function.ParseJSON(item.HIC_ShopifySync__Info__c);
+  if (info.length > 0) {
+   for (y = 0; y < info.length; y++) {
+    var item1 = info[y];
+
+    try {
+    var id = Platform.Function.ParseJSON(item1.id);
+    var email = Platform.Function.ParseJSON(item1.email);
+    var acceptsMarketing = Platform.Function.ParseJSON(item1.accepts_marketing);
+    var lastOrderId = Platform.Function.ParseJSON(item1.last_order_id);
+    var confirmDate = Platform.Function.ParseJSON(item1.accepts_marketing_updated_at);
+    } catch (e) {
+        Write("<br>parseJSONError: " + e)
+    }
+
+    Write(Stringify("<br>" + "x= " + x +" id: " + id + ", email: " + email + ", acceptsMarketing: " + acceptsMarketing + ", lastOrderId: " + lastOrderId + ", confirmDate: " + confirmDate));
+    try {
+        var rows = Platform.Function.InsertData(targetDE,["Id","email","acceptsMarketing","lastOrderId","confirmDate"],[id,email,acceptsMarketing,lastOrderId,confirmDate])
+    } catch (error) {
+        Write("error: " + error)
+    }
+  
+   }
+  }
+
+ }
+}
+
+</script>
+
