@@ -5,7 +5,7 @@ var dataRows = "";
 var dataExtension = "shopifyOrders2Permissions";
 var targetDE = "shopifyLog"
 try{
-dataRows = Platform.Function.LookupOrderedRows(dataExtension,10000,'CreatedDate ASC','processed','false', 'id', 'a0j5q000000tJtQAAU');
+dataRows = Platform.Function.LookupOrderedRows(dataExtension,10000,'CreatedDate ASC','processed','false');
 } catch (e1) {
         Write("<br>error1: " + e1)
     }
