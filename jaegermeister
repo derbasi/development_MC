@@ -43,7 +43,7 @@ if (dataRows.length > 0) {
         Write("<br>error6: " + e6)
     }
     //var rows = Platform.Function.UpsertData(targetDE,["Id"],["Id","email","acceptsMarketing","lastOrderId","confirmDate"],[id,email,acceptsMarketing,lastOrderId,confirmDate]);
-    Write(Stringify("<br>item1: " + item1 + "id: " + id + ", email: " + email + ", acceptsMarketing: " + acceptsMarketing + ", lastOrderId: " + lastOrderId));
+    Write(Stringify("<br>x: " + x " item1: " + item1 + " id: " + id + ", email: " + email + ", acceptsMarketing: " + acceptsMarketing + ", lastOrderId: " + lastOrderId));
     //Write("<br>")
     //var logDE = "shopifyPersonId";
     //var log = dataExtension.Init(logDE);
