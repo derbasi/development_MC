@@ -4,9 +4,11 @@ Platform.Load("Core",1)
 var dataRows = "";
 var dataExtension = "shopifyOrders2Permissions";
 var targetDE = "shopifyLog"
-
-dataRows = Platform.Function.LookupOrderedRows(dataExtension,10000,'CreatedDate ASC','processed','false', 'Id', 'a0j5q000000tJtQAAU');
-
+try{
+dataRows = Platform.Function.LookupOrderedRows(dataExtension,10000,'CreatedDate ASC','processed','false');
+} catch (e1) {
+        Write("<br>error1: " + e1)
+    }
 if (dataRows.length > 0) {
  for (var x = 0; x < dataRows.length; x++) {
   var item = dataRows[x];
@@ -14,18 +16,42 @@ if (dataRows.length > 0) {
   if (info.length > 0) {
    for (y = 0; y < info.length; y++) {
     var item1 = info[y];
+    try{
     var id = Platform.Function.ParseJSON(item1.id);
+    } catch (e2) {
+        Write("<br>error2: " + e2)
+    }
+    try{
     var email = Platform.Function.ParseJSON(item1.email);
+    } catch (e3) {
+        Write("<br>error3: " + e3)
+    }
+    try{
     var acceptsMarketing = Platform.Function.ParseJSON(item1.accepts_marketing);
+        } catch (e4) {
+        Write("<br>error4: " + e4)
+    }
+    try{
     var lastOrderId = Platform.Function.ParseJSON(item1.last_order_id);
+     } catch (e5) {
+        Write("<br>error5: " + e5)
+    }
+    try{
     var confirmDate = Platform.Function.ParseJSON(item1.accepts_marketing_updated_at);
+     } catch (e6) {
+        Write("<br>error6: " + e6)
+    }
     //var rows = Platform.Function.UpsertData(targetDE,["Id"],["Id","email","acceptsMarketing","lastOrderId","confirmDate"],[id,email,acceptsMarketing,lastOrderId,confirmDate]);
     Write(Stringify("id: " + id + ", email: " + email + ", acceptsMarketing: " + acceptsMarketing + ", lastOrderId: " + lastOrderId));
     //Write("<br>")
     //var logDE = "shopifyPersonId";
     //var log = dataExtension.Init(logDE);
     //log.Rows.Add({id:"InsertData(Data Extension name,Column name,Value to insert)"})
-    var rows = Platform.Function.InsertData(targetDE,["Id","email","acceptsMarketing","lastOrderId","confirmDate"],[id,email,acceptsMarketing,lastOrderId,confirmDate])
+    try{
+        var rows = Platform.Function.InsertData(targetDE,["Id","email","acceptsMarketing","lastOrderId","confirmDate"],[id,email,acceptsMarketing,lastOrderId,confirmDate])
+    } catch (error) {
+        Write("<br>error: " + error)
+    }
    }
   }
 
