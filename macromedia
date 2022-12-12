@@ -1,1 +1,32 @@
-hallo
+<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=BeratungsterminMacromedia.ics");</script>%%[
+set @locationRaw = AttributeValue("Event:Location") 
+set @location = Substring(@locationRaw,1, Subtract(IndexOf(@locationRaw," "),1))
+set @assignedTo = AttributeValue("Event:Name_Assigned_To__c") 
+set @email = AttributeValue("Event:Location_Email__c") 
+set @phone = AttributeValue("Event:Location_Phone__c")
+set @startDate = AttributeValue('Event:StartDateTime')
+set @formattedstartDate = Format(DateAdd(@startDate,1,"H"),"yyyyMMdd'T'HHmmss")
+set @endDate = AttributeValue('Event:EndDateTime')
+set @formattedEndDate = Format(DateAdd(@endDate,1,"H"),"yyyyMMdd'T'HHmmss")
+set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
+]%%BEGIN:VCALENDAR
+PRODID:-//Macromedia//DE
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+DTSTART:%%=v(@formattedstartDate)=%%
+DTEND:%%=v(@formattedEndDate)=%%
+DTSTAMP:%%=v(@formattedDateNow)=%%
+CREATED:%%=v(@formattedDateNow)=%%
+SUMMARY:Beratungstermin Macromedia
+DESCRIPTION:Wir freuen uns, dass du einen Beratungstermin bei uns gebucht hast.\n\nWann: %%=Format(DateAdd(AttributeValue('Event:StartDateTime'),1,"H"),"dd.MM.yyy HH:mm","Date","de-DE")=%% - %%=Format(DateAdd(AttributeValue('Event:EndDateTime'),1,"H"),"HH:mm","Date","de-DE")=%% Uhr\nWo:%%[ set @variable = AttributeValue('Event:Appointment_Type__c') IF @variable == 'People' THEN SET @value = "Am Campus" ELSE SET @value = "Telefonisch mit unserer Beratung" ENDIF ]%% %%=v(@value)=%% %%=v(@location)=%%\n\nWir freuen uns auf dich.\n\n %%=v(@assignedTo)=%%\nBeratung %%=v(@location)=%%\n%%=v(@email)=%%\nTel. %%=v(@phone)=%%
+LOCATION:
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-PT180M
+ACTION:DISPLAY
+DESCRIPTION:Reminder
+END:VALARM
+END:VEVENT
+END:VCALENDAR
