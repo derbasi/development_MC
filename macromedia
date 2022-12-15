@@ -567,18 +567,6 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
       
       if (skipDOIDueToAdditionalProcessing == false) {
 
-        logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey +
-                                  " | subscriberKey: " + subscriberKey +
-                                  " | email: " + email +
-                                  " | permissionType: " + permissionType +
-                                  " | channel: " + channel +
-                                  " | locale: " + locale +
-                                  " | completePermissions: " + completePermissions +
-                                  " | sourceCategory: " + sourceCategory +
-                                  " | source: " + source +
-                                  " | formDataJSON: " + formDataJSON
-                                   });
-
         /* additional sendout block changed nothing */
         /* sendout start */
         try {
@@ -600,6 +588,19 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
               }
             }
           });
+
+                  logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey +
+                                  " | subscriberKey: " + subscriberKey +
+                                  " | email: " + email +
+                                  " | permissionType: " + permissionType +
+                                  " | channel: " + channel +
+                                  " | locale: " + locale +
+                                  " | completePermissions: " + completePermissions +
+                                  " | sourceCategory: " + sourceCategory +
+                                  " | source: " + source +
+                                  " | formDataJSON: " + formDataJSON
+                                  " | url: " + url
+                                   });
 
           if(Variable.GetValue("@environment") != "test") {
             // double check threshold for max emails defined
