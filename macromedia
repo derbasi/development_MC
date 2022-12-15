@@ -568,15 +568,15 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
       if (skipDOIDueToAdditionalProcessing == false) {
 
         logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey +
-                                  "subscriberKey: " + subscriberKey +
-                                  "email: " + email +
-                                  "permissionType: " + permissionType +
-                                  "channel: " + channel +
-                                  "locale: " + locale +
-                                  "completePermissions: " + completePermissions +
-                                  "sourceCategory: " + sourceCategory +
-                                  "source: " + source +
-                                  "formDataJSON: " + formDataJSON
+                                  "| subscriberKey: " + subscriberKey +
+                                  "| email: " + email +
+                                  "| permissionType: " + permissionType +
+                                  "| channel: " + channel +
+                                  "| locale: " + locale +
+                                  "| completePermissions: " + completePermissions +
+                                  "| sourceCategory: " + sourceCategory +
+                                  "| source: " + source +
+                                  "| formDataJSON: " + formDataJSON
                                    });
 
         /* additional sendout block changed nothing */
@@ -627,6 +627,7 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
             
             if (belowMaxNumberDois == true) {
               var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
+              logDE.Rows.Add({errormsg: "call executed"});
             }
           }
         }
