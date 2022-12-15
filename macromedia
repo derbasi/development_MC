@@ -598,8 +598,8 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
                         " | completePermissions: " + completePermissions +
                         " | sourceCategory: " + sourceCategory +
                         " | source: " + source +
-                        " | formDataJSON: " + formDataJSON
-                        " | url: " + "ladida"
+                        " | formDataJSON: " + formDataJSON + 
+                        " | url: " + url
                          });
 
           if(Variable.GetValue("@environment") != "test") {
