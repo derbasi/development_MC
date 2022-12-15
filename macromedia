@@ -618,12 +618,14 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
             if(maxNumberOfDoiEmailsAsString) {
               var maxNumberOfDoiEmails = parseInt(maxNumberOfDoiEmailsAsString);                  
               Variable.SetValue("@maxNumberOfDoiEmails",maxNumberOfDoiEmails)
+              logDE.Rows.Add({errormsg: "maxNumberOfDoiEmailsAsString: " + maxNumberOfDoiEmailsAsString});
 
               if(currentNumberOfDoiEmails >= maxNumberOfDoiEmails) {
                 belowMaxNumberDois = false
               } 
             }
             Variable.SetValue("@belowMaxNumberDois",Stringify(belowMaxNumberDois));
+            logDE.Rows.Add({errormsg: "belowMaxNumberDois: " + belowMaxNumberDois});
             
             if (belowMaxNumberDois == true) {
               var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
