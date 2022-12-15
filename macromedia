@@ -630,6 +630,8 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
             if (belowMaxNumberDois == true) {
               logDE.Rows.Add({errormsg: "right before the call"});
               var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
+              var statusCode = result.StatusCode
+              logDE.Rows.Add({errormsg: "statusCode: " + statusCode});
               logDE.Rows.Add({errormsg: "call executed"});
             }
           }
