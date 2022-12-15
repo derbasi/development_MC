@@ -66,10 +66,10 @@ IF not empty(@token) THEN
   var nameParentBU = Variable.GetValue("@nameParentBU");
 
   // get tokenContext
-  var access_token = Variable.GetValue("@token");
+  var accessToken = Variable.GetValue("@token");
   var restUrl = restEndpoint + "platform/v1/tokenContext";
   var headerNames = ["Authorization"];
-  var headerValues = ["Bearer " + access_token];
+  var headerValues = ["Bearer " + accessToken];
   var accountId = "";
   var tokenContext = {};
   var tokenContent = "";
@@ -525,7 +525,7 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
       var completePermissions = Variable.GetValue("@completePermissions");
       var channel = Variable.GetValue("channel");
       var locale = Variable.GetValue("locale");
-      var access_token = Variable.GetValue("@token");
+      var accessToken = Variable.GetValue("@token");
       var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
       var cxConfigDE = Variable.GetValue("@cxConfigDE");  
       /* additionalProcessing lookup */
@@ -567,7 +567,7 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
       
       if (skipDOIDueToAdditionalProcessing == false) {
 
-        logDE.Rows.Add({errormsg: eventDefinitionKey});
+        logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey});
 
         /* additional sendout block changed nothing */
         /* sendout start */
@@ -575,7 +575,7 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
           var url = restEndpoint + 'messaging/v1/email/messages/' + subscriberKey;
           var contentType = 'application/json; charset=UTF-8';
           var headerNames = ["Authorization"];
-          var headerValues = ["Bearer "+ access_token];
+          var headerValues = ["Bearer "+ accessToken];
           var payload = Stringify({ "definitionKey": eventDefinitionKey, 
             "recipient": { "contactKey": subscriberKey 
             ,"to": email
