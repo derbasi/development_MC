@@ -1,37 +1,752 @@
-<script language="javascript" runat="server">Platform.Load("Core","1.1.1");HTTPHeader.SetValue("Content-type","text/calendar; charset=utf-8");HTTPHeader.SetValue("Content-Disposition","attachment; filename=BeratungsterminMacromedia.ics");</script>%%[
-set @locationRaw = AttributeValue("Event:Location") 
-set @indexCheck = IndexOf(@locationRaw," ")
-if @indexCheck > '0' then
-	set @location = Substring(@locationRaw,1, Subtract(IndexOf(@locationRaw," "),1))
-else
-	set @location = @locationRaw
-endif
-set @assignedTo = AttributeValue("Event:Name_Assigned_To__c") 
-set @email = AttributeValue("Event:Location_Email__c") 
-set @phone = AttributeValue("Event:Location_Phone__c")
-set @startDate = AttributeValue('Event:StartDateTime')
-set @formattedstartDate = Format(DateAdd(@startDate,1,"H"),"yyyyMMdd'T'HHmmss")
-set @endDate = AttributeValue('Event:EndDateTime')
-set @formattedEndDate = Format(DateAdd(@endDate,1,"H"),"yyyyMMdd'T'HHmmss")
-set @formattedDateNow = Format(SystemDateToLocalDate(Now()),"yyyyMMdd'T'HHmmss")
-]%%BEGIN:VCALENDAR
-PRODID:-//Macromedia//DE
-VERSION:2.0
-CALSCALE:GREGORIAN
-METHOD:REQUEST
-BEGIN:VEVENT
-DTSTART:%%=v(@formattedstartDate)=%%
-DTEND:%%=v(@formattedEndDate)=%%
-DTSTAMP:%%=v(@formattedDateNow)=%%
-CREATED:%%=v(@formattedDateNow)=%%
-SUMMARY:Beratungstermin Macromedia
-DESCRIPTION:Wir freuen uns, dass du einen Beratungstermin bei uns gebucht hast.\n\nWann: %%=Format(DateAdd(AttributeValue('Event:StartDateTime'),1,"H"),"dd.MM.yyy HH:mm","Date","de-DE")=%% - %%=Format(DateAdd(AttributeValue('Event:EndDateTime'),1,"H"),"HH:mm","Date","de-DE")=%% Uhr\nWo:%%[ set @variable = AttributeValue('Event:Appointment_Type__c') IF @variable == 'People' THEN SET @value = "Am Campus" ELSE SET @value = "Telefonisch mit unserer Beratung" ENDIF ]%% %%=v(@value)=%% %%=v(@location)=%%\n\nWir freuen uns auf dich.\n\n %%=v(@assignedTo)=%%\nBeratung %%=v(@location)=%%\n%%=v(@email)=%%\nTel. %%=v(@phone)=%%
-LOCATION:
-STATUS:CONFIRMED
-BEGIN:VALARM
-TRIGGER:-PT180M
-ACTION:DISPLAY
-DESCRIPTION:Reminder
-END:VALARM
-END:VEVENT
-END:VCALENDAR
+%%[
+/*
+Parent Business Unit, CloudPages - subscriptionManagement
+TEST Cloudpage URL: https://cloud.mm.macromedia.de/TEST_subscribeViaAP
+LIVE CloudPage URL: https://cloud.mm.macromedia.de/LIVE_subscribeViaAPI
+*/
+/* TESTComment switch 
+SET @environment = "test"
+*/
+SET @parentBU = "510004565"
+SET @nameParentBU = "global"
+SET @token = Requestparameter("token")
+SET @tokenValid = "false"
+
+SET @apiresponseTextsDE = "APIResponseTexts"
+SET @cxConfigDE = "cxConfig" 
+SET @cxSwitcherDE = "cxSwitcher"
+SET @allSubscribers = "_Subscribers" 
+SET @fieldValidationDE = "fieldValidation"
+SET @subscriptionArchiveDE = "subscriptionArchive" 
+
+/* reading help: "lookup in the cxConfig the value where the record belongs to context Parent MID and record name is ___ " */
+SET @restEndpoint = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','restEndpoint')
+SET @soapEndpoint = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','soapEndpoint')
+
+IF @environment == "test" THEN
+  SET @logDELookupField = "DOITestLogDE"
+ELSE 
+  SET @logDELookupField = "DOILogDE"
+ENDIF
+
+SET @doiLogDE = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName',@logDELookupField)
+
+/* begin move: 
+below token check for one BU setups because it requires accountId  */
+
+SET @guestAffinitiesDE = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','guestAffinitiesDEBaseName')
+SET @guestsDE = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','guestsDE')
+
+IF @environment == "test" THEN
+SET @guestAffinitiesDE = concat("TEST_",@guestAffinitiesDE)
+ELSE 
+SET @guestAffinitiesDE = concat("LIVE_",@guestAffinitiesDE)
+ENDIF
+
+/* end move */
+/* timezone check */
+SET @servertime = NOW()
+SET @localtime = SystemDateToLocalDate(Now())
+/* perform timezone check to apply german daylight saving time offset;*/
+SET @timezoneOffset = DateDiff(@servertime,@localtime, 'H')
+/* LOCAL TIME HAS TO BE SENT BY THE ORIGINATING SYSTEM! */
+
+
+IF not empty(@token) THEN
+  /* check token + account_ID validity */
+
+  ]%%<script type="javascript" runat="server"> 
+  Platform.Load("Core","1");
+  var restEndpoint = Variable.GetValue("@restEndpoint");
+  var timezoneOffset = Variable.GetValue("@timezoneOffset");
+  var cxConfigDE = Variable.GetValue("@cxConfigDE"); 
+  var log = Variable.GetValue("@doiLogDE");
+  var logDE = DataExtension.Init(log);
+
+  var nameParentBU = Variable.GetValue("@nameParentBU");
+
+  // get tokenContext
+  var access_token = Variable.GetValue("@token");
+  var restUrl = restEndpoint + "platform/v1/tokenContext";
+  var headerNames = ["Authorization"];
+  var headerValues = ["Bearer " + access_token];
+  var accountId = "";
+  var tokenContext = {};
+  var tokenContent = "";
+  var parameterContext = "";
+  try {
+    tokenContext = HTTP.Get(restUrl,headerNames,headerValues);
+    tokenContent = Stringify(Platform.Function.ParseJSON(tokenContext.Content));
+    accountId = Stringify(Platform.Function.ParseJSON(tokenContext.Content).organization.id);
+    Variable.SetValue("@accountId",accountId)
+    //logDE.Rows.Add({errormsg: accountId,timezoneOffset: timezoneOffset});
+    parameterContext = Platform.Function.Lookup(cxConfigDE,"parameterContext",['parameterName','parameterValue'],['MID',accountId])
+    /* parameterContext has to be filed in cxConfig (="exists") and must be something other than "parent" */
+
+    if(parameterContext != nameParentBU) {
+      //logDE.Rows.Add({errormsg: "token_valid",timezoneOffset: timezoneOffset});
+      Variable.SetValue("@tokenValid","true");
+
+      //continue processing
+    }
+    else {
+      /* invalid accountId */
+      Variable.SetValue("@statusmessage","invalidAccountId");
+    }
+    
+  } catch (err) {
+      /* invalid token */
+      Variable.SetValue("@statusmessage","invalidToken");
+      logDE.Rows.Add({errormsg: Stringify(err),timezoneOffset: timezoneOffset});
+  }
+  </script>%%[
+
+  IF @accountId != @parentBU THEN
+    SET @doiLogDE = concat("ENT.",@doiLogDE)
+    SET @guestsDE = concat("ENT.",@guestsDE)
+    SET @guestAffinitiesDE = concat("ENT.",@guestAffinitiesDE)
+  ENDIF
+
+  SET @defaultSourceCategory = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultSourceCategoryAPISubscription')
+  SET @defaultSource = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultSourceAPISubscription')
+  SET @defaultPermissionType = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultPermission')
+  SET @defaultChannel = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultChannel')
+  SET @defaultLocale = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultLocale')
+
+ENDIF
+IF @tokenValid == "true" THEN
+
+  SET @operation = Requestparameter("operation")
+
+  SET @sourceCategory = Requestparameter("sourceCategory") 
+  IF empty(@sourceCategory) THEN
+    SET @sourceCategory = @defaultSourceCategory
+  ENDIF
+
+  SET @source = requestparameter("source")
+  IF empty(@source) THEN
+    SET @source = @defaultSource
+  ENDIF
+
+  SET @email = Requestparameter("email")
+  SET @ip = Requestparameter("ip")
+  SET @permissionType = Requestparameter("permissionType")
+  IF empty(@permissionType) THEN
+    SET @permissionType = @defaultPermissionType
+  ENDIF
+
+  SET @channel = Requestparameter("channel")
+  IF empty(@channel) THEN
+    SET @channel = @defaultChannel
+  ENDIF
+
+  SET @locale = Requestparameter("locale")
+  IF empty(@locale) THEN
+    SET @locale = @defaultLocale
+  ENDIF
+
+  SET @utmSource = Requestparameter("utm_source")
+  SET @utmMedium = Requestparameter("utm_medium")
+  SET @utmCampaign = Requestparameter("utm_campaign")
+  SET @utmTerm = Requestparameter("utm_term")
+  SET @utmContent = Requestparameter("utm_content")
+
+  SET @formDataJSON = Requestparameter("formDataJSON")
+  IF not empty(@permissionType) THEN
+    SET @permissionTypeAsRowset = BuildRowSetFromString(@permissionType,",")
+    SET @rowCountPermissions = rowCount(@permissionTypeAsRowset)
+    IF @rowCountPermissions > 0 THEN
+      SET @completePermissions = @permissionType
+    ENDIF 
+  ENDIF
+  /* used for multi subscription, see code further below. */
+  
+  /* check what call is incoming */
+  IF @operation != "subscribe" THEN
+    SET @statusmessage = "doiInvalidOperation"
+  ENDIF /* end subscription */
+
+ELSE 
+  SET @statusmessage = "invalidToken"
+ENDIF
+
+IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
+
+  /* A / B testing */
+  SET @defaultEventDefinitionKey = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultDOIJourneyEventDefinitionKey')
+  SET @threshold = Lookup(@cxSwitcherDE,"textContent","businessUnit",@accountId,"textClass",@source,"textId","percentageDOIEmailVariantB")
+  ]%%<script runat="server">
+  // convert to integer
+  var thresholdFromDE = Variable.GetValue("threshold");
+  if (thresholdFromDE) {
+    var percentage = parseInt(thresholdFromDE);
+    Variable.SetValue("@percentage",percentage);
+  }
+  </script>%%[
+  IF not empty(@percentage) THEN 
+    SET @randomNo = Random(1,100)
+    IF @randomNo >= @percentage THEN
+     /* A Version "default" here */
+      SET @eventDefinitionKey = Lookup(@cxSwitcherDE,"textContent","businessUnit",@accountId,"textClass",@source,"textId","doiConfirmationEventKeyA")
+    ELSE
+      /* B version (special here) */
+      SET @eventDefinitionKey = Lookup(@cxSwitcherDE,"textContent","businessUnit",@accountId,"textClass",@source,"textId","doiConfirmationEventKeyB")
+    ENDIF
+  ELSE 
+    SET @eventDefinitionKey = @defaultEventDefinitionKey  
+  ENDIF
+
+  /* regex checks for backend validation */
+  /* the next section solves the problem that in the fieldValidation DE there could be:
+  a) validation patterns listed as "defaultPatterns" for the locale (identifier = "default")
+  b) validation patterns listed specifically for this @source  (identifier = anything but "default")
+  Duplicate entries of the same pattern name create potential conflicts. 
+  
+  To resolve them, the code chooses a setting by the following logic: 
+  for each field, If there is a @source specific setting (validation pattern & mandatory setting), 
+  the specific setting is used.
+  The default is used in case no source-specific definition has been made for a given field.
+  This way, additional fieldValidation definitions can be added as individual fields, usecase by usecase.
+  There is no need copy entire sets of patterns in fieldValidations if they are already listed as defaults.
+  */
+
+  SET @defaultsPatternsAsRowset = LookupRows(@fieldValidationDE,"locale",@locale,"identifier","default")
+  SET @sourceSpecificPatterns = LookupRows(@fieldValidationDE,"locale",@locale,"identifier",@source)
+  
+
+  SET @listOfDefaultPatterns = ""
+  FOR @i = 1 TO rowcount(@defaultsPatternsAsRowset) DO
+    SET @row = row(@defaultsPatternsAsRowset,@i)
+    SET @fieldname = field(@row,"fieldname")
+    SET @listOfDefaultPatterns = concat(@listOfDefaultPatterns,@fieldname,",")
+  NEXT @i 
+  /* trim last comma to get an array-like structure as a string */
+  SET @listOfDefaultPatterns = Substring(@listOfDefaultPatterns,1,Subtract(Length(@listOfDefaultPatterns),1))
+  
+  SET @listOfSourceSpecificPatterns = ""
+  FOR @i = 1 TO rowcount(@sourceSpecificPatterns) DO
+    SET @row = row(@sourceSpecificPatterns,@i)
+    SET @fieldname = field(@row,"fieldname")
+    SET @listOfSourceSpecificPatterns = concat(@listOfSourceSpecificPatterns,@fieldname,",")
+  NEXT @i 
+  /* trim last comma to get an array-like structure as a string */
+  SET @listOfSourceSpecificPatterns = Substring(@listOfSourceSpecificPatterns,1,Subtract(Length(@listOfSourceSpecificPatterns),1))
+  
+  SET @sourceSpecificPatternsAsRowset = BuildRowSetFromString(@listOfSourceSpecificPatterns,",")
+
+
+  SET @chosenIdentifiersAsString = ""
+  SET @chosenMandatorySettingsAsString = ""
+
+  /* go through the patterns that are specified for default identifier in fieldValidation DE.
+  If a pattern is also defined for the current @source, the current @source validation pattern and mandatory setting wins
+  Otherwise, use the default pattern. */   
+  FOR @i = 1 To rowcount(@defaultsPatternsAsRowset) DO
+    SET @row = row(@defaultsPatternsAsRowset,@i)   
+    SET @fieldname = field(@row,1)
+    
+    IF indexOf(@listOfSourceSpecificPatterns,@fieldname) > 0 THEN
+      SET @identifier = @source
+    ELSE
+      SET @identifier = "default"
+    ENDIF
+    SET @mandatoryValue = Lookup(@fieldValidationDE,"mandatory","fieldname",@fieldname,"locale",@locale,"identifier",@identifier)   
+    SET @chosenMandatorySettingsAsString = concat(@chosenMandatorySettingsAsString,@mandatoryValue,",")
+    SET @chosenIdentifiersAsString = concat(@chosenIdentifiersAsString,@identifier,",")
+  NEXT @i
+
+  /* After the choice of patterns that are in both default and @source specific lists,
+  check patterns that are ONLY specified for the current usecase. 
+  For those, obviously use the settings listed with the identifier @source (as it is the only pattern available). */
+  FOR @i = 1 To rowcount(@sourceSpecificPatternsAsRowset) DO
+    SET @row = row(@sourceSpecificPatternsAsRowset,@i)   
+    SET @fieldname = field(@row,1)
+    IF indexOf(@listOfDefaultPatterns,@fieldname) == 0 THEN
+      SET @identifier = @source
+      SET @mandatoryValue = Lookup(@fieldValidationDE,"mandatory","fieldname",@fieldname,"locale",@locale,"identifier",@identifier)   
+      SET @listOfDefaultPatterns = concat(@listOfDefaultPatterns,",",@fieldname)
+      SET @chosenMandatorySettingsAsString = concat(@chosenMandatorySettingsAsString,@mandatoryValue,",")
+      SET @chosenIdentifiersAsString = concat(@chosenIdentifiersAsString,@identifier,",")
+    ENDIF
+
+  NEXT @i
+  /* trim last comma to get an array-like structure as a string */
+  SET @chosenIdentifiersAsString = Substring(@chosenIdentifiersAsString,1,Subtract(Length(@chosenIdentifiersAsString),1))
+  SET @fieldValidationFields = BuildRowSetFromString(@listOfDefaultPatterns,",") 
+  SET @identifiersAsRowset = BuildRowSetFromString(@chosenIdentifiersAsString,",") 
+  SET @mandatoryValuesAsRowset = BuildRowSetFromString(@chosenMandatorySettingsAsString,",") 
+
+  SET @fieldValidationRowCount = rowcount(@fieldValidationFields)
+  FOR @i = 1 TO @fieldValidationRowCount DO  
+    SET @fieldValidationRow = row(@fieldValidationFields,@i)
+    SET @fieldname = field(@fieldValidationRow,1)
+    SET @identifiersRow = row(@identifiersAsRowset,@i)
+    SET @identifier = field(@identifiersRow,1)
+    SET @mandatoriesRow = row(@mandatoryValuesAsRowset,@i)
+    SET @mandatoryValue = field(@mandatoriesRow,1) 
+    
+    /* dynamically request all parameters and make them variables */
+    
+    SET @currentFieldNameValue = Requestparameter(@fieldname)
+    ]%%%%=TreatAsContent(Concat("%","%[SET @",@fieldname," = '",@currentFieldNameValue,"']%","%"))=%%%%[
+
+    IF EMPTY(@currentFieldNameValue) THEN /* incoming request has not provided input for field */
+       
+      IF @mandatoryValue == "True" THEN  /* input is required according to fieldValidation setting */
+          SET @regexCheckFailedMandatoryCheck = true
+          SET @invalidInput = concat("mandatory field missing - ",@fieldname,"-",@currentFieldNameValue)
+      ELSE /* no input required according to fieldValidation setting >> an empty field is ok >> override the error. */
+          SET @regexResult = "no_userinput_required"
+      ENDIF
+      /* repeat empty check so that the dynamic requests do not overwrite important standards. */
+      IF empty(@sourceCategory) THEN
+        SET @sourceCategory = @defaultSourceCategory
+      ENDIF
+      IF empty(@source) THEN
+        SET @source = @defaultSource
+      ENDIF
+      IF empty(@permissionType) THEN
+        SET @permissionType = @defaultPermissionType
+      ENDIF
+      IF empty(@channel) THEN
+        SET @channel = @defaultChannel
+      ENDIF
+      IF empty(@locale) THEN
+        SET @locale = @defaultLocale
+      ENDIF
+    ELSE /* incoming request has provided input, perform regex check */
+      /* find the right regex pattern, source specific if possible */
+      SET @regexPatternAMPScript = Lookup(@fieldValidationDE,"regexPatternAMPScript","fieldname",@fieldname,"locale",@locale,"identifier",@source)
+      IF empty(@regexPatternAMPScript) THEN
+        /* fallback to default pattern */
+        SET @regexPatternAMPScript = Lookup(@fieldValidationDE,"regexPatternAMPScript","fieldname",@fieldname,"locale",@locale,"identifier","default")
+      ENDIF
+      /* apply the pattern */
+      SET @regexResult = RegExMatch(@currentFieldNameValue,@regexPatternAMPScript, 0)
+    ENDIF    
+    
+    IF empty(@regexResult) THEN /* RegExMatch found no match >> invalid */
+        SET @regexCheckFailedValidation = true
+        SET @invalidInput = concat("pattern mismatch - ",@fieldname,"-",@currentFieldNameValue)
+    ENDIF
+     
+  NEXT @i
+
+  IF @regexCheckFailedValidation == true
+  or @regexCheckFailedMandatoryCheck == true THEN
+      /* validation error. no further processing. display error page or perform other error operations */
+      SET @statusmessage = "invalidData"
+  ELSE    
+    /* regex validation successful: continue processing */
+    /* start business validation -
+      
+    /* Handling of "BLOCKED" */
+    /* Assumptions: There are one or more auto suppression configurations, where the user's email is listed to exclude him from all sends. */
+    SET @userOnBlacklist = ""
+  
+    SET @listOfAllRelevantASCNames = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','strictBlocklistName')
+ 
+    SET @blacklistsAsRowset = BuildRowSetFromString(@listOfAllRelevantASCNames)
+    SET @rowCountblacklists = rowcount(@blacklistsAsRowset)
+  
+    IF @rowCountblacklists > 0 THEN
+      FOR @i = 1 TO @rowCountblacklists DO
+        SET @row = row(@blacklistsAsRowset,@i)
+        SET @blacklist = field(@row,1)
+        /*  blacklist lookup Parent BU */
+        SET @occurrenceOnBlacklist = Lookup(@blacklist, "Email Address", "Email Address", @email) 
+        IF not empty(@occurrenceOnBlacklist) THEN
+          SET @userOnBlacklist = "true"
+        ENDIF 
+        
+      NEXT @i
+    ENDIF
+  
+    /* check all subscribers */
+    SET @subscriberStatus = Lookup(@allSubscribers, "Status", "EmailAddress", @email) 
+
+    /* begin list detective */
+    ]%%<script type="javascript" runat="server">
+    var log = Variable.GetValue("@doiLogDE");
+    var logDE = DataExtension.Init(log);
+    var emailToValidate = Variable.GetValue("@email");
+    var token = Variable.GetValue("@token");
+    var url = restEndpoint + "address/v1/validateEmail";
+    var payload = Stringify({
+          email: emailToValidate, 
+          validators: ['SyntaxValidator', 'MXValidator', 'ListDetectiveValidator']
+        });
+    try {
+
+      var contentType = 'application/json';
+      var headerNames = ["Authorization"];
+      var headerValues = ["Bearer "+ token];
+      var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
+      var valid = Platform.Function.ParseJSON(result.Response[0])["valid"];
+      var failedValidation = Platform.Function.ParseJSON(result.Response[0])["failedValidation"];
+        
+      if (failedValidation === "ListDetectiveValidator" || failedValidation === "SyntaxValidator" || failedValidation === "MXValidator") {
+        var reason = failedValidation;
+        //logDE.Rows.Add({errormsg: "email validation error",timezoneOffset: timezoneOffset}); //, validatedEmailAddress:  emailToValidate, reasonForValidationError: reason
+        Variable.SetValue("@subscriberStatus","technicalValidationError");
+        Variable.SetValue("@emailToValidate",emailToValidate);
+        Variable.SetValue("@reason",reason);
+      }
+    } 
+    catch(e) 
+    {
+      Variable.SetValue("@listDetectiveError","true")
+    }
+    
+    /* end list detective */
+    
+    </script>%%[
+    /* end list detective */
+
+    IF not EMPTY(@userOnBlacklist) THEN
+      /* business case: contact is on one of the blacklists in Parent BU */
+      SET @statusmessage = "doiAddressBlocked"        
+    ELSEIF not EMPTY(@blacklistLookupError) THEN
+      SET @statusmessage = "blacklistLookupError"
+    ELSEIF not EMPTY(@listDetectiveError) THEN
+      SET @statusmessage = "listDetectiveError"
+    /* Handling of "BOUNCED" */
+    /* This assumes that bounce handling happens in the All Subscribers list, and only HELD  - hard bounced - users are treated as bounces) */
+    ELSEIF @subscriberStatus == "held" THEN
+      /* business case: contact is registered as hardbounced / held */
+      SET @statusmessage = "doiAddressBounced"
+
+    ELSEIF @subscriberStatus == "technicalValidationError" THEN
+      /* business case: contact is registered as hardbounced / held */
+      SET @statusmessage = "doiTechnicalValidationError"
+    
+    ELSE /* start success business case */
+          
+        /* OTHER BUSINESS PROCESSING LOGICS HERE.
+      The - at this stage unconfirmed - user might (!) have to be sent to other systems. Generally this is not advised as this data is invalid until confirmed.
+      All the processing of confirmed users should normally be triggered after the user confirms the email link (= not here!).
+      */       
+          
+      /* business case: success */    
+      SET @dummyKey = concat("DOI_",GUID())
+      SET @subscriberKey = @dummyKey
+
+      IF @environment != "test" THEN
+        UpsertData(@guestsDE,4
+        ,'email',@email,'permissionType',@completePermissions,'channel',@channel,'locale',@locale
+        ,'accountId',@accountId
+        ,'subscriberKey',@subscriberKey
+        ,'sourceCategory',@sourceCategory
+        ,'source',@source
+        ,'soiDate',Now()
+        ,'timezoneOffsetSoiDate',@timezoneOffset
+        ,'firstname',@firstname
+        ,'lastname',@lastname
+        ,'gender',@gender
+        ,'externalKey',@externalKey
+        ,'utm_source',@utmSource
+        ,'utm_medium',@utmMedium
+        ,'utm_campaign',@utmCampaign
+        ,'utm_term',@utmTerm
+        ,'utm_content',@utmContent
+        )
+      ENDIF
+
+      IF @rowCountPermissions > 0 THEN
+
+        FOR @i = 1 TO @rowCountPermissions DO
+          SET @row = row(@permissionTypeAsRowset, @i) 
+          SET @permissionType = field(@row,1)
+          IF @environment != "test" THEN    
+            InsertData(@subscriptionArchiveDE
+            ,'rowkey',Guid()
+            ,'subscriberKey',@subscriberKey
+            ,'source',@source
+            ,'sourceCategory',@sourceCategory
+            ,'channel',@channel
+            ,'locale',@locale
+            ,'accountId',@accountId
+            ,'soiDate',NOW()
+            ,'permissionType',@permissionType
+            ,'soiIP',@ip
+            ,'timezoneOffsetSoiDate',@timezoneOffset
+            ,'lastChangeDateServertime',NOW()
+            ,'relationId',@subscriberKey
+            ,'utm_source',@utmSource
+            ,'utm_medium',@utmMedium
+            ,'utm_campaign',@utmCampaign
+            ,'utm_term',@utmTerm
+            ,'utm_content',@utmContent
+            )
+          ENDIF
+        NEXT @i
+      ENDIF 
+
+
+      /* additionalProcessing lookup basics */
+      SET @permissionTypeForAssetLookup = @permissionType
+      IF @rowCountPermissions > 1 THEN
+        SET @permissionTypeForAssetLookup = "multiPermission"
+      ENDIF
+
+      ]%%<script type="javascript" runat="server">
+      /* end replace */
+
+      var subscriberKey = Variable.GetValue("@subscriberKey");
+
+      /* affinities */
+      var guestAffinitiesDE = Variable.GetValue("@guestAffinitiesDE")
+      var formDataJSON = [];
+      formDataJSON = Variable.GetValue("@formDataJSON");
+
+      var arrayLength = Platform.Function.ParseJSON(formDataJSON).length;
+      var submissionSetKey = Platform.Function.GUID();
+      for (var i = 0; i < arrayLength; i++) {
+        var affinityKey = Platform.Function.ParseJSON(formDataJSON)[i]["affinityKey"];
+        var affinityState = Platform.Function.ParseJSON(formDataJSON)[i]["state"];
+        var affinityValue = Platform.Function.ParseJSON(formDataJSON)[i]["affinityValue"];
+        // var affinitySource = "test" //Platform.Function.ParseJSON(formDataJSON)[i]["affinityValue"];
+        // Cleanout links
+        affinityValue = affinityValue.replace(/https:\/\//gi, '');
+        affinityValue = affinityValue.replace(/http:\/\//gi, '');
+        affinityValue = affinityValue.replace(/sftp:\/\//gi, '');
+        affinityValue = affinityValue.replace(/ftps:\/\//gi, '');
+        affinityValue = affinityValue.replace(/ftp:\/\//gi, '');
+        affinityValue = affinityValue.replace(/www\./gi, '');
+        Platform.Function.UpsertData(guestAffinitiesDE,["subscriberKey","affinityKey"],[subscriberKey,affinityKey],["affinityState","affinityValue","submissionSetKey"],[affinityState,affinityValue,submissionSetKey]);  
+      }
+      /* end affinities */      
+      
+      /* get the necessary AMPScript variables */    
+      var email = Variable.GetValue("@email");
+      var permissionType = Variable.GetValue("@permissionType");
+      var sourceCategory = Variable.GetValue("@sourceCategory");
+      var source = Variable.GetValue("@source");
+      var completePermissions = Variable.GetValue("@completePermissions");
+      var channel = Variable.GetValue("channel");
+      var locale = Variable.GetValue("locale");
+      var access_token = Variable.GetValue("@token");
+      var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
+      var cxConfigDE = Variable.GetValue("@cxConfigDE");  
+      /* additionalProcessing lookup */
+      var permissionTypeForAssetLookup = Variable.GetValue("@permissionTypeForAssetLookup")
+      var cxSwitcherDE = Variable.GetValue("@cxSwitcherDE")
+      var skipDOIDueToAdditionalProcessing = false;
+
+      var additContext = "dynamic"; /* dynamic == nothing special defined */
+
+      /* specific lookup by source / marketingAction */
+
+      var textSubClass = Platform.Function.Lookup(cxSwitcherDE,'textSubClass',['businessUnit','context','textClass','textSubClass','textId'],[accountId,additContext,'dynamic',source,'additionalSubscribeProcessing']);
+
+      if (textSubClass) {
+        var additTextSubClass = textSubClass;
+        permissionTypeForAssetLookup = 'dynamic'
+        // force to AMPScript for other functions
+        Variable.SetValue("@permissionTypeForAssetLookup",permissionTypeForAssetLookup)
+      } else {
+        var additTextSubClass = 'dynamic';
+      };
+
+      /* specific lookup by source / marketingAction END */
+      var additionalProcessingBlock = Platform.Function.Lookup(cxSwitcherDE,'textContent',['businessUnit','context','textClass','textSubClass','textId'],[accountId,additContext,permissionTypeForAssetLookup,additTextSubClass,'additionalSubscribeProcessing']);
+      
+      if (additionalProcessingBlock || additionalProcessingBlock == 'n/A') {
+        if (Variable.GetValue("@environment") != "test") {
+            
+            Platform.Function.ContentBlockByKey(additionalProcessingBlock)
+            Variable.SetValue("@additionalProcessingBlock",additionalProcessingBlock);
+            /* block could set the escape variable "skipDOIDueToAdditionalProcessing" for the next sendout.
+            if it does NOT, the block sends normally. */
+          } 
+        else {
+          /* output only */
+          Variable.SetValue("@additionalProcessingBlock",additionalProcessingBlock);
+        }  
+      }
+      
+      if (skipDOIDueToAdditionalProcessing == false) {
+
+        logDE.Rows.Add({errormsg: "ins If geschafft!"});
+        logDE.Rows.Add({errormsg: eventDefinitionKey});
+
+        /* additional sendout block changed nothing */
+        /* sendout start */
+        try {
+          var url = restEndpoint + 'messaging/v1/email/messages/' + subscriberKey;
+          var contentType = 'application/json; charset=UTF-8';
+          var headerNames = ["Authorization"];
+          var headerValues = ["Bearer "+ access_token];
+          var payload = Stringify({ "definitionKey": eventDefinitionKey, 
+            "recipient": { "contactKey": subscriberKey 
+            ,"to": email
+            ,"attributes": {
+              "permissionType": permissionType
+              ,"channel": channel
+              ,"locale": locale
+              ,"completePermissions": completePermissions
+              ,"sourceCategory": sourceCategory
+              ,"source": source
+              ,"formDataJSON":formDataJSON
+              }
+            }
+          });
+
+          if(Variable.GetValue("@environment") != "test") {
+            // double check threshold for max emails defined
+            var belowMaxNumberDois = true
+
+            // guests for factual number of emails sent
+            var guestsDE = Variable.GetValue("@guestsDE")
+            currentNumberOfDoiEmails = Platform.Function.Lookup(guestsDE,'numberDOIMailsReceived',['email','permissionType','channel','locale'],[email,permissionType,channel,locale]);
+            Variable.SetValue("@currentNumberOfDoiEmails",currentNumberOfDoiEmails)
+            
+
+            // config for maximum defined number
+            var maxNumberOfDoiEmailsAsString = Platform.Function.Lookup(cxConfigDE,'parameterValue',['parameterContext','parameterName'],[accountId,'maxNumberOfDoiEmails']);
+            // convert string from lookup to integer
+
+            if(maxNumberOfDoiEmailsAsString) {
+              var maxNumberOfDoiEmails = parseInt(maxNumberOfDoiEmailsAsString);                  
+              Variable.SetValue("@maxNumberOfDoiEmails",maxNumberOfDoiEmails)
+
+              if(currentNumberOfDoiEmails >= maxNumberOfDoiEmails) {
+                belowMaxNumberDois = false
+              } 
+            }
+            Variable.SetValue("@belowMaxNumberDois",Stringify(belowMaxNumberDois));
+            
+            if (belowMaxNumberDois == true) {
+              var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
+            }
+          }
+        }
+        catch (err)  
+        {
+          // error: "no token" >> invalid credentials
+          Variable.SetValue("@statusmessage","invalidToken");
+        }
+        /*sendout end */
+        Variable.SetValue("@statusmessage","doiInitiated");
+      } 
+      else {
+        /* doi skipped due to some escape logic in additionalProcessing */
+        Variable.SetValue("@statusmessage","doiSkippedByAdditionalProcess");
+      }
+      </script>%%[
+   
+      IF @rowCountPermissions > 1 
+      and @statusmessage == "doiInitiated" THEN
+        SET @statusmessage = "doiInitiatedMultiple"
+      ENDIF
+
+    ENDIF /* End Success Business Case */   
+    
+
+  ENDIF /* end regex validation */
+
+ENDIF /* end valid token */
+/* Response JSON assembly */
+IF @statusmessage == "invalidToken" 
+or @statusmessage == "invalidAccountId"
+or @statusmessage == "doiInvalidOperation"
+or @statusmessage == "blacklistLookupError"
+or @statusmessage == "listDetectiveError"
+THEN 
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+  SET @subJSON = concat('{"status": "',@status,'","message":"',@statusmessage,'", "details": "',@statusdetails,'" }')
+  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+
+ELSEIF @statusmessage == "invalidData" THEN
+
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+  
+  SET @subJSON = concat('{"status": "', @status,'", "message": "', @statusmessage,'", "details": "', @statusdetails,"",@invalidInput,'", "userdata": {')
+  SET @subJSON = concat(@subJSON,'"email":"', @email)
+  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
+  SET @subJSON = concat(@subJSON,'","source":"', @source)
+  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
+  SET @subJSON = concat(@subJSON, '"}')
+  SET @subJSON = concat(@subJSON,'}')
+  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+
+ELSEIF @statusmessage == "doiTechnicalValidationError" THEN
+
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+  
+  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "userdata": {')
+  SET @subJSON = concat(@subJSON,'"email":"', @email)
+  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
+  SET @subJSON = concat(@subJSON,'","source":"', @source)
+  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
+  SET @subJSON = concat(@subJSON,'","reason":"', @reason)
+  SET @subJSON = concat(@subJSON, '"}')
+  SET @subJSON = concat(@subJSON,'}')
+  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+
+ELSEIF @statusmessage == "doiAddressBlocked" 
+or @statusmessage == "doiAddressBounced"
+THEN
+
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+  
+  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "userdata": {')
+  SET @subJSON = concat(@subJSON,'"email":"', @email)
+  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
+  SET @subJSON = concat(@subJSON,'","source":"', @source)
+  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
+  SET @subJSON = concat(@subJSON, '"}')
+  SET @subJSON = concat(@subJSON,'}')
+  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+
+ELSEIF @statusmessage == "doiInitiatedMultiple" THEN 
+ 
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+
+  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "additionalProcessing": "',@additionalProcessingBlock,'", "userdata": {')
+  SET @subJSON = concat(@subJSON,'"email":"', @email)
+  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
+  SET @subJSON = concat(@subJSON,'","source":"', @source)
+  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
+  SET @subJSON = concat(@subJSON, '"}')
+  SET @subJSON = concat(@subJSON,'}')
+  IF @environment == "test" THEN
+    InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+  ENDIF
+
+ELSEIF @statusmessage == "doiSkippedByAdditionalProcess" THEN 
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+
+  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "additionalProcessing": "',@additionalProcessingBlock,'", "userdata": {')
+  SET @subJSON = concat(@subJSON,'"email":"', @email)
+  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
+  SET @subJSON = concat(@subJSON,'","source":"', @source)
+  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
+  SET @subJSON = concat(@subJSON, '"}')
+  SET @subJSON = concat(@subJSON,'}')
+  IF @environment == "test" THEN
+    InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+  ENDIF
+ELSE
+/* statusMessage = "doiInitiated" */
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok")
+  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
+
+  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "additionalProcessing": "',@additionalProcessingBlock,'", "userdata": {')
+  SET @subJSON = concat(@subJSON,'"email":"', @email)
+  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
+  SET @subJSON = concat(@subJSON,'","source":"', @source)
+  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
+  SET @subJSON = concat(@subJSON, '"}')
+  SET @subJSON = concat(@subJSON,'}')
+  IF @environment == "test" THEN
+    InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
+  ENDIF
+ENDIF
+]%%%%=v(@subJSON)=%%
