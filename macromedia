@@ -567,7 +567,6 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
       
       if (skipDOIDueToAdditionalProcessing == false) {
 
-        logDE.Rows.Add({errormsg: "ins If geschafft!"});
         logDE.Rows.Add({errormsg: eventDefinitionKey});
 
         /* additional sendout block changed nothing */
@@ -628,6 +627,8 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
         }
         /*sendout end */
         Variable.SetValue("@statusmessage","doiInitiated");
+        logDE.Rows.Add({errormsg: Stringify(result)});
+
       } 
       else {
         /* doi skipped due to some escape logic in additionalProcessing */
