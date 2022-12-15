@@ -589,18 +589,18 @@ IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
             }
           });
 
-                  logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey +
-                                  " | subscriberKey: " + subscriberKey +
-                                  " | email: " + email +
-                                  " | permissionType: " + permissionType +
-                                  " | channel: " + channel +
-                                  " | locale: " + locale +
-                                  " | completePermissions: " + completePermissions +
-                                  " | sourceCategory: " + sourceCategory +
-                                  " | source: " + source +
-                                  " | formDataJSON: " + formDataJSON
-                                  " | url: " + url
-                                   });
+        logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey +
+                        " | subscriberKey: " + subscriberKey +
+                        " | email: " + email +
+                        " | permissionType: " + permissionType +
+                        " | channel: " + channel +
+                        " | locale: " + locale +
+                        " | completePermissions: " + completePermissions +
+                        " | sourceCategory: " + sourceCategory +
+                        " | source: " + source +
+                        " | formDataJSON: " + formDataJSON
+                        " | url: " + "ladida"
+                         });
 
           if(Variable.GetValue("@environment") != "test") {
             // double check threshold for max emails defined
