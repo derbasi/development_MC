@@ -1,771 +1,1502 @@
 %%[
-/*
-Parent Business Unit, CloudPages - subscriptionManagement
-TEST Cloudpage URL: https://cloud.mm.macromedia.de/TEST_subscribeViaAP
-LIVE CloudPage URL: https://cloud.mm.macromedia.de/LIVE_subscribeViaAPI
+/* Parent Business Unit, CloudPages - Subscription Management - TEST_internalRequestData
+https://cloud.mm.macromedia.de/TEST_requestData
+
+LIVE_internalRequestData
+https://cloud.mm.macromedia.de/LIVE_requestData
 */
-/* TESTComment switch 
+
+SET @parentBU = "510004565"
+
+/* test/live switch 
 SET @environment = "test"
 */
-SET @parentBU = "510004565"
-SET @nameParentBU = "global"
-SET @token = Requestparameter("token")
-SET @tokenValid = "false"
+/* external */
+SET @encryptedSubscriberKey = Requestparameter("encryptedSubscriberKey")
+SET @encryptedEmail = Requestparameter("encryptedEmail")
 
-SET @apiresponseTextsDE = "APIResponseTexts"
-SET @cxConfigDE = "cxConfig" 
-SET @cxSwitcherDE = "cxSwitcher"
-SET @allSubscribers = "_Subscribers" 
-SET @fieldValidationDE = "fieldValidation"
-SET @subscriptionArchiveDE = "subscriptionArchive" 
 
-/* reading help: "lookup in the cxConfig the value where the record belongs to context Parent MID and record name is ___ " */
+/* internal */
+SET @subscriberkey = Requestparameter("subscriberKey")
+SET @email = Requestparameter("email")
+
+SET @token = Requestparameter("token") 
+SET @operation = Requestparameter("operation") 
+SET @affinitiesRequested = Requestparameter("affinities")
+SET @permissionsRequested = Requestparameter("permissions")
+SET @personalDataRequested = Requestparameter("personalData") 
+SET @historyRequested = Requestparameter("history")
+SET @individualEmailLayout = Requestparameter("individualEmailLayout")
+SET @sendoutStatisticsByJobId = Requestparameter("sendoutStatisticsByJobId")
+SET @sendoutStatisticsByEmailName = Requestparameter("sendoutStatisticsByEmailName")
+SET @sfmcSubscriberStatusRequested = Requestparameter("sfmcSubscriberStatus")
+SET @sfmcEmailValidationRequested = Requestparameter("sfmcEmailValidation")
+/*SET @marketingActionRequested = RequestParameter("marketingAction")*/
+SET @lookupBy = Requestparameter("lookupBy")
+
+SET @pw = "pwExternalKey"
+SET @salt = "saltExternalKey"
+SET @IV = "ivExternalKey"
+
+SET @apiresponseTextsDE = "apiResponseTexts"
+SET @cxConfigDE = "cxConfig"
+SET @allSubscribers = "_Subscribers"
+SET @permissionsDefinitionDE = "permissionsDefinition"
+SET @permissionsDE = Lookup(@cxConfigDE,"parameterValue","parameterContext",@parentBU,"parameterName","permissionsDE")
+SET @commercialEmailBlocklist = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','commercialBlacklistName')
+SET @commercialTransactionalEmailBlocklist = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','globalBlacklistName')
+/*custom name */
+SET @globalPrintBlocklist = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','globalPrintBlacklist')
+
+SET @locale = Requestparameter("locale")
+
+
+
+IF empty(@locale) THEN
+  SET @locale = Lookup(@cxConfigDE,"parameterValue","parameterName","defaultLocale")
+ENDIF
+
+IF @environment == "test" THEN
+  SET @affinityDefinitionDE = "TEST_affinityDefinition"
+  SET @translationsDE = "TEST_affinityTranslations"
+  SET @affinityDE = "TEST_affinities"
+  /* for testing, any data input is fine == nominally "encrypted" data can be plain. it is encrypted here before further use */
+  /* SET @encryptedSubscriberKey = EncryptSymmetric(@encryptedSubscriberKey, 'AES', @pw, @null, @salt, @null, @IV, @null)*/
+  /* SET @encryptedEmail = EncryptSymmetric(@encryptedEmail, 'AES', @pw, @null, @salt, @null, @IV, @null)*/
+ELSE
+  SET @affinityDefinitionDE = "LIVE_affinityDefinition"
+  SET @translationsDE = "LIVE_affinityTranslations"
+  SET @affinityDE = "LIVE_affinities"
+ENDIF
+
 SET @restEndpoint = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','restEndpoint')
 SET @soapEndpoint = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','soapEndpoint')
 
-IF @environment == "test" THEN
-  SET @logDELookupField = "DOITestLogDE"
-ELSE 
-  SET @logDELookupField = "DOILogDE"
-ENDIF
-
-SET @doiLogDE = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName',@logDELookupField)
-
-/* begin move: 
-below token check for one BU setups because it requires accountId  */
-
-SET @guestAffinitiesDE = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','guestAffinitiesDEBaseName')
-SET @guestsDE = Lookup(@cxConfigDE,'parameterValue','parameterContext',@parentBU,'parameterName','guestsDE')
-
-IF @environment == "test" THEN
-SET @guestAffinitiesDE = concat("TEST_",@guestAffinitiesDE)
-ELSE 
-SET @guestAffinitiesDE = concat("LIVE_",@guestAffinitiesDE)
-ENDIF
-
-/* end move */
-/* timezone check */
-SET @servertime = NOW()
-SET @localtime = SystemDateToLocalDate(Now())
-/* perform timezone check to apply german daylight saving time offset;*/
-SET @timezoneOffset = DateDiff(@servertime,@localtime, 'H')
-/* LOCAL TIME HAS TO BE SENT BY THE ORIGINATING SYSTEM! */
 
 
-IF not empty(@token) THEN
-  /* check token + account_ID validity */
 
+]%%<script type="javascript" runat="server"> 
+Platform.Load("Core","1");
+
+function adaptDate(sentDate){
+
+  //Split SentDate after T
+  var sentDateUTC = sentDate.split("T");
+  //separate date
+  var date = sentDateUTC[0];
+  //separate time into hour and rest
+  var time = sentDateUTC[1]; 
+  var hour = time[0] + time[1];
+  var min = time [2] + time [3] + time [4] + time [5] + time [6] + time [7];
+  //transform string into a number
+  var calc = Number(hour);
+  //calculate the european hour
+  calc = calc + 6;
+  var newDate = date + " " + calc + min;
+
+  return newDate;
+
+}
+
+
+function adaptEmailResult(content, tag){
+     
+  var regexXMLTags = new RegExp('<' + tag + '.*?>.*?<\/' + tag + '>', 'g');
+  var result = content.match(regexXMLTags);
+  if (result.length > 1) {
+    Variable.SetValue("@statusmessage","invalidData")
+    Variable.SetValue("@invalidInput","EmailName must be unique")
+  }
+}
+
+function isInArray(originalArray, key, nameOfTheProp) {
+  for (var index=0; index<originalArray.length; index++) {
+    if (originalArray[index][nameOfTheProp] === key) {
+      return true
+    }
+  }
+  return false
+}
+
+function dedupe(a) {
+  var seen = {};
+  var dedupedArr = [];
+  var len = a.length;
+  var j = 0;
+  for(var i = 0; i < len; i++) {
+       var item = a[i];
+       if(seen[item] !== 1) {
+             seen[item] = 1;
+             dedupedArr[j++] = item;
+       }
+  }
+  return dedupedArr;
+}
+
+
+
+
+
+function parseXML(data, tag) {
+  if (data) {
+    var regexXMLTags = new RegExp('<' + tag + '.*?>.*?<\/' + tag + '>', 'g');
+    var regexXMLSelfClosedTags = new RegExp('<' + tag + '.*?\/>', 'g');
+    // firstly, trying to find whether searched tag is a normal closed tag
+    var result = data.match(regexXMLTags);
+    if (result.length === 0) {
+      // if we cannot find anything, then trying to find whether searched tag is a self-closed tag
+      result = data.match(regexXMLSelfClosedTags);
+      if (result.length === 0) {
+        // if we still cannot find anything, this means that there is no searched tag in this XML string
+        return null;
+      }
+    }
+    
+    var returnedResult = [];
+    // since in the XML string could be more than one instance of searched tag, we make a loop through result variable
+    for (var i = 0; i < result.length; i++) {
+      // regex with groups allow us to separate part of the string with attributes (group 1) and part of the string with content (group 2)
+      var regexXMLTagsWithGroups = new RegExp('(<' + tag + '.*?>)(.*?)(<\/' + tag + '>)');
+      var res = result[i].match(regexXMLTagsWithGroups);
+      // res.length will be either 0 or 4
+      // 0 - if the tag has no content and we can use the result[i] directly to parse its attributes
+      // 4 - if the tag has content. In this case:
+      // res[0] - the whole matched string itself
+      // res[1] - part of the string for the group 1 (needed part for the attributes parsing)
+      // res[2] - part of the string for the group 2 (content of the tag)
+      // res[3] - part of the string for the group 3 (closing of the tag)
+      
+      var attrs = {};
+      var innerContent = '';
+      var returnedResultItem = {};
+      if (res.length === 0) {
+        attrs = getAttr(result[i]);
+      } else {
+        attrs = getAttr(res[1]);
+        innerContent = res[2];
+      }
+      
+      returnedResultItem['attributes'] = attrs;
+      returnedResultItem['innerContent'] = innerContent;
+      returnedResult.push(returnedResultItem);
+    }
+    return returnedResult;
+  } else {
+  return null;
+  }
+}
+
+/**
+  @param data - part of the XML string from "<" to ">"
+  @return attributes - an object of attributes from data
+*/
+function getAttr(data) {
+  var regexAttributes = /\s(\w.+?)="(.*?)"/g;
+  var result = data.match(regexAttributes);
+  // res.length will be either 0 or multiple of 3
+  // 0 - if the tag has no attributes
+  // multiple of 3 - if the tag has attributes. In this case (n starts from 0):
+  // res[n] - the whole matched string itself
+  // res[n + 1] - part of the string for the group 1 (name of the attribute)
+  // res[n + 2] - part of the string for the group 2 (value of the attribute)
+  var attributes = {};
+  // if we have at least 1 attribute, then loop through result variable to get the attributes object
+  if (result.length > 0) {
+    // loop starts from 2, so we loop through values, so to speak
+    // each value stays in a 3rd place in the result variable, that's why i += 3
+    // so, result[i] - is a value of the attribute
+    // result[i - 1] - is a name of the attribute
+    for (var i = 2; i < result.length; i += 3) {
+      attributes[result[i - 1]] = result[i];
+    }
+  }
+  return attributes;
+}
+
+/* parse XML, source:
+https://salesforce.stackexchange.com/questions/170754/parse-xml-in-server-side-javascript */
+
+function trim(x) {
+  return x.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+};
+
+function dataFromAttr(data, attr, notNull){
+  if (data) {
+    var reg = new RegExp("<"+attr+">", "g");
+    var result = data.match(reg);
+    if(result.length == 0) {
+      var str = '';
+      return trim(str);
+    }
+    if(result.length == 1) {
+      var str = data.split("<"+attr+">")[1];
+      str = str.split("</"+attr+">")[0];
+      return trim(str);
+    }
+    if(result.length > 1) {
+      var str = data.split("</"+attr+"> <"+attr+">");
+      return str;
+    }
+    var nullElementValue = new RegExp("<"+attr+" />");
+    if(data.match(nullElementValue).length) return "";
+    if(notNull) return "";
+  }
+  else {
+    return null;
+  }
+};
+
+String.prototype.trim = function () {
+  return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+};
+
+try {
+</script>%%[
+  IF @operation == "requestData" THEN
+    SET @subscriberKey = DecryptSymmetric(@encryptedSubscriberKey, 'AES', @pw, @null, @salt, @null, @IV, @null)
+    SET @email = DecryptSymmetric(@encryptedEmail, 'AES', @pw, @null, @salt, @null, @IV, @null)
+  ENDIF
+]%%<script type="javascript" runat="server"> 
+} catch (err) {
+    Variable.SetValue("@statusmessage","decryptionFailed");
+}
+
+
+/* check token + account_ID validity */
+var restEndpoint = Variable.GetValue("@restEndpoint");
+var cxConfigDE = Variable.GetValue("@cxConfigDE");    
+
+// get tokenContext
+var access_token = Variable.GetValue("@token");
+var restUrl = restEndpoint + "platform/v1/tokenContext";
+var headerNames = ["Authorization"];
+var headerValues = ["Bearer " + access_token];
+var tokenContext = "";
+var tokenContent = "";
+var parameterContext = "";
+var accountIdFromToken = "";
+
+try {
+
+  tokenContext = HTTP.Get(restUrl,headerNames,headerValues);
+  tokenContent = Stringify(Platform.Function.ParseJSON(tokenContext.Content));
+  accountIdFromToken = Stringify(Platform.Function.ParseJSON(tokenContext.Content).organization.id);
+  parameterContext = Platform.Function.Lookup(cxConfigDE,"parameterContext",['parameterName','parameterValue'],['MID',accountIdFromToken]);
+
+  Variable.SetValue("@accountIdFromToken",accountIdFromToken)
+  /* parameterContext has to be filed in systemRegister (="exists") and must be something other than "parent" */
+  if(parameterContext && parameterContext != "Parent") {
+    Variable.SetValue("@tokenValid","true");
+    //continue processing
+  }
+  else {
+    // invalid account_id
+    Variable.SetValue("@statusmessage","invalidToken");
+  } 
+} catch (err) {
+  //invalid token
+  Variable.SetValue("@err",Stringify(err))
+  Variable.SetValue("@statusmessage","invalidToken");
+}
+
+</script>%%[
+
+
+IF @tokenValid == "true" THEN
+  /* check operation */
+
+  IF (@operation == "requestData" 
+    or @operation == "requestDataInternal")
+  and @statusmessage != "decryptionFailed" 
+  THEN
   ]%%<script type="javascript" runat="server"> 
-  Platform.Load("Core","1");
-  var restEndpoint = Variable.GetValue("@restEndpoint");
-  var timezoneOffset = Variable.GetValue("@timezoneOffset");
-  var cxConfigDE = Variable.GetValue("@cxConfigDE"); 
-  var log = Variable.GetValue("@doiLogDE");
-  var logDE = DataExtension.Init(log);
+    var soapEndpoint = Variable.GetValue("@soapEndpoint");
+    var resultsArray = [];
+    var locale = Variable.GetValue("@locale");
+    var subscriberKey = Variable.GetValue("@subscriberKey");
+    var email = Variable.GetValue("@email");
+    var lookupBy = Variable.GetValue("@lookupBy");
+    var lookupValue = "";
 
-  var nameParentBU = Variable.GetValue("@nameParentBU");
+    /* parkplatz */
+    var masterDE = "personMaster";
+    
 
-  // get tokenContext
-  var accessToken = Variable.GetValue("@token");
-  var restUrl = restEndpoint + "platform/v1/tokenContext";
-  var headerNames = ["Authorization"];
-  var headerValues = ["Bearer " + accessToken];
-  var accountId = "";
-  var tokenContext = {};
-  var tokenContent = "";
-  var parameterContext = "";
-  try {
-    tokenContext = HTTP.Get(restUrl,headerNames,headerValues);
-    tokenContent = Stringify(Platform.Function.ParseJSON(tokenContext.Content));
-    accountId = Stringify(Platform.Function.ParseJSON(tokenContext.Content).organization.id);
-    Variable.SetValue("@accountId",accountId)
-    //logDE.Rows.Add({errormsg: accountId,timezoneOffset: timezoneOffset});
-    parameterContext = Platform.Function.Lookup(cxConfigDE,"parameterContext",['parameterName','parameterValue'],['MID',accountId])
-    /* parameterContext has to be filed in cxConfig (="exists") and must be something other than "parent" */
-
-    if(parameterContext != nameParentBU) {
-      //logDE.Rows.Add({errormsg: "token_valid",timezoneOffset: timezoneOffset});
-      Variable.SetValue("@tokenValid","true");
-
-      //continue processing
+    if (lookupBy == "subscriberKey") {
+      lookupBy = "subscriberKey"
+      lookupValue = subscriberKey
     }
     else {
-      /* invalid accountId */
-      Variable.SetValue("@statusmessage","invalidAccountId");
+
+      // fallback to email if unspecified or defined as such.
+      lookupValue = Variable.GetValue("@email");
+
+      var subscriberKeyFromSystemDE = Platform.Function.Lookup(masterDE,'subscriberKey',['email'],[lookupValue]);
+      
+      if (subscriberKeyFromSystemDE) {
+        var lookupBy = "subscriberKey"
+        var lookupValue = subscriberKeyFromSystemDE 
+      }
+      
+    }          
+    
+    if (masterDE,lookupBy,lookupValue) {
+      
+      subscriberKey = Platform.Function.Lookup(masterDE,'subscriberKey',[lookupBy],[lookupValue])
+      email = Platform.Function.Lookup(masterDE,'email',[lookupBy],[lookupValue])
+      var firstname = Platform.Function.Lookup(masterDE,'firstname',[lookupBy],[lookupValue])
+      var lastname = Platform.Function.Lookup(masterDE,'lastname',[lookupBy],[lookupValue])
+      var postalCode = Platform.Function.Lookup(masterDE,'postalCode',[lookupBy],[lookupValue])
+//    var gender = Platform.Function.Lookup(masterDE,'gender',[lookupBy],[lookupValue])
+//    var street = Platform.Function.Lookup(masterDE,'street',[lookupBy],[lookupValue])
+//    var houseNo = Platform.Function.Lookup(masterDE,'houseNo',[lookupBy],[lookupValue])
+//    var city = Platform.Function.Lookup(masterDE,'city',[lookupBy],[lookupValue])
+//    var state = Platform.Function.Lookup(masterDE,'state',[lookupBy],[lookupValue])
+//    var country = Platform.Function.Lookup(masterDE,'country',[lookupBy],[lookupValue])
+//    var language = Platform.Function.Lookup(masterDE,'language',[lookupBy],[lookupValue])
+
+    } else {
+      var lookupToPersonMasterError = "true"
+      resultsArray.push({'systemType':'masterDELookup'
+        ,'requestStatus':'failure'
+        ,'error': sfmcDataExtensionErrorMsg
+        })
     }
-    
-  } catch (err) {
-      /* invalid token */
-      Variable.SetValue("@statusmessage","invalidToken");
-      logDE.Rows.Add({errormsg: Stringify(err),timezoneOffset: timezoneOffset});
-  }
-  </script>%%[
 
-  IF @accountId != @parentBU THEN
-    SET @doiLogDE = concat("ENT.",@doiLogDE)
-    SET @guestsDE = concat("ENT.",@guestsDE)
-    SET @guestAffinitiesDE = concat("ENT.",@guestAffinitiesDE)
-  ENDIF
+    if (Variable.GetValue("@personalDataRequested") == "true"       
+    && lookupToPersonMasterError != "true") {
+             
+      resultsArray.push({'systemType': 'personalData'
+                   ,'requestStatus':'ok'
+      //             ,'dataDebug': personalDataRetrieveResponsefull
+      //             ,'resultsDebug': personalDataRetrieveResponse
+                   ,'dataExtension': masterDE
+                   ,'subscriberKey': subscriberKey
+                   ,'email': email
+                   ,'firstname': firstname
+                   ,'lastname': lastname
+                   ,'postalcode': postalCode
+                   })     
+    } /* personalDataRequested */  
 
-  SET @defaultSourceCategory = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultSourceCategoryAPISubscription')
-  SET @defaultSource = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultSourceAPISubscription')
-  SET @defaultPermissionType = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultPermission')
-  SET @defaultChannel = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultChannel')
-  SET @defaultLocale = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultLocale')
-
-ENDIF
-IF @tokenValid == "true" THEN
-
-  SET @operation = Requestparameter("operation")
-
-  SET @sourceCategory = Requestparameter("sourceCategory") 
-  IF empty(@sourceCategory) THEN
-    SET @sourceCategory = @defaultSourceCategory
-  ENDIF
-
-  SET @source = requestparameter("source")
-  IF empty(@source) THEN
-    SET @source = @defaultSource
-  ENDIF
-
-  SET @email = Requestparameter("email")
-  SET @ip = Requestparameter("ip")
-  SET @permissionType = Requestparameter("permissionType")
-  IF empty(@permissionType) THEN
-    SET @permissionType = @defaultPermissionType
-  ENDIF
-
-  SET @channel = Requestparameter("channel")
-  IF empty(@channel) THEN
-    SET @channel = @defaultChannel
-  ENDIF
-
-  SET @locale = Requestparameter("locale")
-  IF empty(@locale) THEN
-    SET @locale = @defaultLocale
-  ENDIF
-
-  SET @utmSource = Requestparameter("utm_source")
-  SET @utmMedium = Requestparameter("utm_medium")
-  SET @utmCampaign = Requestparameter("utm_campaign")
-  SET @utmTerm = Requestparameter("utm_term")
-  SET @utmContent = Requestparameter("utm_content")
-
-  SET @formDataJSON = Requestparameter("formDataJSON")
-  IF not empty(@permissionType) THEN
-    SET @permissionTypeAsRowset = BuildRowSetFromString(@permissionType,",")
-    SET @rowCountPermissions = rowCount(@permissionTypeAsRowset)
-    IF @rowCountPermissions > 0 THEN
-      SET @completePermissions = @permissionType
-    ENDIF 
-  ENDIF
-  /* used for multi subscription, see code further below. */
-  
-  /* check what call is incoming */
-  IF @operation != "subscribe" THEN
-    SET @statusmessage = "doiInvalidOperation"
-  ENDIF /* end subscription */
-
-ELSE 
-  SET @statusmessage = "invalidToken"
-ENDIF
-
-IF @statusmessage != "doiInvalidOperation" and @tokenValid == "true" THEN
-
-  /* A / B testing */
-  SET @defaultEventDefinitionKey = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','defaultDOIJourneyEventDefinitionKey')
-  SET @threshold = Lookup(@cxSwitcherDE,"textContent","businessUnit",@accountId,"textClass",@source,"textId","percentageDOIEmailVariantB")
-  ]%%<script runat="server">
-  // convert to integer
-  var thresholdFromDE = Variable.GetValue("threshold");
-  if (thresholdFromDE) {
-    var percentage = parseInt(thresholdFromDE);
-    Variable.SetValue("@percentage",percentage);
-  }
-  </script>%%[
-  IF not empty(@percentage) THEN 
-    SET @randomNo = Random(1,100)
-    IF @randomNo >= @percentage THEN
-     /* A Version "default" here */
-      SET @eventDefinitionKey = Lookup(@cxSwitcherDE,"textContent","businessUnit",@accountId,"textClass",@source,"textId","doiConfirmationEventKeyA")
-    ELSE
-      /* B version (special here) */
-      SET @eventDefinitionKey = Lookup(@cxSwitcherDE,"textContent","businessUnit",@accountId,"textClass",@source,"textId","doiConfirmationEventKeyB")
-    ENDIF
-  ELSE 
-    SET @eventDefinitionKey = @defaultEventDefinitionKey  
-  ENDIF
-
-  /* regex checks for backend validation */
-  /* the next section solves the problem that in the fieldValidation DE there could be:
-  a) validation patterns listed as "defaultPatterns" for the locale (identifier = "default")
-  b) validation patterns listed specifically for this @source  (identifier = anything but "default")
-  Duplicate entries of the same pattern name create potential conflicts. 
-  
-  To resolve them, the code chooses a setting by the following logic: 
-  for each field, If there is a @source specific setting (validation pattern & mandatory setting), 
-  the specific setting is used.
-  The default is used in case no source-specific definition has been made for a given field.
-  This way, additional fieldValidation definitions can be added as individual fields, usecase by usecase.
-  There is no need copy entire sets of patterns in fieldValidations if they are already listed as defaults.
-  */
-
-  SET @defaultsPatternsAsRowset = LookupRows(@fieldValidationDE,"locale",@locale,"identifier","default")
-  SET @sourceSpecificPatterns = LookupRows(@fieldValidationDE,"locale",@locale,"identifier",@source)
-  
-
-  SET @listOfDefaultPatterns = ""
-  FOR @i = 1 TO rowcount(@defaultsPatternsAsRowset) DO
-    SET @row = row(@defaultsPatternsAsRowset,@i)
-    SET @fieldname = field(@row,"fieldname")
-    SET @listOfDefaultPatterns = concat(@listOfDefaultPatterns,@fieldname,",")
-  NEXT @i 
-  /* trim last comma to get an array-like structure as a string */
-  SET @listOfDefaultPatterns = Substring(@listOfDefaultPatterns,1,Subtract(Length(@listOfDefaultPatterns),1))
-  
-  SET @listOfSourceSpecificPatterns = ""
-  FOR @i = 1 TO rowcount(@sourceSpecificPatterns) DO
-    SET @row = row(@sourceSpecificPatterns,@i)
-    SET @fieldname = field(@row,"fieldname")
-    SET @listOfSourceSpecificPatterns = concat(@listOfSourceSpecificPatterns,@fieldname,",")
-  NEXT @i 
-  /* trim last comma to get an array-like structure as a string */
-  SET @listOfSourceSpecificPatterns = Substring(@listOfSourceSpecificPatterns,1,Subtract(Length(@listOfSourceSpecificPatterns),1))
-  
-  SET @sourceSpecificPatternsAsRowset = BuildRowSetFromString(@listOfSourceSpecificPatterns,",")
-
-
-  SET @chosenIdentifiersAsString = ""
-  SET @chosenMandatorySettingsAsString = ""
-
-  /* go through the patterns that are specified for default identifier in fieldValidation DE.
-  If a pattern is also defined for the current @source, the current @source validation pattern and mandatory setting wins
-  Otherwise, use the default pattern. */   
-  FOR @i = 1 To rowcount(@defaultsPatternsAsRowset) DO
-    SET @row = row(@defaultsPatternsAsRowset,@i)   
-    SET @fieldname = field(@row,1)
-    
-    IF indexOf(@listOfSourceSpecificPatterns,@fieldname) > 0 THEN
-      SET @identifier = @source
-    ELSE
-      SET @identifier = "default"
-    ENDIF
-    SET @mandatoryValue = Lookup(@fieldValidationDE,"mandatory","fieldname",@fieldname,"locale",@locale,"identifier",@identifier)   
-    SET @chosenMandatorySettingsAsString = concat(@chosenMandatorySettingsAsString,@mandatoryValue,",")
-    SET @chosenIdentifiersAsString = concat(@chosenIdentifiersAsString,@identifier,",")
-  NEXT @i
-
-  /* After the choice of patterns that are in both default and @source specific lists,
-  check patterns that are ONLY specified for the current usecase. 
-  For those, obviously use the settings listed with the identifier @source (as it is the only pattern available). */
-  FOR @i = 1 To rowcount(@sourceSpecificPatternsAsRowset) DO
-    SET @row = row(@sourceSpecificPatternsAsRowset,@i)   
-    SET @fieldname = field(@row,1)
-    IF indexOf(@listOfDefaultPatterns,@fieldname) == 0 THEN
-      SET @identifier = @source
-      SET @mandatoryValue = Lookup(@fieldValidationDE,"mandatory","fieldname",@fieldname,"locale",@locale,"identifier",@identifier)   
-      SET @listOfDefaultPatterns = concat(@listOfDefaultPatterns,",",@fieldname)
-      SET @chosenMandatorySettingsAsString = concat(@chosenMandatorySettingsAsString,@mandatoryValue,",")
-      SET @chosenIdentifiersAsString = concat(@chosenIdentifiersAsString,@identifier,",")
-    ENDIF
-
-  NEXT @i
-  /* trim last comma to get an array-like structure as a string */
-  SET @chosenIdentifiersAsString = Substring(@chosenIdentifiersAsString,1,Subtract(Length(@chosenIdentifiersAsString),1))
-  SET @fieldValidationFields = BuildRowSetFromString(@listOfDefaultPatterns,",") 
-  SET @identifiersAsRowset = BuildRowSetFromString(@chosenIdentifiersAsString,",") 
-  SET @mandatoryValuesAsRowset = BuildRowSetFromString(@chosenMandatorySettingsAsString,",") 
-
-  SET @fieldValidationRowCount = rowcount(@fieldValidationFields)
-  FOR @i = 1 TO @fieldValidationRowCount DO  
-    SET @fieldValidationRow = row(@fieldValidationFields,@i)
-    SET @fieldname = field(@fieldValidationRow,1)
-    SET @identifiersRow = row(@identifiersAsRowset,@i)
-    SET @identifier = field(@identifiersRow,1)
-    SET @mandatoriesRow = row(@mandatoryValuesAsRowset,@i)
-    SET @mandatoryValue = field(@mandatoriesRow,1) 
-    
-    /* dynamically request all parameters and make them variables */
-    
-    SET @currentFieldNameValue = Requestparameter(@fieldname)
-    ]%%%%=TreatAsContent(Concat("%","%[SET @",@fieldname," = '",@currentFieldNameValue,"']%","%"))=%%%%[
-
-    IF EMPTY(@currentFieldNameValue) THEN /* incoming request has not provided input for field */
-       
-      IF @mandatoryValue == "True" THEN  /* input is required according to fieldValidation setting */
-          SET @regexCheckFailedMandatoryCheck = true
-          SET @invalidInput = concat("mandatory field missing - ",@fieldname,"-",@currentFieldNameValue)
-      ELSE /* no input required according to fieldValidation setting >> an empty field is ok >> override the error. */
-          SET @regexResult = "no_userinput_required"
-      ENDIF
-      /* repeat empty check so that the dynamic requests do not overwrite important standards. */
-      IF empty(@sourceCategory) THEN
-        SET @sourceCategory = @defaultSourceCategory
-      ENDIF
-      IF empty(@source) THEN
-        SET @source = @defaultSource
-      ENDIF
-      IF empty(@permissionType) THEN
-        SET @permissionType = @defaultPermissionType
-      ENDIF
-      IF empty(@channel) THEN
-        SET @channel = @defaultChannel
-      ENDIF
-      IF empty(@locale) THEN
-        SET @locale = @defaultLocale
-      ENDIF
-    ELSE /* incoming request has provided input, perform regex check */
-      /* find the right regex pattern, source specific if possible */
-      SET @regexPatternAMPScript = Lookup(@fieldValidationDE,"regexPatternAMPScript","fieldname",@fieldname,"locale",@locale,"identifier",@source)
-      IF empty(@regexPatternAMPScript) THEN
-        /* fallback to default pattern */
-        SET @regexPatternAMPScript = Lookup(@fieldValidationDE,"regexPatternAMPScript","fieldname",@fieldname,"locale",@locale,"identifier","default")
-      ENDIF
-      /* apply the pattern */
-      SET @regexResult = RegExMatch(@currentFieldNameValue,@regexPatternAMPScript, 0)
-    ENDIF    
-    
-    IF empty(@regexResult) THEN /* RegExMatch found no match >> invalid */
-        SET @regexCheckFailedValidation = true
-        SET @invalidInput = concat("pattern mismatch - ",@fieldname,"-",@currentFieldNameValue)
-    ENDIF
-     
-  NEXT @i
-
-  IF @regexCheckFailedValidation == true
-  or @regexCheckFailedMandatoryCheck == true THEN
-      /* validation error. no further processing. display error page or perform other error operations */
-      SET @statusmessage = "invalidData"
-  ELSE    
-    /* regex validation successful: continue processing */
-    /* start business validation -
+    if (Variable.GetValue("@sfmcSubscriberStatusRequested") == "true") {
+      var allSubscribers = Variable.GetValue("@allSubscribers");
       
-    /* Handling of "BLOCKED" */
-    /* Assumptions: There are one or more auto suppression configurations, where the user's email is listed to exclude him from all sends. */
-    SET @userOnBlacklist = ""
-  
-    SET @listOfAllRelevantASCNames = Lookup(@cxConfigDE,'parameterValue','parameterContext',@accountId,'parameterName','strictBlocklistName')
- 
-    SET @blacklistsAsRowset = BuildRowSetFromString(@listOfAllRelevantASCNames)
-    SET @rowCountblacklists = rowcount(@blacklistsAsRowset)
-  
-    IF @rowCountblacklists > 0 THEN
-      FOR @i = 1 TO @rowCountblacklists DO
-        SET @row = row(@blacklistsAsRowset,@i)
-        SET @blacklist = field(@row,1)
-        /*  blacklist lookup Parent BU */
-        SET @occurrenceOnBlacklist = Lookup(@blacklist, "Email Address", "Email Address", @email) 
-        IF not empty(@occurrenceOnBlacklist) THEN
-          SET @userOnBlacklist = "true"
-        ENDIF 
-        
-      NEXT @i
-    ENDIF
-  
-    /* check all subscribers */
-    SET @subscriberStatus = Lookup(@allSubscribers, "Status", "EmailAddress", @email) 
-
-    /* begin list detective */
-    ]%%<script type="javascript" runat="server">
-    var log = Variable.GetValue("@doiLogDE");
-    var logDE = DataExtension.Init(log);
-    var emailToValidate = Variable.GetValue("@email");
-    var token = Variable.GetValue("@token");
-    var url = restEndpoint + "address/v1/validateEmail";
-    var payload = Stringify({
-          email: emailToValidate, 
-          validators: ['SyntaxValidator', 'MXValidator', 'ListDetectiveValidator']
-        });
-    try {
-
-      var contentType = 'application/json';
-      var headerNames = ["Authorization"];
-      var headerValues = ["Bearer "+ token];
-      var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
-      var valid = Platform.Function.ParseJSON(result.Response[0])["valid"];
-      var failedValidation = Platform.Function.ParseJSON(result.Response[0])["failedValidation"];
-        
-      if (failedValidation === "ListDetectiveValidator" || failedValidation === "SyntaxValidator" || failedValidation === "MXValidator") {
-        var reason = failedValidation;
-        //logDE.Rows.Add({errormsg: "email validation error",timezoneOffset: timezoneOffset}); //, validatedEmailAddress:  emailToValidate, reasonForValidationError: reason
-        Variable.SetValue("@subscriberStatus","technicalValidationError");
-        Variable.SetValue("@emailToValidate",emailToValidate);
-        Variable.SetValue("@reason",reason);
-      }
-    } 
-    catch(e) 
-    {
-      Variable.SetValue("@listDetectiveError","true")
-    }
-    
-    /* end list detective */
-    
-    </script>%%[
-    /* end list detective */
-
-    IF not EMPTY(@userOnBlacklist) THEN
-      /* business case: contact is on one of the blacklists in Parent BU */
-      SET @statusmessage = "doiAddressBlocked"        
-    ELSEIF not EMPTY(@blacklistLookupError) THEN
-      SET @statusmessage = "blacklistLookupError"
-    ELSEIF not EMPTY(@listDetectiveError) THEN
-      SET @statusmessage = "listDetectiveError"
-    /* Handling of "BOUNCED" */
-    /* This assumes that bounce handling happens in the All Subscribers list, and only HELD  - hard bounced - users are treated as bounces) */
-    ELSEIF @subscriberStatus == "held" THEN
-      /* business case: contact is registered as hardbounced / held */
-      SET @statusmessage = "doiAddressBounced"
-
-    ELSEIF @subscriberStatus == "technicalValidationError" THEN
-      /* business case: contact is registered as hardbounced / held */
-      SET @statusmessage = "doiTechnicalValidationError"
-    
-    ELSE /* start success business case */
+      var allSubscribersRows = Platform.Function.LookupRows(allSubscribers,['EmailAddress'],[email]);
+      
+      if(allSubscribersRows && allSubscribersRows.length > 0) {
+        var uniqueCount = 0
+        for(var i=0; i<allSubscribersRows.length; i++) { 
+          var oneAllSubsSubscriberKey = allSubscribersRows[i].SubscriberKey
+          var oneAllSubsStatus = allSubscribersRows[i].Status
           
-        /* OTHER BUSINESS PROCESSING LOGICS HERE.
-      The - at this stage unconfirmed - user might (!) have to be sent to other systems. Generally this is not advised as this data is invalid until confirmed.
-      All the processing of confirmed users should normally be triggered after the user confirms the email link (= not here!).
-      */       
-          
-      /* business case: success */    
-      SET @dummyKey = concat("DOI_",GUID())
-      SET @subscriberKey = @dummyKey
-
-      IF @environment != "test" THEN
-        UpsertData(@guestsDE,4
-        ,'email',@email,'permissionType',@completePermissions,'channel',@channel,'locale',@locale
-        ,'accountId',@accountId
-        ,'subscriberKey',@subscriberKey
-        ,'sourceCategory',@sourceCategory
-        ,'source',@source
-        ,'soiDate',Now()
-        ,'timezoneOffsetSoiDate',@timezoneOffset
-        ,'firstname',@firstname
-        ,'lastname',@lastname
-        ,'gender',@gender
-        ,'externalKey',@externalKey
-        ,'utm_source',@utmSource
-        ,'utm_medium',@utmMedium
-        ,'utm_campaign',@utmCampaign
-        ,'utm_term',@utmTerm
-        ,'utm_content',@utmContent
-        )
-      ENDIF
-
-      IF @rowCountPermissions > 0 THEN
-
-        FOR @i = 1 TO @rowCountPermissions DO
-          SET @row = row(@permissionTypeAsRowset, @i) 
-          SET @permissionType = field(@row,1)
-          IF @environment != "test" THEN    
-            InsertData(@subscriptionArchiveDE
-            ,'rowkey',Guid()
-            ,'subscriberKey',@subscriberKey
-            ,'source',@source
-            ,'sourceCategory',@sourceCategory
-            ,'channel',@channel
-            ,'locale',@locale
-            ,'accountId',@accountId
-            ,'soiDate',NOW()
-            ,'permissionType',@permissionType
-            ,'soiIP',@ip
-            ,'timezoneOffsetSoiDate',@timezoneOffset
-            ,'lastChangeDateServertime',NOW()
-            ,'relationId',@subscriberKey
-            ,'utm_source',@utmSource
-            ,'utm_medium',@utmMedium
-            ,'utm_campaign',@utmCampaign
-            ,'utm_term',@utmTerm
-            ,'utm_content',@utmContent
-            )
-          ENDIF
-        NEXT @i
-      ENDIF 
-
-
-      /* additionalProcessing lookup basics */
-      SET @permissionTypeForAssetLookup = @permissionType
-      IF @rowCountPermissions > 1 THEN
-        SET @permissionTypeForAssetLookup = "multiPermission"
-      ENDIF
-
-      ]%%<script type="javascript" runat="server">
-      /* end replace */
-
-      var subscriberKey = Variable.GetValue("@subscriberKey");
-
-      /* affinities */
-      var guestAffinitiesDE = Variable.GetValue("@guestAffinitiesDE")
-      var formDataJSON = [];
-      formDataJSON = Variable.GetValue("@formDataJSON");
-
-      var arrayLength = Platform.Function.ParseJSON(formDataJSON).length;
-      var submissionSetKey = Platform.Function.GUID();
-      for (var i = 0; i < arrayLength; i++) {
-        var affinityKey = Platform.Function.ParseJSON(formDataJSON)[i]["affinityKey"];
-        var affinityState = Platform.Function.ParseJSON(formDataJSON)[i]["state"];
-        var affinityValue = Platform.Function.ParseJSON(formDataJSON)[i]["affinityValue"];
-        // var affinitySource = "test" //Platform.Function.ParseJSON(formDataJSON)[i]["affinityValue"];
-        // Cleanout links
-        affinityValue = affinityValue.replace(/https:\/\//gi, '');
-        affinityValue = affinityValue.replace(/http:\/\//gi, '');
-        affinityValue = affinityValue.replace(/sftp:\/\//gi, '');
-        affinityValue = affinityValue.replace(/ftps:\/\//gi, '');
-        affinityValue = affinityValue.replace(/ftp:\/\//gi, '');
-        affinityValue = affinityValue.replace(/www\./gi, '');
-        Platform.Function.UpsertData(guestAffinitiesDE,["subscriberKey","affinityKey"],[subscriberKey,affinityKey],["affinityState","affinityValue","submissionSetKey"],[affinityState,affinityValue,submissionSetKey]);  
-      }
-      /* end affinities */      
-      
-      /* get the necessary AMPScript variables */    
-      var email = Variable.GetValue("@email");
-      var permissionType = Variable.GetValue("@permissionType");
-      var sourceCategory = Variable.GetValue("@sourceCategory");
-      var source = Variable.GetValue("@source");
-      var completePermissions = Variable.GetValue("@completePermissions");
-      var channel = Variable.GetValue("channel");
-      var locale = Variable.GetValue("locale");
-      var accessToken = Variable.GetValue("@token");
-      var eventDefinitionKey = Variable.GetValue("@eventDefinitionKey");
-      var cxConfigDE = Variable.GetValue("@cxConfigDE");  
-      /* additionalProcessing lookup */
-      var permissionTypeForAssetLookup = Variable.GetValue("@permissionTypeForAssetLookup")
-      var cxSwitcherDE = Variable.GetValue("@cxSwitcherDE")
-      var skipDOIDueToAdditionalProcessing = false;
-
-      var additContext = "dynamic"; /* dynamic == nothing special defined */
-
-      /* specific lookup by source / marketingAction */
-
-      var textSubClass = Platform.Function.Lookup(cxSwitcherDE,'textSubClass',['businessUnit','context','textClass','textSubClass','textId'],[accountId,additContext,'dynamic',source,'additionalSubscribeProcessing']);
-
-      if (textSubClass) {
-        var additTextSubClass = textSubClass;
-        permissionTypeForAssetLookup = 'dynamic'
-        // force to AMPScript for other functions
-        Variable.SetValue("@permissionTypeForAssetLookup",permissionTypeForAssetLookup)
-      } else {
-        var additTextSubClass = 'dynamic';
-      };
-
-      /* specific lookup by source / marketingAction END */
-      var additionalProcessingBlock = Platform.Function.Lookup(cxSwitcherDE,'textContent',['businessUnit','context','textClass','textSubClass','textId'],[accountId,additContext,permissionTypeForAssetLookup,additTextSubClass,'additionalSubscribeProcessing']);
-      
-      if (additionalProcessingBlock || additionalProcessingBlock == 'n/A') {
-        if (Variable.GetValue("@environment") != "test") {
-            
-            Platform.Function.ContentBlockByKey(additionalProcessingBlock)
-            Variable.SetValue("@additionalProcessingBlock",additionalProcessingBlock);
-            /* block could set the escape variable "skipDOIDueToAdditionalProcessing" for the next sendout.
-            if it does NOT, the block sends normally. */
-          } 
-        else {
-          /* output only */
-          Variable.SetValue("@additionalProcessingBlock",additionalProcessingBlock);
-        }  
-      }
-      
-      if (skipDOIDueToAdditionalProcessing == false) {
-
-        /* additional sendout block changed nothing */
-        /* sendout start */
-        try {
-          var url = restEndpoint + 'messaging/v1/email/messages/' + subscriberKey;
-          var contentType = 'application/json; charset=UTF-8';
-          var headerNames = ["Authorization"];
-          var headerValues = ["Bearer "+ accessToken];
-          var payload = Stringify({ "definitionKey": eventDefinitionKey, 
-            "recipient": { "contactKey": subscriberKey 
-            ,"to": email
-            ,"attributes": {
-              "permissionType": permissionType
-              ,"channel": channel
-              ,"locale": locale
-              ,"completePermissions": completePermissions
-              ,"sourceCategory": sourceCategory
-              ,"source": source
-              ,"formDataJSON":formDataJSON
-              }
-            }
-          });
-
-        logDE.Rows.Add({errormsg: "eventDefinitionKey: " + eventDefinitionKey +
-                        " | subscriberKey: " + subscriberKey +
-                        " | email: " + email +
-                        " | permissionType: " + permissionType +
-                        " | channel: " + channel +
-                        " | locale: " + locale +
-                        " | completePermissions: " + completePermissions +
-                        " | sourceCategory: " + sourceCategory +
-                        " | source: " + source +
-                        " | formDataJSON: " + formDataJSON + 
-                        " | url: " + url
-                         });
-
-          if(Variable.GetValue("@environment") != "test") {
-            // double check threshold for max emails defined
-            var belowMaxNumberDois = true
-
-            // guests for factual number of emails sent
-            var guestsDE = Variable.GetValue("@guestsDE")
-            currentNumberOfDoiEmails = Platform.Function.Lookup(guestsDE,'numberDOIMailsReceived',['email','permissionType','channel','locale'],[email,permissionType,channel,locale]);
-            Variable.SetValue("@currentNumberOfDoiEmails",currentNumberOfDoiEmails)
-            
-
-            // config for maximum defined number
-            var maxNumberOfDoiEmailsAsString = Platform.Function.Lookup(cxConfigDE,'parameterValue',['parameterContext','parameterName'],[accountId,'maxNumberOfDoiEmails']);
-            // convert string from lookup to integer
-
-            if(maxNumberOfDoiEmailsAsString) {
-              var maxNumberOfDoiEmails = parseInt(maxNumberOfDoiEmailsAsString);                  
-              Variable.SetValue("@maxNumberOfDoiEmails",maxNumberOfDoiEmails)
-              logDE.Rows.Add({errormsg: "maxNumberOfDoiEmailsAsString: " + maxNumberOfDoiEmailsAsString});
-
-              if(currentNumberOfDoiEmails >= maxNumberOfDoiEmails) {
-                belowMaxNumberDois = false
-              } 
-            }
-            Variable.SetValue("@belowMaxNumberDois",Stringify(belowMaxNumberDois));
-            logDE.Rows.Add({errormsg: "belowMaxNumberDois: " + belowMaxNumberDois});
-
-            if (belowMaxNumberDois == true) {
-              logDE.Rows.Add({errormsg: "right before the call"});
-              var result = HTTP.Post(url, contentType, payload, headerNames, headerValues);
-              var statusCode = result.StatusCode
-              logDE.Rows.Add({errormsg: "statusCode: " + statusCode});
-              logDE.Rows.Add({errormsg: "call executed"});
-            }
+          //filter out temp records
+          if(oneAllSubsSubscriberKey.toLowerCase().indexOf("doi_") === -1 ) {
+            uniqueCount = uniqueCount +1
+            resultsArray.push({'systemType':'sfmcSubscriberStatus'
+                      ,'requestStatus':'ok'
+                      ,'uniqueCount':uniqueCount
+                      ,'subscriberKey':oneAllSubsSubscriberKey
+                      ,'status': oneAllSubsStatus
+                      ,'email': email
+                      //,"description": description
+                      //,"state": state
+            })
           }
         }
-        catch (err)  
-        {
-          // error: "no token" >> invalid credentials
-          Variable.SetValue("@statusmessage","invalidToken");
-          logDE.Rows.Add({errormsg: "error: " + Stringify(err)});
-        }
-        /*sendout end */
-        Variable.SetValue("@statusmessage","doiInitiated");
-        logDE.Rows.Add({errormsg: Stringify(result)});
+      }
+      //var allSubStatus = Platform.Function.Lookup(allSubscribers,'Status',['EmailAddress'],[email]);
+      //var allSubscribersSubscriberKey = Platform.Function.Lookup(allSubscribers,'SubscriberKey',['EmailAddress'],[email]);  
+    }  
 
+    if (Variable.GetValue("@sfmcEmailValidationRequested") == "true") {
+    
+      if (!email) {
+        email = Variable.GetValue("@email");
+      }
+      var validateUrl = restEndpoint + "address/v1/validateEmail";
+      var validatePayload = Stringify({
+          email: email, 
+          validators: ['SyntaxValidator', 'MXValidator', 'ListDetectiveValidator']
+      });
+      try {
+    
+        var validateContentType = 'application/json';
+        var validateHeaderNames = ["Authorization"];
+        var validateHeaderValues = ["Bearer "+ access_token];
+        var validateResult = HTTP.Post(validateUrl, validateContentType, validatePayload, validateHeaderNames, validateHeaderValues);
+        var valid = Platform.Function.ParseJSON(validateResult.Response[0])["valid"];
+        var failedValidationReason = Platform.Function.ParseJSON(validateResult.Response[0])["failedValidation"];
+              
+        if (failedValidationReason === "ListDetectiveValidator" || failedValidationReason === "SyntaxValidator" || failedValidationReason === "MXValidator") {
+          
+          resultsArray.push({'systemType':'sfmcEmailValidation'
+            ,'requestStatus':'ok'
+            ,'email': email
+            ,'state': 'invalid'
+            ,'reason': failedValidationReason
+            })
+    
+        } else {
+          resultsArray.push({'systemType':'sfmcEmailValidation'
+          ,'requestStatus':'ok'
+          ,'email': email
+          ,'state': 'valid'
+          })
+        }            
+      } 
+      catch(e) 
+      {
+        resultsArray.push({'systemType':'sfmcEmailValidation'
+            ,'requestStatus':'failure'
+            ,'error': 'technical error.Could not perform listDetective validation.'
+            ,'email': email
+            ,'e':e
+            ,'restEndpoint':restEndpoint
+            ,"access_token":access_token
+            ,'validatePayload':validatePayload
+            })
+      }
+    }  
+
+    if (Variable.GetValue("@affinitiesRequested") == "true") {
+        
+      var translationsDE = Variable.GetValue("@translationsDE");
+      var affinityDefinitionDE = Variable.GetValue("@affinityDefinitionDE");
+      var affinityDE = Variable.GetValue("@affinityDE");
+      var operation = Variable.GetValue("@operation");
+      var subscriberKey = Variable.GetValue("@subscriberKey");
+
+      var rr = Platform.Function.CreateObject("RetrieveRequest");
+      Platform.Function.SetObjectProperty(rr, "ObjectType", "DataExtensionObject[" + affinityDefinitionDE + "]");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "affinityKey");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "businessUnit");  
+      var sfp1 = Platform.Function.CreateObject("SimpleFilterPart");
+      Platform.Function.SetObjectProperty(sfp1, "Property", "businessUnit");
+      Platform.Function.SetObjectProperty(sfp1, "SimpleOperator", "equals");
+      Platform.Function.AddObjectArrayItem(sfp1, "Value", accountIdFromToken);
+     //Add the simple filter to the RetrieveRequest
+      Platform.Function.SetObjectProperty(rr, "Filter", sfp1);
+      var statusAndRequestId = [0, 0];
+      var status = statusAndRequestId[0];
+      var requestID = statusAndRequestId[1];
+       
+      var results = [0,0];
+      var rows = Platform.Function.InvokeRetrieve(rr, results);
+      var len = rows.length
+     //if (showOnPreferenceCenter == 'true') { 
+      
+      var includeTranslations = Request.GetFormField("includeTranslations")
+            
+      for (var i = 0; i < len; i++) {
+
+        var oneRecord = Stringify(rows[i]);
+        var strRecord = Platform.Function.ParseJSON(oneRecord);
+        var affinityKey = strRecord.Properties[0].Value;
+        var accountId = strRecord.Properties[1].Value;
+        var showOnPreferenceCenter = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,locale,affinityKey,'showOnPreferenceCenter']);
+        
+        if (operation == "requestDataInternal" ||
+         (operation == "requestData" && showOnPreferenceCenter == "true")) {
+
+          var displayOrder = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,locale,affinityKey,'displayOrder']);
+          var shortDisplayText = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,locale,affinityKey,'shortDisplayText']);
+          var longDisplayText = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,locale,affinityKey,'longDisplayText']);
+          var affinityCategory = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,locale,affinityKey,'affinityCategory']);     
+          
+          if (includeTranslations == 'true') {
+            var displayTranslationArray = [];
+            var numTranslationRows = 100;
+            var contextsArray = [];
+            var translationRows = Platform.Function.LookupOrderedRows(translationsDE,numTranslationRows,'context ASC', ['affinityKey','businessUnit'], [affinityKey,accountIdFromToken]);
+          
+            if (translationRows && translationRows.length > 0) {
+          
+              for(var j=0; j<translationRows.length; j++) {
+                if (translationRows[j]['context']) {
+                  contextsArray.push(translationRows[j]['context'])
+                  allContexts = dedupe(contextsArray);
+                }
+              }
+              var singleTranslationObj = {};
+              var transDisplayOrder,transShortDisplayText,transLongDisplayText,transAffinityCategory
+              
+              for(var k=0; k<allContexts.length; k++) {           
+                // get locale specific value
+                var oneAffinityCategory = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,allContexts[k],affinityKey,'affinityCategory']);
+                var oneDisplayOrder = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,allContexts[k],affinityKey,'displayOrder']);
+                var oneShortDisplayText = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,allContexts[k],affinityKey,'shortDisplayText']);
+                var oneLongDisplayText = Platform.Function.Lookup(translationsDE,'attributeValue',['businessUnit','context','affinityKey','attributeName'],[accountIdFromToken,allContexts[k],affinityKey,'longDisplayText']);
+                // assemble obj
+                singleTranslationObj.locale = allContexts[k]
+                singleTranslationObj.affinityCategory = oneAffinityCategory
+                singleTranslationObj.displayOrder = oneDisplayOrder
+                singleTranslationObj.shortDisplayText = oneShortDisplayText
+                singleTranslationObj.longDisplayText = oneLongDisplayText
+                //push obj to array
+                displayTranslationArray.push(singleTranslationObj)
+                
+                singleTranslationObj = {}
+              }    
+            }
+          }
+          var affinitySource = "";
+          var affinityRows = "";
+          if (operation === "requestData" ) {
+            affinitySource = "subscriber"
+            affinityRows = Platform.Function.LookupRows(affinityDE,['subscriberKey','affinityKey','affinitySource'],[subscriberKey,affinityKey,affinitySource]);
+          } 
+          else {
+            affinityRows = Platform.Function.LookupRows(affinityDE,['subscriberKey','affinityKey'],[subscriberKey,affinityKey]);
+          }
+          
+          if(affinityRows && affinityRows.length > 0) {
+            
+            for(var j=0; j<affinityRows.length; j++) { 
+              var oneAffinityState = affinityRows[j].affinityState
+              var oneAffinitySource = affinityRows[j].affinitySource     
+              var oneAffinityValue = affinityRows[j].affinityValue    
+              // non-internal sources get only filtered data by showOnPreferenceCenter parameter.
+              // non-internal sources get no affinityValues.
+
+              if(operation == "requestData") {                
+                /* prohibit values for external sources */
+                oneAffinityValue = "not displayed for this operation"  
+              }
+
+              resultsArray.push({'systemType':'affinity'
+                                ,'requestStatus':'ok'
+                                ,'affinityKey':affinityKey
+                                ,'affinitySource':oneAffinitySource
+                                ,'affinityState':oneAffinityState
+                                ,'affinityValue':oneAffinityValue
+                                ,'displayOrder':displayOrder
+                                ,'shortDisplayText':shortDisplayText
+                                ,'longDisplayText':longDisplayText
+                                ,'affinityCategory':affinityCategory
+                                ,'showOnPreferenceCenter':showOnPreferenceCenter
+                                ,'availableTranslations': displayTranslationArray 
+              })
+
+            }
+          }
+          //push affinities with no values into array with null values / "not displayed"
+          if(operation == "requestData") {                
+            /* prohibit values for external sources */
+            var dummyAffinityValue = "not displayed for this operation"  
+          } else {
+            var dummyAffinityValue = null
+          }
+          dummyAffinityState = null
+          var isAlreadyIn = isInArray(resultsArray,affinityKey,'affinityKey')
+          if (isAlreadyIn != true) { 
+          
+            resultsArray.push({'systemType':'affinity'
+                                  ,'requestStatus':'ok'
+                                  ,'affinityKey':affinityKey
+                                  ,'affinitySource': affinitySource
+                                  ,'affinityState': dummyAffinityState
+                                  ,'affinityValue': dummyAffinityValue
+                                  ,'displayOrder':displayOrder
+                                  ,'shortDisplayText':shortDisplayText
+                                  ,'longDisplayText':longDisplayText
+                                  ,'affinityCategory':affinityCategory
+                                  ,'showOnPreferenceCenter':showOnPreferenceCenter
+                                  ,'availableTranslations': displayTranslationArray 
+            })   
+          }         
+        }   
+      }    
+    } 
+    if (Variable.GetValue("@permissionsRequested") == "true") {
+
+      var operation = Variable.GetValue("@operation")
+      </script>%%[
+
+      /*channelwide block handling */
+      /*email*/
+      SET @emailBlocked = false
+      IF not empty(@email) THEN
+        SET @emailBlockedCommercial = Lookup(@commercialEmailBlocklist,"Email Address","Email Address",@email)
+      ENDIF  
+
+      IF not empty(@emailBlockedCommercial) THEN
+        SET @emailBlockLocation = @commercialEmailBlocklist
+        SET @emailDescription = @emailBlockLocation
+        SET @emailBlocked = true
+        SET @emailBlockStatus = "CHANNELWIDE BLOCK"
+        SET @emailState = "RELAXED"
+      ENDIF
+    
+      IF not empty(@email) THEN
+        SET @emailBlockedCompletely = Lookup(@commercialTransactionalEmailBlocklist,"Email Address","Email Address",@email)
+      ENDIF
+    
+      IF not empty(@emailBlockedCompletely) THEN
+        IF not empty(@blockLocation) THEN
+          SET @emailBlockLocation = concat(@commercialEmailBlocklist," + ",@commercialTransactionalEmailBlocklist)
+        ELSE
+          SET @emailBlockLocation = @commercialTransactionalEmailBlocklist
+        ENDIF
+        SET @emailDescription = @emailBlockLocation
+        SET @emailBlocked = true
+        SET @emailBlockStatus = "CHANNELWIDE BLOCK"
+        SET @emailState = "STRICT"
+      ENDIF
+      /* custom lookup required */
+      /*print 
+      SET @printBlocked = false
+      SET @printBlockedCompletely = Lookup(@globalPrintBlocklist,"SubscriberKey","SubscriberKey",@subscriberKey)
+      IF not empty(@printBlockedCompletely) THEN
+        SET @printBlockLocation = @globalPrintBlocklist
+        SET @printDescription = concat(Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","printBlockedCompletely")," ",@printBlockLocation)
+        SET @printBlocked = true
+        SET @printBlockStatus = "CHANNELWIDE BLOCK"
+        SET @printState = "STRICT"
+      ENDIF
+      */
+      ]%%<script type="javascript" runat="server">
+      
+      var emailBlockStatus = Variable.GetValue("@emailBlockStatus");
+      var printBlockStatus = Variable.GetValue("@printBlockStatus");
+      var emailState = Variable.GetValue("@emailState");
+      var printState = Variable.GetValue("@printState");
+      var emailBlocked = Variable.GetValue("@emailBlocked");
+      var emailBlockLocation = Variable.GetValue("@emailBlockLocation");
+      var printBlocked = Variable.GetValue("@printBlocked");
+      var printBlockLocation = Variable.GetValue("@printBlockLocation");
+      var emailDescription = Variable.GetValue("@emailDescription");
+      var printDescription = Variable.GetValue("@printDescription");
+
+      if (emailBlocked == true) {
+        resultsArray.push({'systemType':'block'
+          ,'requestStatus':'ok'
+          ,'permissionType': emailBlockStatus
+          ,'channel':'email'
+          ,'description': emailDescription
+          ,'state':emailState
+          ,'showOnPreferenceCenter':'False'
+          })
+      }
+      if (printBlocked == true) {
+        resultsArray.push({'systemType':'block'
+          ,'requestStatus':'ok'
+          ,'permissionType': printBlockStatus
+          ,'channel':'print'
+          ,'description': printDescription
+          ,'state':printState
+          ,'showOnPreferenceCenter':'False'
+          })
+      }
+
+      /* list unsubscribe exception handling */
+      var permissionsDefinitionDE = Variable.GetValue("@permissionsDefinitionDE");
+      var permissionsDE = Variable.GetValue("@permissionsDE");
+      //var subscriberKey = Variable.GetValue("@subscriberKey");
+      var allSubscribers = Variable.GetValue("@allSubscribers")
+      var currentlyUnsubscribed = Platform.Function.Lookup(allSubscribers,"Status",['SubscriberKey'],[subscriberKey]);
+
+      if(currentlyUnsubscribed == "unsubscribed") {      
+        /*all subscribers status = unsubscribed >> output a warning alongside the permissions.*/
+        resultsArray.push({'systemType':'permission'
+          ,'requestStatus':'warning'
+          ,'requestMessage':'currentlyUpdating'
+          ,'details':'permissions are currently updating, permissions might not reflect the latest user input.'
+          })
+      }
+      
+      var rr = Platform.Function.CreateObject("RetrieveRequest");
+
+      Platform.Function.SetObjectProperty(rr, "ObjectType", "DataExtensionObject[" + permissionsDefinitionDE + "]");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "permissionType");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "channel");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "description");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "showOnPreferenceCenter");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "locationForSuppressions");
+      Platform.Function.AddObjectArrayItem(rr, "Properties", "accountId");  
+     
+      var sfp1 = Platform.Function.CreateObject("SimpleFilterPart");
+      Platform.Function.SetObjectProperty(sfp1, "Property", "accountId");
+      Platform.Function.SetObjectProperty(sfp1, "SimpleOperator", "equals");
+      Platform.Function.AddObjectArrayItem(sfp1, "Value", accountIdFromToken);
+
+      if(operation == "requestData"){
+        //custom filtering for external source.
+        var sfp2 = Platform.Function.CreateObject("SimpleFilterPart");
+        Platform.Function.SetObjectProperty(sfp2, "Property", "showOnPreferenceCenter");
+        Platform.Function.SetObjectProperty(sfp2, "SimpleOperator", "equals");
+        Platform.Function.AddObjectArrayItem(sfp2, "Value", "true");
+
+        //Adding two Simple filters together to create a Complex filter
+        var cfp = Platform.Function.CreateObject("ComplexFilterPart");
+        Platform.Function.SetObjectProperty(cfp, "LeftOperand", sfp1);
+        Platform.Function.SetObjectProperty(cfp, "LogicalOperator", "AND");     
+        Platform.Function.SetObjectProperty(cfp, "RightOperand", sfp2);
+
+        //Add the Complex filter to the RetrieveRequest
+        Platform.Function.SetObjectProperty(rr, "Filter", cfp);
       } 
       else {
-        /* doi skipped due to some escape logic in additionalProcessing */
-        Variable.SetValue("@statusmessage","doiSkippedByAdditionalProcess");
+        //internal source get all permissions for parsing.
+        Platform.Function.SetObjectProperty(rr, "Filter", sfp1);
+      } 
+
+      var statusAndRequestId = [0, 0];
+      var status = statusAndRequestId[0];
+      var requestID = statusAndRequestId[1];
+       
+      var results = [0,0];
+      var rows = Platform.Function.InvokeRetrieve(rr, results);
+      var len = rows.length
+
+      //  var permissionObj = {
+      //    "permissionType:":"",
+      //    "channel":"",
+      //    "description":"" //,
+      //    //"showOnPreferenceCenter":""
+      //  };
+
+      for (var i = 0; i < len; i++) {
+
+        var oneRecord = Stringify(rows[i]);
+        var strRecord = Platform.Function.ParseJSON(oneRecord);
+        var permissionType = strRecord.Properties[0].Value;
+        var channel = strRecord.Properties[1].Value;
+        var description = strRecord.Properties[2].Value;
+        var showOnPreferenceCenter = strRecord.Properties[3].Value;
+        var locationForSuppressions = strRecord.Properties[4].Value;
+        /* custom */
+        //  var state = Platform.Function.Lookup(permissionsDE,"state",['subscriberKey','permissionType','channel'],[subscriberKey,permissionType,channel]);
+        //  if (channel == "email" && emailBlocked == true && emailState == "STRICT") {
+        //    state = "blockedStrict" 
+        //  }
+        //
+        //  else if (channel == "email" && emailBlocked == true && emailState == "RELAXED" ) {
+        //    state = "blockedRelaxed"
+        //  }
+        //
+        //  if (channel == "print" && printBlocked == true && printState == "STRICT") {
+        //    state = "blockedStrict"
+        //  }
+        /* reset states for each permission */
+        var state = ""
+        var specificASCState = ""
+        var stateWithoutBlocks = Platform.Function.Lookup(permissionsDE,"state",['subscriberKey','permissionType','channel'],[subscriberKey,permissionType,channel]);
+        var grantedLastTimestampUTC = Platform.Function.Lookup(permissionsDE,"grantedLastTimestampUTC",['subscriberKey','permissionType','channel'],[subscriberKey,permissionType,channel]);
+        var revokedLastTimestampUTC = Platform.Function.Lookup(permissionsDE,"revokedLastTimestampUTC",['subscriberKey','permissionType','channel'],[subscriberKey,permissionType,channel]);
+        if (!stateWithoutBlocks) {
+     
+          try {
+            var emailOnSpecificAutoSuppression = Platform.Function.Lookup(locationForSuppressions,"Email Address",["Email Address"],[email])
+            if(emailOnSpecificAutoSuppression) {
+              var onSpecificAutoSuppression = "true"
+              var specificASCState = "RELAXED"
+              var state = specificASCState
+              resultsArray.push({'systemType':'block'
+              ,'requestStatus':'ok'
+              ,'permissionType': permissionType
+              ,'channel':'email'
+              ,'description': 'Address listed on AutoSuppression ' + locationForSuppressions + '.'
+              ,'state': specificASCState
+              ,'showOnPreferenceCenter':'False'
+              })
+            }
+          } catch (e) 
+          {
+            resultsArray.push({'systemType':'block'
+              ,'requestStatus':'failure'
+              ,'permissionType': permissionType
+              ,'channel':'email'
+              ,'description': 'suppressionlist ' + locationForSuppressions + ' not found.'
+              ,'state': specificASCState
+              ,'showOnPreferenceCenter':'False'
+              })
+          }
+      
+        }  
+        if (channel == "email" && emailBlocked == true && emailState == "STRICT") {
+          state = "blockedStrict"
+        } else if (channel == "email" && emailBlocked == true && emailState == "RELAXED") {
+          state = "blockedRelaxed" 
+        } else if (channel == "print" && printBlocked == true && printState == "STRICT") {
+          state = "blockedStrict"
+        } else if (channel == "email" && specificASCState) {
+          state = "blockedRelaxed"
+        } else {
+          state = stateWithoutBlocks
+        }
+        resultsArray.push({'systemType':'permission'
+                            ,'requestStatus':'ok'
+                            ,'permissionType': permissionType
+                            ,'channel': channel
+                            ,'description': description
+                            ,'state': state
+                            ,'grantedLastTimestampUTC': grantedLastTimestampUTC
+                            ,'revokedLastTimestampUTC': revokedLastTimestampUTC
+                            ,'stateWithoutBlocks':stateWithoutBlocks
+                            ,'showOnPreferenceCenter':showOnPreferenceCenter
+                            ,'locationForSuppressions':locationForSuppressions
+                            ,'onSpecificAutoSuppression':onSpecificAutoSuppression
+        })
+      } 
+    } /* permissionsRequested */
+
+    if (Variable.GetValue("@historyRequested") == "true"
+    && lookupToPersonMasterError != "true") {
+
+      var contactMasterDEKey = "multiPermissionTestRecords" /*'personMaster' */
+      var historyDEKey = 'generalSendLog'
+      var pageSize = Request.GetFormField("historyPageSize");
+      if (!pageSize) {
+        pageSize = 10
       }
-      </script>%%[
-   
-      IF @rowCountPermissions > 1 
-      and @statusmessage == "doiInitiated" THEN
-        SET @statusmessage = "doiInitiatedMultiple"
-      ENDIF
 
-    ENDIF /* End Success Business Case */   
+      var page = Request.GetFormField("historyPage");
+      if (!page) {
+        page = 1
+      }
+
+      var orderBy = "sentDateServertime DESC"
+      var filter = "subscriberKey eq '" + subscriberKey + "' and accountId eq '" + accountIdFromToken + "'"
+      var formattedFilter = filter.replace(/ /g,'%20')
+      var fullFilterString = "?$filter=" + formattedFilter + "&$pagesize=" + pageSize +"&$page=" + page + "&$orderBy=" + orderBy
+
+      var historyGetRequest = restEndpoint + "data/v1/customobjectdata/key/" + historyDEKey + "/rowset/" + fullFilterString
+
+      var req = new Script.Util.HttpRequest(historyGetRequest);
+        req.emptyContentHandling = 0;
+        req.retries = 0;
+        req.continueOnError = true;
+        req.contentType = "application/json"
+        req.setHeader("Authorization", "Bearer " + access_token);
+        req.method = "GET"; 
+      var response = req.send();
+      var responseContent = String(response.content);
+      var responseContent = Platform.Function.ParseJSON(responseContent);
+      var items = responseContent.items;
+      var formattedJobValues = "";
+      var jobsArray = [];
+      if (items && items.length > 0) {
+        for(var i=0; i<items.length; i++) { 
+          var jobId = items[i].keys.jobid;
+          // for response assembly
+          jobsArray.push(jobId)
+          //for payload
+          formattedJobValues += '<Value>' + jobId + '</Value>'
+        }
+
+        var operator = ""
+        if(jobsArray.length == 1) {
+          operator = "equals"
+        }
+        else {
+          operator = "IN"
+        }
+
+        var sendRetrieveURL = soapEndpoint + 'Service.asmx';
+        var sendRetrieveContentType = 'text/xml;charset=UTF-8;';
+        var sendRetrieveHeaderNames = ['SOAPAction'];
+        var sendRetrieveHeaderValues  = ['Retrieve'];
+        var sendRetrieveResultStr = "";
+         
+        var sendRetrievePayload = '<?xml version="1.0" encoding="UTF-8"?>'
+        sendRetrievePayload += '  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">';
+        sendRetrievePayload += '  <s:Header>';
+        sendRetrievePayload += '  <fueloauth>' + access_token + '</fueloauth>';
+        sendRetrievePayload += '  </s:Header>';
+        sendRetrievePayload += '  <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">';
+        sendRetrievePayload += '     <RetrieveRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI">'
+        sendRetrievePayload += '       <RetrieveRequest>'
+        sendRetrievePayload += '          <ObjectType>Send</ObjectType>'
+        sendRetrievePayload += '          <Properties>ID</Properties>'
+        sendRetrievePayload += '          <Properties>Client.ID</Properties>'
+        sendRetrievePayload += '          <Properties>Email.ID</Properties>'
+        sendRetrievePayload += '          <Properties>Subject</Properties>'
+        sendRetrievePayload += '          <Properties>SentDate</Properties>'
+        sendRetrievePayload += '          <Filter xsi:type="SimpleFilterPart">'
+        sendRetrievePayload += '             <Property>ID</Property>'
+        sendRetrievePayload += '             <SimpleOperator>' + operator + '</SimpleOperator>'
+        sendRetrievePayload += formattedJobValues
+        sendRetrievePayload += '          </Filter>'
+        sendRetrievePayload += '       </RetrieveRequest>'
+        sendRetrievePayload += '    </RetrieveRequestMsg>'
+        sendRetrievePayload += '  </s:Body>'
+        sendRetrievePayload += '</s:Envelope>'  
+
+        // var sfmcAPIErrorMsg = "Error reading sfmc data via API"
+        // var sfmcDataExtensionErrorMsg = "Could not reach 'childContactsDEName' Data Extension specified in systemRegister."
+        var errorMsg = "";
+        var statusCode = "";
+        var sendResultContent = "";
+        var emailSubject = "";
+        var emailId = "";
+        var previewUrl = "";
+        var searchIndex = 0;
+
+        var emailTimestampObject = {};
+        
+        var sortedJobsArray = [];
+        var incompleteJobsArray = [];
+        var jobIdFromXML = "";
+        var emailIdFromXML = "";
+        var sentDate = "";
+        var sendResultContentTrimmed = "";
+
+        var partialResultsArrayCompletes = [];
+        var partialResultsArrayIncompletes = [];
+
+        try {
+                    var sendResult = HTTP.Post(sendRetrieveURL,sendRetrieveContentType,sendRetrievePayload,sendRetrieveHeaderNames,sendRetrieveHeaderValues);
+          statusCode = sendResult["StatusCode"];
+          //var statusCode = 400;
+          sendResultContent = sendResult["Response"][0];
+
+
+          // make XML more compatible with parser = construct unique node <emailId> through "replace with nothing".
+          var replace = '<Client><ID>' + accountIdFromToken + '</ID></Client>';     
+          sendResultContentTrimmed = sendResultContent.split(replace).join('');
+          var replace2 = '<PartnerKey xsi:nil="true" />';
+          sendResultContentTrimmed = sendResultContentTrimmed.split(replace2).join('');
+          var replace3 = '<ObjectID xsi:nil="true" />';
+          sendResultContentTrimmed = sendResultContentTrimmed.split(replace3).join('');
+          var replace4 = '<Email><ID>'
+          sendResultContentTrimmed = sendResultContentTrimmed.split(replace4).join('<emailID>');
+          var replace5 = '</ID></Email>'
+          sendResultContentTrimmed = sendResultContentTrimmed.split(replace5).join('</emailID>');
+          
+          var replace6 = '\n'
+          sendResultContentTrimmed = sendResultContentTrimmed.split(replace6).join('-');
+          // parse for email IDs and sort by sentDate.
+          var parseResultArray = parseXML(sendResultContentTrimmed, 'Results');
+          
+          if (parseResultArray.length < jobsArray.length) {
+            var numberOfMismatches = jobsArray.length - parseResultArray.length
+          }
+
+          // compare job lookup with job retrieve for mismatches
+          for (var k = 0; k < jobsArray.length ; k++) {
+            var regex = new RegExp(jobsArray[k]);
+            if (!regex.test(sendResultContentTrimmed)) {
+              incompleteJobsArray.push({
+                jobId: jobsArray[k]
+                ,emailId: "not in XML"
+                ,sentDateFromXML: "not in XML"
+              })
+            }
+          }           
+
+          // successful lookups
+          for (var j = 0; j < parseResultArray.length; j++) {
+            
+            var jobIdFromXMLParseAttempt = parseXML(parseResultArray[j].innerContent, 'ID');            
+            // completeness checks / exception handling
+            if (jobIdFromXMLParseAttempt) { 
+              jobIdFromXML = jobIdFromXMLParseAttempt[0].innerContent
+            } else { 
+              jobIdFromXML = "not retrieved"
+            }
+            var emailIdFromXMLParseAttempt = parseXML(parseResultArray[j].innerContent, 'emailID');
+            if (emailIdFromXMLParseAttempt) { 
+              emailIdFromXML = emailIdFromXMLParseAttempt[0].innerContent             
+            } else { 
+              emailIdFromXML = "not retrieved"
+            }
+            var sentDateFromXML = "";
+            var sentDateParseAttempt = parseXML(parseResultArray[j].innerContent, 'SentDate');
+            if (sentDateParseAttempt) { 
+              sentDateFromXML = sentDateParseAttempt[0].innerContent
+            } else { 
+              sentDateFromXML = "not retrieved"
+            }
+
+            var emailSubjectFromXML = "";
+            var emailSubjectParseAttempt = parseXML(parseResultArray[j].innerContent, 'Subject');
+            if (emailSubjectParseAttempt) { 
+              emailSubjectFromXML = emailSubjectParseAttempt[0].innerContent
+            } else { 
+              emailSubjectFromXML = "not retrieved"
+            }
+
+            sortedJobsArray.push({
+                jobId: jobIdFromXML // jobIdFromXML[0].innerContent,
+                ,emailId: emailIdFromXML
+                ,emailSubject: emailSubjectFromXML
+                ,sentDateFromXML: sentDateFromXML
+            })
+          }
+
+
+          for (var i=0; i<items.length; i++) {
+
+            var jobId = items[i].keys.jobid;
+            var trackingId = items[i].values.trackingid;
+            var emailName = items[i].values.emailname;
+            var sentDateServertime = items[i].values.sentdateservertime;
+          //  var openDateServertime = items[i].values.opendate_servertime;
+          //var clickDateServertime = items[i].values.clickdate_servertime;
+           // var unsubscribeDateServertime = items[i].values.unsubscribedate_servertime;
+           // var emailSubject = items[i].values.emailsubject.trim()
+
+
+            for (var j = 0; j < sortedJobsArray.length; j++) {
+              if (jobId == sortedJobsArray[j].jobId) {
+                emailId = sortedJobsArray[j].emailId;
+                previewUrl  = restEndpoint + "guide/v1/emails/" + emailId + "/dataExtension/key:" + contactMasterDEKey + "/contacts/key:" + subscriberKey +"/preview?kind=html"
+              } 
+
+              if (sortedJobsArray[j].jobId == jobId) {
+                
+                partialResultsArrayCompletes.push({'systemType': 'history'
+                ,'requestStatus':'ok'
+                ,'jobid': jobId
+                ,'trackingId': trackingId 
+                ,'emailName': emailName
+                ,'sentDateServertime': sentDateServertime
+                ,'emailSubject': trim(sortedJobsArray[j].emailSubject)
+                //,'debugSortedJobs':sortedJobsArray[j]
+                //,'openDateServertime'//: openDateServertime
+                //,'clickDateServertime': clickDateServertime
+                //,'unsubscribeDateServertime': unsubscribeDateServertime
+                ,'emailId':emailId
+                //,'couponCodePlusClass': couponCodePlusClass
+                ,'previewUrl':previewUrl        
+              //  ,'items':items.length
+              //  ,'formattedJobValues':formattedJobValues
+              //  ,'parseResults Length':parseResultArray.length
+              //  ,'sendResultContentTrimmed':sendResultContentTrimmed
+
+                })   
+              } 
+            }    
+
+            for (var j = 0; j < incompleteJobsArray.length; j++) {
+              
+              if (incompleteJobsArray[j].jobId == jobId) {
+                partialResultsArrayIncompletes.push({'systemType': 'history'
+                  ,'requestStatus':'incomplete'
+                  ,'jobid': jobId
+                  ,'provId': provId 
+                  ,'emailName': emailName
+                  ,'sentDateServertime': sentDateServertime
+                  ,'emailSubject': emailSubjectFromXML
+
+                  //,'openDateServertime': openDateServertime
+                  //,'clickDateServertime': clickDateServertime
+                  //,'unsubscribeDateServertime': unsubscribeDateServertime
+                  ,'emailId': 'not retrieved'
+                 // ,'couponCodePlusClass': couponCodePlusClass
+                  ,'previewUrl': 'not retrieved'              
+                })
+              }
+            }
+
+            resultsArray = partialResultsArrayCompletes.concat(partialResultsArrayIncompletes);              
+            resultsArray.sort(function(a,b){
+              // Turn strings into dates, and then subtract them
+              // to get a value that is either negative, positive, or zero.
+              return new Date(b.sentDateServertime) - new Date(a.sentDateServertime);
+            });
+          }
+
+        } catch (e) {
+          emailId = "error retrieving Data";
+          resultsArray.push({'systemType': 'history'
+              ,'requestStatus':'failure'
+              ,'detail': e
+              ,'debugEmailId': emailId
+              ,'debugpreviewURL:':previewUrl
+              ,'sendRetrieveURL':sendRetrieveURL 
+              ,'sendRetrievePayload':sendRetrievePayload 
+              ,'sendResultContent':sendResultContent
+              ,'jobsArray': jobsArray
+              ,'formattedJobValues':formattedJobValues      
+          })    
+        }   
+      }
+    }
+
+    if (Variable.GetValue("@individualEmailLayout")
+    && lookupToPersonMasterError != "true") {
+        var req = "";
+        var response, responseContent,emailMessage,emailContent;
+        var previewUrl = Variable.GetValue("@individualEmailLayout")
+        req = new Script.Util.HttpRequest(previewUrl);
+        req.emptyContentHandling = 0;
+        req.retries = 0;
+        req.continueOnError = true;
+        req.contentType = "application/json"
+        req.setHeader("Authorization", "Bearer " + access_token);
+        req.method = "POST"; 
+        
+
+        try {
+          response = req.send();
+          responseContent = String(response.content);
+          responseContent = Platform.Function.ParseJSON(responseContent);
+          emailMessage = responseContent.message;
+          emailContent = responseContent.message.views[0].content
+          resultsArray.push({'systemType': 'individualEmailLayout'
+                ,'requestStatus':'ok'
+                ,"emailContent":emailContent
+              })   
+
+        } catch (e) {
+          errorMsg = e
+          resultsArray.push({'systemType': 'individualEmailLayout'
+              ,'requestStatus':'failure'
+              ,'detail': errorMsg
+          })  
+        }
+    }  
+
+        if ((Variable.GetValue("@sendoutStatisticsByEmailName")) 
+    || (Variable.GetValue("@sendoutStatisticsByJobId"))) {
+
+      // Get Statistic Data via JobId OR EmailName depending on what the incoming parameter specifies
+      
+      var jobId = Request.GetFormField("sendoutStatisticsByJobId");
+      var emailName = Request.GetFormField("sendoutStatisticsByEmailName");
+      
+      if (Variable.GetValue("@sendoutStatisticsByJobId")) { 
+        var property = "ID"; 
+        var value = jobId;
+        var systemType = "sendoutStatisticsByJobId";
+      } else if (Variable.GetValue("@sendoutStatisticsByEmailName")) {
+        var property = "EmailName"; 
+        var value = emailName;
+        var systemType = "sendoutStatisticsByEmailName";
+      }
+
+      var sendRetrieveURL = soapEndpoint + 'Service.asmx';
+      var sendRetrieveContentType = 'text/xml;charset=UTF-8;'
+      var sendRetrieveHeaderNames = ['SOAPAction'];
+      var sendRetrieveHeaderValues  = ['Retrieve'];
+      var sendRetrieveResultStr = "";
+      var sendRetrievePayload = '<?xml version="1.0" encoding="UTF-8"?>'
+      sendRetrievePayload += '  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">';
+      sendRetrievePayload += '  <s:Header>';
+      sendRetrievePayload += '  <fueloauth>' + access_token + '</fueloauth>';
+      sendRetrievePayload += '  </s:Header>';
+      sendRetrievePayload += '  <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">';
+      sendRetrievePayload += '     <RetrieveRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI">'
+      sendRetrievePayload += '       <RetrieveRequest>'
+      sendRetrievePayload += '          <ObjectType>Send</ObjectType>'
+      sendRetrievePayload += '          <Properties>ID</Properties>'
+      sendRetrievePayload += '          <Properties>Client.ID</Properties>'
+      sendRetrievePayload += '          <Properties>Email.ID</Properties>'
+      sendRetrievePayload += '          <Properties>Subject</Properties>'
+      sendRetrievePayload += '          <Properties>SentDate</Properties>'
+      sendRetrievePayload += '          <Properties>FromName</Properties>'
+      sendRetrievePayload += '          <Properties>Duplicates</Properties>'
+      sendRetrievePayload += '          <Properties>InvalidAddresses</Properties>'
+      sendRetrievePayload += '          <Properties>ExistingUndeliverables</Properties>'
+      sendRetrievePayload += '          <Properties>ExistingUnsubscribes</Properties>'
+      sendRetrievePayload += '          <Properties>HardBounces</Properties>'
+      sendRetrievePayload += '          <Properties>OtherBounces</Properties>'
+      sendRetrievePayload += '          <Properties>SoftBounces</Properties>'
+      sendRetrievePayload += '          <Properties>UniqueClicks</Properties>'
+      sendRetrievePayload += '          <Properties>UniqueOpens</Properties>'
+      sendRetrievePayload += '          <Properties>NumberSent</Properties>'
+      sendRetrievePayload += '          <Properties>Unsubscribes</Properties>'
+      sendRetrievePayload += '          <Properties>MissingAddresses</Properties>'
+      sendRetrievePayload += '          <Properties>PreviewURL</Properties>'
+      sendRetrievePayload += '          <Properties>SentDate</Properties>'
+      sendRetrievePayload += '          <Properties>EmailName</Properties>'
+      sendRetrievePayload += '          <Properties>Status</Properties>'
+      sendRetrievePayload += '          <Properties>NumberTargeted</Properties>'
+      sendRetrievePayload += '          <Properties>NumberDelivered</Properties>'
+      sendRetrievePayload += '          <Properties>NumberExcluded</Properties>'
+      sendRetrievePayload += '          <Filter xsi:type="SimpleFilterPart">'
+      sendRetrievePayload += '             <Property>' + property + '</Property>'
+      sendRetrievePayload += '             <SimpleOperator>' + 'equals' + '</SimpleOperator>'
+      sendRetrievePayload += '             <Value><![CDATA[' + value + ']]></Value>'
+      sendRetrievePayload += '          </Filter>'
+      sendRetrievePayload += '       </RetrieveRequest>'
+      sendRetrievePayload += '    </RetrieveRequestMsg>'
+      sendRetrievePayload += '  </s:Body>'
+      sendRetrievePayload += '</s:Envelope>'  
+      var result = "";
+      var statusCode = "";
+      var resultContent = "";
     
+      try {
+        result = HTTP.Post(sendRetrieveURL,sendRetrieveContentType,sendRetrievePayload,sendRetrieveHeaderNames,sendRetrieveHeaderValues);
+        statusCode = result["StatusCode"];
+        resultContent = result["Response"][0];
+        adaptEmailResult(resultContent, 'EmailName');
+          
+        var invalidAddresses = dataFromAttr(resultContent, "InvalidAddresses");
+        var existingUndeliverables = dataFromAttr(resultContent, "ExistingUndeliverables");
+        var existingUnsubscribes = dataFromAttr(resultContent, "ExistingUnsubscribes");
+        var hardBounces = dataFromAttr(resultContent, "HardBounces");
+        var otherBounces = dataFromAttr(resultContent, "OtherBounces");
+        var softBounces = dataFromAttr(resultContent, "SoftBounces");
+        var uniqueOpens = dataFromAttr(resultContent, "UniqueOpens");
+        var uniqueClicks = dataFromAttr(resultContent, "UniqueClicks");
+        var numberSent = dataFromAttr(resultContent, "NumberSent");
+        var unsubscribes = dataFromAttr(resultContent, "Unsubscribes");
+        var missingAddresses = dataFromAttr(resultContent, "MissingAddresses");
+        var subject = dataFromAttr(resultContent, "Subject");
+        var sentDate = dataFromAttr(resultContent, "SentDate");
+        var status = dataFromAttr(resultContent, "Status");
+        var numberTargeted = dataFromAttr(resultContent, "NumberTargeted");
+        var numberDelivered = dataFromAttr(resultContent, "NumberDelivered");
+        var numberExcluded = dataFromAttr(resultContent, "NumberExcluded");
+        if (!jobId) {
+          
+          var trimmedContent = parseXML(resultContent,'Results')[0].innerContent
+          // clear "wrong" IDs from client and email 
+          // prune Client node 
+          var startOfClient = trimmedContent.indexOf("<Client>"); 
+          var endOfClient = trimmedContent.indexOf("<\/Client>");
+          var nodeLength = endOfClient - startOfClient;
+          var clientNode = trimmedContent.substring(startOfClient,endOfClient + "</Client>".length) //trimmedContent.replace(,'');
+          trimmedContent = trimmedContent.replace(clientNode,'')
 
-  ENDIF /* end regex validation */
+          // prune Email node 
+          var startOfEmail = trimmedContent.indexOf("<Email>"); 
+          var endOfEmail = trimmedContent.indexOf("<\/Email>"); 
+          var nodeLength = endOfEmail - startOfEmail; 
+          var emailNode = trimmedContent.substring(startOfEmail,endOfEmail +  "</Email>".length) //trimmedContent.replace(,'');
+          trimmedContent = trimmedContent.replace(emailNode,'')
 
-ENDIF /* end valid token */
+          var jobId = trimmedContent //emailNode //trimmedContent
+          jobId = dataFromAttr(trimmedContent,"ID");
+        }
+        if (!emailName) {
+          var emailName = dataFromAttr(resultContent,"EmailName");
+        } 
+
+        if (sentDate) {
+          var sentDateUTC = adaptDate(sentDate);
+
+          resultsArray.push({'systemType': systemType
+                  ,'requestStatus':'ok'
+                  ,'emailName': emailName
+                  ,'jobId': jobId
+                  ,'invalidAddresses': invalidAddresses
+                  ,'existingUndeliverables': existingUndeliverables
+                  ,'existingUnsubscribes': existingUnsubscribes
+                  ,'hardBounces': hardBounces
+                  ,'otherBounces': otherBounces
+                  ,'softBounces': softBounces
+                  ,'uniqueOpens': uniqueOpens
+                  ,'numberSent': numberSent
+                  ,'unsubscribes': unsubscribes
+                  ,'missingAddresses': missingAddresses
+                  ,'subject': subject
+                  ,'sentDate': sentDate
+                  ,'sentDateUTC': sentDateUTC
+                  ,'status': status
+                  ,'numberTargeted': numberTargeted
+                  ,'numberDelivered': numberDelivered
+                  ,'numberExcluded': numberExcluded
+          }) 
+        } else {
+          resultsArray.push({'systemType': systemType
+                  ,'requestStatus':'failure'
+                  ,'detail': 'sendout not found / no sendDate'
+          }) 
+        }
+      } 
+      catch (e) {
+        emailId = "error retrieving Data";  
+        resultsArray.push({'systemType': systemType
+                      ,'requestStatus':'failure'
+                      ,'detail': 'emailName not unique (includes test sends). Please use sendoutStatisticsByJobId.'
+                  //    ,'debug:': sentDate
+                  //    ,'debug2': sendRetrieveURL   
+        })    
+      } 
+    } // end sendoutStatisticsByJobId, sendoutStatisticsByEmailName: Caution, ensure that EmailName is UNIQUE, this includes test sends.
+  
+/*
+    if (Variable.GetValue("marketingActionRequested")) {
+      
+      function sleep(milliseconds) {
+        var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+          if ((new Date().getTime() - start) > milliseconds){
+            break;
+          }
+        }
+      }
+      // expects the first 50 chars of the subjectline, having all " replaced with '. 
+      var systemType = "marketingAction";
+      var prefix = "SH42_";
+      var objectName = "S5_MarketingAction__c";
+      Variable.SetValue("@objectName",objectName);
+      //replace " with ' 
+      var marketingActionName = Variable.GetValue("marketingActionRequested").replace('"',"'");
+      marketingActionName = prefix + marketingActionName.substring(0,50); 
+      Variable.SetValue("@marketingActionName",marketingActionName);
+
+      var marketingActionBrand = Request.GetFormField("marketingActionBrand");
+      if (!marketingActionBrand) {
+          marketingActionBrand = "dynamic"
+      }
+      marketingActionBrand = "brand_" + marketingActionBrand;
+      Variable.SetValue("@marketingActionBrand",marketingActionBrand)
+      
+      var marketingActionPermissionType = Request.GetFormField("marketingActionPermissionType");
+      if (!marketingActionPermissionType) {
+          marketingActionPermissionType = "dynamic"
+      }
+      Variable.SetValue("@marketingActionPermissionType",marketingActionPermissionType);
+
+      var marketingActionStatus = Request.GetFormField("marketingActionStatus");
+      
+      Variable.SetValue("@marketingActionStatus",marketingActionStatus);
+
+      try {
+        </script>%%[ 
+        SET @rs = RetrieveSalesForceObjects(@objectName,'Id,Name'
+                                        ,'S5_Name__c','=',@marketingActionName)
+        SET @rowCount = rowCount(@rs)
+        IF @rowCount == 1 THEN
+          SET @row = ROW(@rs,1)
+          SET @marketingActionNo = FIELD(@row,"Name")
+          SET @marketingActionSfid = FIELD(@row,"Id")
+          SET @existingOrNew = "existing"
+        ELSEIF @rowcount == 0 THEN
+          SET @existingOrNew = "new"
+
+          IF @environment != "test" THEN
+            SET @marketingActionSfid = CreateSalesforceObject(@objectName, 8 
+              ,"Name__c",@marketingActionName
+              ,"Type__c","E-Mail" 
+              ,"State__C",@marketingActionStatus
+              ,"TechnicalProcess__c","emailSendoutAutomated"
+              ,"PermissionType__c",@marketingActionPermissionType
+              ,"BrandForSourceCategory__c",@marketingActionBrand
+              ,"BusinessContext__c","emailNewsletter"
+              ,"Description__c","auto-generated by external"
+            )
+          ENDIF   
+        ELSE
+          ]%%
+            resultsArray.push({'systemType': systemType
+              ,'requestStatus':'failure'
+              ,'existingOrNew': "more than one found"
+              })
+          %%[
+        ENDIF
+        ]%%<script type="javascript" runat="server"> 
+      } catch (err) {
+       // logDE.Rows.Add({errormsg: Stringify(err),timezoneOffset: timezoneOffset});
+      } 
+      sleep(1000)
+
+      </script>%%[ 
+        IF @environment != "test" THEN
+          SET @rs = RetrieveSalesForceObjects(@objectName,'Id,Name'
+                                          ,'Id','=',@marketingActionSfid)
+          SET @rowCount = rowcount(@rs)
+          IF @rowCount > 0 THEN
+            SET @row = ROW(@rs,1)
+            SET @marketingActionNo = FIELD(@row,"Name")
+          ENDIF      
+        ELSE 
+          SET @dummyMarketingAction = "MA311_dummyForTesting"
+          SET @marketingActionNo = @dummyMarketingAction  
+        ENDIF
+
+      ]%%<script type="javascript" runat="server">
+
+      var existingOrNew = Variable.GetValue("@existingOrNew")
+      var marketingActionNo = Variable.GetValue("@marketingActionNo")
+      var marketingActionSfid = Variable.GetValue("@marketingActionSfid")
+      // custom 
+      var marketingActionDeepLink = "https://XXXXXX.lightning.force.com/lightning/r/" + objectName + "/" + marketingActionSfid + "/view"
+      //     SH42 - first 50 chars of [subject Line] - uniqueId
+      resultsArray.push({'systemType': systemType
+                  ,'requestStatus':'ok'
+                  ,'existingOrNew': existingOrNew
+                  ,'id': marketingActionNo
+                  ,'name': marketingActionName
+                  ,'deeplink': marketingActionDeepLink
+      })
+
+    }
+*/
+
+
+    // generic output    
+    if (Variable.GetValue("@affinitiesRequested") != "true"
+        && Variable.GetValue("@permissionsRequested") != "true" 
+        && Variable.GetValue("@personalDataRequested") != "true"
+        && Variable.GetValue("@sfmcEmailValidationRequested") != "true"
+        && Variable.GetValue("@sfmcSubscriberStatusRequested") != "true"
+        && Variable.GetValue("@historyRequested") != "true"
+        //&& !Variable.GetValue("@marketingActionRequested")
+        && !Variable.GetValue("@sendoutStatisticsByJobId")
+        && !Variable.GetValue("@sendoutStatisticsByEmailName")
+        && !Variable.GetValue("@individualEmailLayout")
+        ) 
+    {
+      Variable.SetValue("@statusmessage","invalidOutputSpecification");
+    } 
+    else {
+      Variable.SetValue("@statusmessage","dataRetrieved");
+      Variable.SetValue("@resultsArray",Stringify(resultsArray));
+    }   
+    </script>%%[
+
+  ELSEIF (@operation == "requestData" 
+    or @operation == "requestDataInternal")
+    and @statusmessage == "decryptionFailed" THEN
+    /* change nothing */
+  
+  ELSE /* invalid operation unless invalid data was found */
+    SET @statusmessage = "invalidOperation"
+  ENDIF
+
+ELSE /* token not valid */
+  SET @statusmessage = "invalidToken"
+ENDIF   
+/* end requestData */
+
+
 /* Response JSON assembly */
 IF @statusmessage == "invalidToken" 
-or @statusmessage == "invalidAccountId"
-or @statusmessage == "doiInvalidOperation"
-or @statusmessage == "blacklistLookupError"
-or @statusmessage == "listDetectiveError"
+or @statusmessage == "invalidOperation"
+/*or @statusmessage == "permissionUpdateInProgress"*/
+or @statusmessage == "invalidOutputSpecification"
 THEN 
   SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
-  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-  SET @subJSON = concat('{"status": "',@status,'","message":"',@statusmessage,'", "details": "',@statusdetails,'" }')
-  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-
+  SET @statusdetails =Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage) 
+  SET @resultJSON = concat('{"status": "',@status,'","message":"',@statusmessage,'", "details": "',@statusdetails,'" }')
+  output(v(@resultJSON))
+ELSEIF @statusmessage == "decryptionFailed"
+THEN 
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
+  SET @statusdetails =Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage) 
+  SET @resultJSON = concat('{"status": "',@status,'","message":"',@statusmessage,'", "details": "',@statusdetails,"encryptedSubscriberKey: ",@encryptedSubscriberKey,'" }')
+  output(v(@resultJSON))
 ELSEIF @statusmessage == "invalidData" THEN
-
   SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
   SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-  
-  SET @subJSON = concat('{"status": "', @status,'", "message": "', @statusmessage,'", "details": "', @statusdetails,"",@invalidInput,'", "userdata": {')
-  SET @subJSON = concat(@subJSON,'"email":"', @email)
-  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
-  SET @subJSON = concat(@subJSON,'","source":"', @source)
-  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
-  SET @subJSON = concat(@subJSON, '"}')
-  SET @subJSON = concat(@subJSON,'}')
-  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-
-ELSEIF @statusmessage == "doiTechnicalValidationError" THEN
-
-  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
-  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-  
-  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "userdata": {')
-  SET @subJSON = concat(@subJSON,'"email":"', @email)
-  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
-  SET @subJSON = concat(@subJSON,'","source":"', @source)
-  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
-  SET @subJSON = concat(@subJSON,'","reason":"', @reason)
-  SET @subJSON = concat(@subJSON, '"}')
-  SET @subJSON = concat(@subJSON,'}')
-  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-
-ELSEIF @statusmessage == "doiAddressBlocked" 
-or @statusmessage == "doiAddressBounced"
-THEN
-
-  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","failure")
-  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-  
-  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "userdata": {')
-  SET @subJSON = concat(@subJSON,'"email":"', @email)
-  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
-  SET @subJSON = concat(@subJSON,'","source":"', @source)
-  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
-  SET @subJSON = concat(@subJSON, '"}')
-  SET @subJSON = concat(@subJSON,'}')
-  InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-
-ELSEIF @statusmessage == "doiInitiatedMultiple" THEN 
- 
+  /* assemble JSON */ 
+  SET @resultJSON = concat('{"status": "', @status,'", "message": "', @statusmessage,'", "details": "', @statusdetails,"",@invalidInput,'", "userdata": {')
+  SET @resultJSON = concat(@resultJSON,'"email":"', @email)
+  SET @resultJSON = concat(@resultJSON,'","sourceCategory":"', @sourceCategory)
+  SET @resultJSON = concat(@resultJSON,'","source":"', @source)
+  SET @resultJSON = concat(@resultJSON,'","permissionType":"', @permissionType)
+  SET @resultJSON = concat(@resultJSON, '"}')
+  SET @resultJSON = concat(@resultJSON,'}')
+  output(v(@resultJSON))  
+ELSEIF @statusmessage == "authEmailSent" THEN
   SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok")
-  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-
-  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "additionalProcessing": "',@additionalProcessingBlock,'", "userdata": {')
-  SET @subJSON = concat(@subJSON,'"email":"', @email)
-  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
-  SET @subJSON = concat(@subJSON,'","source":"', @source)
-  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
-  SET @subJSON = concat(@subJSON, '"}')
-  SET @subJSON = concat(@subJSON,'}')
-  IF @environment == "test" THEN
-    InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-  ENDIF
-
-ELSEIF @statusmessage == "doiSkippedByAdditionalProcess" THEN 
-  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok")
-  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-
-  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "additionalProcessing": "',@additionalProcessingBlock,'", "userdata": {')
-  SET @subJSON = concat(@subJSON,'"email":"', @email)
-  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
-  SET @subJSON = concat(@subJSON,'","source":"', @source)
-  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
-  SET @subJSON = concat(@subJSON, '"}')
-  SET @subJSON = concat(@subJSON,'}')
-  IF @environment == "test" THEN
-    InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-  ENDIF
-ELSE
-/* statusMessage = "doiInitiated" */
-  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok")
-  SET @statusdetails = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)
-
-  SET @subJSON = concat('{"status": "', @status,'", "message": "',@statusmessage,'", "details": "',@statusdetails,'", "additionalProcessing": "',@additionalProcessingBlock,'", "userdata": {')
-  SET @subJSON = concat(@subJSON,'"email":"', @email)
-  SET @subJSON = concat(@subJSON,'","sourceCategory":"', @sourceCategory)
-  SET @subJSON = concat(@subJSON,'","source":"', @source)
-  SET @subJSON = concat(@subJSON,'","permissionType":"', @completePermissions)
-  SET @subJSON = concat(@subJSON, '"}')
-  SET @subJSON = concat(@subJSON,'}')
-  IF @environment == "test" THEN
-    InsertData(@doiLogDE,"errormsg",concat(@operation," - ",@subJSON),"timezoneOffset",@timezoneOffset,"subscriberKey",@subscriberKey,"permissionType",@completePermissions)
-  ENDIF
+  SET @statusdetails =Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage) 
+  SET @resultJSON = concat('{"status": "',@status,'","message":"',@statusmessage,'", "details": "',@statusdetails,"",@email,'" }')
+  output(v(@resultJSON))
+ELSE 
+  /* SET @statusmessage = "dataRetrieved" */
+  SET @status = Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId","ok") 
+  SET @statusdetails = @locale /* Lookup(@apiresponseTextsDE,"textContent","textClass","APIresponseText","textId",@statusmessage)*/
+  SET @resultJSON = concat('{"status": "', @status,'", "message": "', @statusmessage,'", "details": "', @statusdetails,'", "userdata": ')
+  SET @resultJSON = concat(@resultJSON,@resultsArray)
+  SET @resultJSON = concat(@resultJSON,'}')
+  OUTPUT(v(@resultJSON))
 ENDIF
-]%%%%=v(@subJSON)=%%
+]%%
