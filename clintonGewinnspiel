@@ -19,12 +19,12 @@ try {
   });
 
   var result = HTTP.Post(getCouponURL, contentType, headerNames, headerValues, payload);
-  Write(Stringify(result));
+  Write('response: ' + Stringify(result));
 
 }
 catch (err)  
 {
-  Write(Stringify(err));
+  Write('err ' + Stringify(err));
 };
 
 </script>
