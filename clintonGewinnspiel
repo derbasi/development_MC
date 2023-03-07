@@ -1,5 +1,9 @@
 <script runat="server" type="text/javascript">
-Platform.Load("Core","1.1.1")
+Platform.Load("Core","1.1")
+
+var couponCodeDE = 'couponTest'
+var process = 'testing'
+var subscriberKey = GUID()
 
 var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
 var contentType = 'application/json';
@@ -28,7 +32,13 @@ try {
 
     var myarray = codes.split(',')
     for(var i = 0; i < myarray.length; i++) {
-       Write('<br>' + myarray[i]);
+      var singleVoucherCode = myarray[i]
+      Write('<br>' + myarray[i]);
+
+      var addRow = Platform.Function.InsertData(couponCodeDE,
+        ['subscriberKey', 'voucherCode', 'process'],
+        [subscriberKey, singleVoucherCode, process]
+        );
     };
 
 }
