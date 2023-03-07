@@ -19,11 +19,10 @@ var payload = {
 try {
 
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
-  Write('response: ' + Stringify(result));
+  Write('<br>response: ' + Stringify(result) + '<br>');
 
-  var codes = result.vouchercodes;
-  Write("<br>codes: " + codes);
-  Write("<br>codes: " + Stringify(codes);
+  Write(String(result.vouchercodes));
+
 
 
 }
