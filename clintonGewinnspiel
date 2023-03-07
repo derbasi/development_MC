@@ -19,15 +19,10 @@ var payload = {
 try {
 
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
-  Write('<br>response: ' + Stringify(result) + '<br>');
+  Write('<br>responseStr: ' + Stringify(result) + '<br>');
+  Write('<br>response: ' + result + '<br>');
 
-var resultStr = String(result.vouchercodes);
-Write('<br>response: ' + resultStr)
 
-var resultJSON = Platform.Function.ParseJSON(String(result.vouchercodes));
-Write('<br>response: ' + resultJSON)
-var strVouchercodes = Stringify(resultJSON);
-Write('<br>response: ' + strVouchercodes)
 }
 catch (err)  
 {
