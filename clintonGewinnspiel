@@ -26,6 +26,11 @@ try {
     var codes = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
     Write('<br>codes: ' + Stringify(codes) + '<br>');
 
+    var myarray = codes.split(',')
+    for(var i = 0; i < myarray.length; i++) {
+       Write(myarray[i]);
+    };
+
 }
 catch (err)  
 {
