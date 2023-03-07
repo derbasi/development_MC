@@ -18,7 +18,7 @@ try {
       , "amount": "1"
     }];
 
-  var result = HTTP.Post(getCouponURL, contentType, payload, headerNames, headerValues);
+  var result = HTTP.Get(getCouponURL, contentType, payload, headerNames, headerValues);
   Write('hooray');
 
 }
