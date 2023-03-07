@@ -22,7 +22,7 @@ try {
   Write('<br>response: ' + Stringify(result) + '<br>');
 
 
-  Write('<br>vouchers: ' + result.vouchers);
+  Write('<br>vouchername: ' + result.vouchername);
 
 }
 catch (err)  
