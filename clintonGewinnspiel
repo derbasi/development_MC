@@ -7,7 +7,6 @@ var couponConfigDE = "couponsApiConfig";
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
 
 var couponCodeDE = 'couponTest'
-var process = 'testing'
 
 var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
 var contentType = 'application/json';
@@ -17,7 +16,7 @@ var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzg
 var payload = {
   "vouchername":"Testgutschein",
   "validdays":30,
-  "discount":7,
+  "discount": discount,
   "type":"percent",
   "amount":1,
   "code": null,
@@ -40,8 +39,8 @@ try {
       Write('<br>' + myarray[i]);
 
       var addRow = Platform.Function.InsertData(couponCodeDE,
-        ['subscriberKey', 'voucherCode', 'process'],
-        [GUID(), singleVoucherCode, process]
+        ['subscriberKey', 'voucherCode', 'marketingAction', 'discount'],
+        [GUID(), singleVoucherCode, marketingAction, discount]
         );
     };
 
