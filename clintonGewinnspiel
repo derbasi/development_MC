@@ -1,14 +1,12 @@
 <script runat="server" type="text/javascript">
 Platform.Load("Core", "1.1.1")
 
-var shopURL = 'https://www.campdavid-soccx.de'
-var getCouponURL = shopURL + '/APIs/shop/register/voucher/create/'
-
+var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
 var contentType = 'application/json';
-var headerNames = "Authorization";
+var headerNames = ["Authorization"];
 var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
 
-var payload = '{
+var payload = {
   "vouchername":"Testgutschein",
   "validdays":30,
   "discount":7,
@@ -16,11 +14,11 @@ var payload = '{
   "amount":3,
   "code":"MEEGA2023",
   "mintotal":"10.00"
-  }';
+  };
 
 try {
 
-  var result = HTTP.Post(getCouponURL, contentType, payload, headerNames, headerValues);
+  var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('hooray');
 
 }
