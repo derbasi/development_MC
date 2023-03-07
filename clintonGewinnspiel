@@ -10,25 +10,21 @@ try {
 
   var getCouponURL = shopURL + 'APIs/shop/register/voucher/create/'
 
-  var payload = [{ 
-    "vouchername": 'fluentTesting'
-    , "validdays": 30
-    , "discount": 7
-    , "type": 'percent'
-    , "amount": 1
-  }];
+  var payload = { 
+    "vouchername": "fluentTesting"
+    , "validdays": "30"
+    , "discount": "7"
+    , "type": "percent"
+    , "amount": "1"
+  };
 
-
-
-  Write('<br>payload ' + Stringify(payload));
-  Write('<br>getCouponURL ' + Stringify(getCouponURL));
+  var result = HTTP.Post(getCouponURL, contentType, headerNames, headerValues, payload);
+  Write('response: ' + Stringify(result));
 
 }
 catch (err)  
 {
-  Write('<br>err ' + Stringify(err));
-  Write('<br>payload ' + Stringify(payload));
-  Write('<br>getCouponURL ' + Stringify(getCouponURL));
+  Write('err ' + Stringify(err));
 };
 
 </script>
