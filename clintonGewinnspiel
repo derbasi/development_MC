@@ -4,11 +4,11 @@ Platform.Load("Core","1.1")
 /* get voucher information*/
 var couponCodeDE = 'couponTest'
 var process = 'testing'
-var discount = 7
-var amount = 5
+var discount = '7'
+var amount = '5'
 var code = ''
 var minTotal = ''
-var validDays = 30
+var validDays = '30'
 var type = 'percent'
 var voucherName = 'Testgutschein'
 
