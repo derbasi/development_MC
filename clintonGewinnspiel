@@ -10,7 +10,7 @@ try {
 
   var getCouponURL = shopURL + 'APIs/shop/register/voucher/create/'
 
-  payload = [{ 
+  var payload = [{ 
     "vouchername": 'fluentTesting'
     , "validdays": 30
     , "discount": 7
@@ -24,7 +24,9 @@ try {
 }
 catch (err)  
 {
-  Write('err ' + Stringify(err));
+  Write('<br>err ' + Stringify(err));
+  Write('<br>err ' + Stringify(err));
+  Write('<br>err ' + Stringify(err));
 };
 
 </script>
