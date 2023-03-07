@@ -5,7 +5,7 @@ var getCouponURL = shopURL + '/APIs/shop/register/voucher/create/'
 
 var contentType = 'application/json';
 var headerNames = "Authorization";
-var headerValues = "Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54";
+var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
 
 var payload = {
   "vouchername":"Testgutschein",
