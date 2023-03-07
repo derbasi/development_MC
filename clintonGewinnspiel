@@ -19,7 +19,7 @@ var payload = {
 try {
 
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
-  Write('hooray');
+  Write('response: ' + Stringify(result));
 
 }
 catch (err)  
