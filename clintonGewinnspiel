@@ -10,13 +10,13 @@ try {
 
   var getCouponURL = shopURL + 'APIs/shop/register/voucher/create/'
 
-  payload = { 
+  payload = [{ 
     "vouchername": 'fluentTesting'
     , "validdays": 30
     , "discount": 7
     , "type": 'percent'
     , "amount": 1
-  };
+  }];
 
   var result = HTTP.Post(getCouponURL, contentType, headerNames, headerValues, payload);
 
