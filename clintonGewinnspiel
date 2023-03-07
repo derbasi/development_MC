@@ -15,7 +15,7 @@ var payload = {
   "discount":7,
   "type":"percent",
   "amount":1,
-  "code": null,
+  "code": "",
   "mintotal":"10.00"
   };
 
