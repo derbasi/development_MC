@@ -6,6 +6,10 @@ var couponConfigDE = "couponsApiConfig";
 
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
 var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',marketingAction)
+var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction)
+var amount = Platform.Function.Lookup(couponConfigDE,'amount','marketingAction',marketingAction)
+var validdays = Platform.Function.Lookup(couponConfigDE,'validdays','marketingAction',marketingAction)
+var vouchername = Platform.Function.Lookup(couponConfigDE,'vouchername','marketingAction',marketingAction)
 
 var couponCodeDE = 'couponTest'
 
@@ -15,13 +19,12 @@ var headerNames = ["Authorization"];
 var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
 
 var payload = {
-  "vouchername":"Testgutschein",
-  "validdays":30,
+  "vouchername": vouchername,
+  "validdays": validdays,
   "discount": discount,
-  "type":"percent",
-  "amount":1,
-  "code": code,
-  "mintotal":"10.00"
+  "type": type,
+  "amount": amount,
+  "code": code
   };
 
 try {
