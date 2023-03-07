@@ -1,31 +1,22 @@
 <script runat="server" type="text/javascript">
 Platform.Load("Core","1.1")
 
-/* get voucher information*/
 var couponCodeDE = 'couponTest'
 var process = 'testing'
-var discount = '7'
-var amount = '5'
-var code = ''
-var minTotal = ''
-var validDays = '30'
-var type = 'percent'
-var voucherName = 'Testgutschein'
 
-/* define API settings */
 var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
 var contentType = 'application/json';
 var headerNames = ["Authorization"];
 var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
 
 var payload = {
-  "vouchername": voucherName,
-  "validdays": validDays,
-  "discount": discount,
-  "type": type,
-  "amount": amount,
-  "code": codeName,
-  "mintotal": minTotal
+  "vouchername":"Testgutschein",
+  "validdays":30,
+  "discount":7,
+  "type":"percent",
+  "amount":3,
+  "code":"MEEGA2023",
+  "mintotal":"10.00"
   };
 
 try {
@@ -48,8 +39,9 @@ try {
         [GUID(), singleVoucherCode, process]
         );
     };
-};
-catch (err);
+
+}
+catch (err)  
 {
   Write('err ' + Stringify(err));
 };
