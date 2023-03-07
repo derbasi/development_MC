@@ -20,9 +20,8 @@ try {
 
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('<br>responseStr: ' + Stringify(result) + '<br>');
-  Write('<br>response: ' + result + '<br>');
 
-  var resultJSON = Platform.Function.ParseJSON(String(resp.Response));
+  var resultJSON = Platform.Function.ParseJSON(resp.Response);
   Write('<br>responseStr: ' + Stringify(resultJSON) + '<br>');
 
 
