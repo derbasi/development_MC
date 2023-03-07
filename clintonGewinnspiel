@@ -21,10 +21,8 @@ try {
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('<br>response: ' + Stringify(result) + '<br>');
 
-  var responseJson = Platform.Function.ParseJSON(result);
-  var voucherCodes = responseJson.vouchercodes
-
-  Write("voucherCodes: " + voucherCodes)
+  var responseJson = Platform.Function.ParseJSON(result.vouchercodes);
+  Write('<br>vouchers: ' + responseJson);
 
 
 
