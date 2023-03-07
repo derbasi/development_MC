@@ -1,5 +1,5 @@
 <script runat="server" type="text/javascript">
-Platform.Load("Core", "1.1.1")
+Platform.Load("Core", "1")
 
 var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
 var contentType = 'application/json';
