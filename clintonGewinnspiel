@@ -24,7 +24,7 @@ try {
     var resultStr = String(result.Response);
     var resultJSON = Platform.Function.ParseJSON(String(result.Response));
 
-    return resultJSON;
+    Write('<br>responseStr: ' + Stringify(resultJSON) + '<br>');
 
 }
 catch (err)  
