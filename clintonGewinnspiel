@@ -22,7 +22,7 @@ try {
   Write('<br>response: ' + Stringify(result) + '<br>');
 
 
-  var json = Platform.Function.ParseJSON(result);
+  var json = Platform.Function.ParseJSON(result.vouchercodes);
   Write("<br>message: " + json.vouchercodes);
 
 }
