@@ -18,8 +18,8 @@ try {
       , "amount": "1"
     }];
 
-  var result = HTTP.Post(getCouponURL, contentType, headerNames, headerValues, payload);
-
+  var result = HTTP.Post(getCouponURL, contentType, payload, headerNames, headerValues);
+  Write('response: ' + Stringify(result));
 
 }
 catch (err)  
