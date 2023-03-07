@@ -25,8 +25,8 @@ try {
 catch (err)  
 {
   Write('<br>err ' + Stringify(err));
-  Write('<br>err ' + Stringify(err));
-  Write('<br>err ' + Stringify(err));
+  Write('<br>payload ' + Stringify(payload));
+  Write('<br>getCouponURL ' + Stringify(getCouponURL));
 };
 
 </script>
