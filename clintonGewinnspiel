@@ -21,6 +21,11 @@ try {
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('response: ' + Stringify(result));
 
+  var codes = result.vouchercodes;
+  Write("<br>codes: " + codes);
+  Write("<br>codes: " + Stringify(codes);
+
+
 }
 catch (err)  
 {
