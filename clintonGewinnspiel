@@ -21,7 +21,7 @@ try {
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('<br>response: ' + Stringify(result) + '<br>');
 
-  Write(String(result.vouchercodes));
+  Write(result.Statuscode);
 
 
 
