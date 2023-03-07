@@ -21,17 +21,10 @@ try {
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('<br>responseStr: ' + Stringify(result) + '<br>');
 
-    var resultStr = String(result.Response);
     var resultJSON = Platform.Function.ParseJSON(String(result.Response));
-
     Write('<br>responseStr: ' + Stringify(resultJSON) + '<br>');
-
-
     var codes = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
     Write('<br>codes: ' + Stringify(codes) + '<br>');
-
-    var numberOfCodes = length.codes
-    Write('<br>numberOfCodes: ' + Stringify(numberOfCodes) + '<br>');
 
 }
 catch (err)  
