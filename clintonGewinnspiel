@@ -21,8 +21,11 @@ try {
   var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
   Write('<br>response: ' + Stringify(result) + '<br>');
 
+var resultStr = String(result.content);
+Write('<br>response: ' + resultStr)
 
-  Write('<br>vouchername: ' + result.vouchername);
+var resultJSON = Platform.Function.ParseJSON(String(result.content));
+Write('<br>response: ' + resultJSON)
 
 }
 catch (err)  
