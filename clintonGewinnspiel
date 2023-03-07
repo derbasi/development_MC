@@ -28,7 +28,7 @@ try {
 
     var myarray = codes.split(',')
     for(var i = 0; i < myarray.length; i++) {
-       Write(myarray[i]);
+       Write('<br>' + myarray[i]);
     };
 
 }
