@@ -1,13 +1,18 @@
 <script runat="server" type="text/javascript">
 Platform.Load("Core","1.1")
 
-/* define variables */
+/* define marketingAction for process */
 var marketingAction = 'MA00000035';
+
+/* define couponsConfig DE */
 var couponConfigDE = "couponsApiConfig";
 
 /* get coupon information from couponConfigDE */
 var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction);
+var vouchername = Platform.Function.Lookup(couponConfigDE,'vouchername','marketingAction',marketingAction);
+var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAction',marketingAction);
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
+var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 
 /* get user count from journey DE */
 var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
@@ -19,10 +24,10 @@ var contentType = 'application/json';
 var headerNames = ["Authorization"];
 var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
 var payload = {
-  "vouchername":"Testgutschein",
-  "validdays":30,
-  "discount": 7,
-  "type":"percent",
+  "vouchername": vouchername,
+  "validdays": validdays,
+  "discount": discount,
+  "type": type,
   "amount":journeyDeRowsCount,
   "code": null,
   "mintotal":"10.00"
@@ -31,26 +36,28 @@ var payload = {
 /* perform api call to get voucher codes */
 var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
 
-/* make voucher codes available */
+/* make voucher codes available in an array */
 var resultJSON = Platform.Function.ParseJSON(String(result.Response));
 var codesList = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
-Write('<br>codes: ' + Stringify(codesList) + '<br>');
 var codesArray = codesList.split(',')
 
-/* get all users from journey DE */
+/* assign voucher codes to users */
 for(var i = 0; i < journeyDeRows.length; i++) {
-      var subscriberKey = journeyDeRows[i]["subscriberKey"];
-      Write("<br>subscriberKey: " + subscriberKey);
-      var singleVoucherCode = codesArray[i]
-      Write('<br>' + codesArray[i]);
 
-      var updateRow = Platform.Function.UpdateData(journeyDE,["subscriberKey"],[subscriberKey],["coupon"],[singleVoucherCode]);
+    /* get subscriberKey from journey DE */
+    var subscriberKey = journeyDeRows[i]["subscriberKey"];
+    Write("<br>subscriberKey: " + subscriberKey);
+
+    /* get voucherCode for user */
+    var singleVoucherCode = codesArray[i]
+    Write('<br>' + codesArray[i]);
+
+    /* update journeyDE with voucherCode */
+    var updateRow = Platform.Function.UpdateData(journeyDE,
+      ["subscriberKey"],[subscriberKey],
+      ["coupon"],
+      [singleVoucherCode]
+      );
     };
+
 </script>
-
-
-
-
-
-
-
