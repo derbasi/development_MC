@@ -14,6 +14,11 @@ var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAc
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
 var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 
+var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',marketingAction);
+if (!code) { 
+  var code = null
+}; 
+
 /* get user count from journey DE */
 var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
 var journeyDeRowsCount = journeyDeRows.length;
@@ -29,7 +34,7 @@ var payload = {
   "discount": discount,
   "type": type,
   "amount":journeyDeRowsCount,
-  "code": null,
+  "code": code,
   "mintotal": null
   };
 
