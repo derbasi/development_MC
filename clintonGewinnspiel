@@ -2,7 +2,7 @@
 Platform.Load("Core","1.1")
 
 /* define variables */
-var marketingAction = 'MA00000035';
+var marketingAction = 'MA00000035'
 var couponConfigDE = "couponsApiConfig";
 
 /* get coupon information from couponConfigDE */
@@ -10,8 +10,10 @@ var journeyDE = Platform.Function.Lookup(couponConfigDE,'discount','marketingAct
 var discount = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
 
 /* get all users from journey DE */
+var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
+var journeyDeRowsRowCount = dataRows.length
 
-Write("hooray");
+
 /* get coupons */
 
 </script>
