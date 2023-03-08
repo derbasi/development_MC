@@ -8,15 +8,23 @@ var marketingAction = 'MA00000035';
 var couponConfigDE = "couponsApiConfig";
 
 /* get coupon information from couponConfigDE */
+/* define journeyDE */
 var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction);
+
+/* get required fields */
 var vouchername = Platform.Function.Lookup(couponConfigDE,'vouchername','marketingAction',marketingAction);
 var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAction',marketingAction);
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
 var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 
+/* get optional fields */
 var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',marketingAction);
 if (!code) { 
   var code = null
+};
+var mintotal = Platform.Function.Lookup(couponConfigDE,'mintotal','marketingAction',marketingAction);
+if (!mintotal) { 
+  var mintotal = null
 }; 
 
 /* get user count from journey DE */
@@ -35,7 +43,7 @@ var payload = {
   "type": type,
   "amount":journeyDeRowsCount,
   "code": code,
-  "mintotal": null
+  "mintotal": mintotal
   };
 
 /* perform api call to get voucher codes */
