@@ -44,11 +44,7 @@ for(var i = 0; i < journeyDeRows.length; i++) {
       var singleVoucherCode = codesArray[i]
       Write('<br>' + codesArray[i]);
 
-      var updateRow = Platform.Function.UpdateData(journeyDE,
-        ['subscriberKey', subscriberKey],
-        ["coupon"],
-        [singleVoucherCode]
-        );
+      var updateRow = Platform.Function.UpdateData(journeyDE,["subscriberKey"],[subscriberKey],["coupon"],[singleVoucherCode]);
     };
 </script>
 
