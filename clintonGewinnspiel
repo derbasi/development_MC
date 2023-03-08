@@ -41,12 +41,8 @@ var codesArray = codesList.split(',')
 for(var i = 0; i < journeyDeRows.length; i++) {
       var subscriberKey = journeyDeRows[i]["subscriberKey"];
       Write("<br>subscriberKey: " + subscriberKey);
-      
-      for(var j = i; i; j++) {
       var singleVoucherCode = codesArray[i]
       Write('<br>' + codesArray[i]);
-      };
-
     };
 </script>
 
