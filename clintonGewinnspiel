@@ -1,53 +1,19 @@
 <script runat="server" type="text/javascript">
 Platform.Load("Core","1.1")
 
+/* define variables */
 var marketingAction = 'MA00000035'
 var couponConfigDE = "couponsApiConfig";
 
-var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
+/* get coupon information from couponConfigDE */
+var journeyDE = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
+var discount = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
 
-var couponCodeDE = 'couponTest'
+/* get all users from journey DE */
+var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
+var journeyDeRowsRowCount = dataRows.length
+Write("journeyDeRowsRowCount: " + journeyDeRowsRowCount)
 
-var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
-var contentType = 'application/json';
-var headerNames = ["Authorization"];
-var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
-
-var payload = {
-  "vouchername":"Testgutschein",
-  "validdays":30,
-  "discount": discount,
-  "type":"percent",
-  "amount":1,
-  "code": null,
-  "mintotal":"10.00"
-  };
-
-try {
-
-  var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
-  Write('<br>responseStr: ' + Stringify(result) + '<br>');
-
-    var resultJSON = Platform.Function.ParseJSON(String(result.Response));
-    Write('<br>responseStr: ' + Stringify(resultJSON) + '<br>');
-    var codes = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
-    Write('<br>codes: ' + Stringify(codes) + '<br>');
-
-    var myarray = codes.split(',')
-    for(var i = 0; i < myarray.length; i++) {
-      var singleVoucherCode = myarray[i]
-      Write('<br>' + myarray[i]);
-
-      var addRow = Platform.Function.InsertData(couponCodeDE,
-        ['subscriberKey', 'voucherCode', 'marketingAction', 'discount'],
-        [GUID(), singleVoucherCode, marketingAction, discount]
-        );
-    };
-
-}
-catch (err)  
-{
-  Write('err ' + Stringify(err));
-};
+/* get coupons */
 
 </script>
