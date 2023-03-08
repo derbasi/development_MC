@@ -5,5 +5,13 @@ Platform.Load("Core","1.1")
 var marketingAction = 'MA00000035';
 var couponConfigDE = "couponsApiConfig";
 
+/* get coupon information from couponConfigDE */
+var journeyDE = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
+var discount = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
+
+/* get all users from journey DE */
+
+Write("hooray");
+/* get coupons */
 
 </script>
