@@ -30,7 +30,7 @@ var payload = {
   "type": type,
   "amount":journeyDeRowsCount,
   "code": null,
-  "mintotal":"10.00"
+  "mintotal": null
   };
 
 /* perform api call to get voucher codes */
