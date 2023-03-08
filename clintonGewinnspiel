@@ -42,7 +42,7 @@ for(var i = 0; i < journeyDeRows.length; i++) {
       var subscriberKey = journeyDeRows[i]["subscriberKey"];
       Write("<br>subscriberKey: " + subscriberKey);
       
-      for(var i = 0; i < journeyDeRowsCount; i++) {
+      for(var j = 0; j < i; j++) {
       var singleVoucherCode = codesArray[i]
       Write('<br>' + codesArray[i]);
       };
