@@ -9,8 +9,8 @@ var couponConfigDE = "couponsApiConfig";
 var journeyDE = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
 var discount = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
 
+Write("journeyDE: " + journeyDE)
 /* get all users from journey DE */
-var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
 
 /* get coupons */
 
