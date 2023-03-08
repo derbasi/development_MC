@@ -10,9 +10,7 @@ var journeyDE = Platform.Function.Lookup(couponConfigDE,'discount','marketingAct
 var discount = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
 
 /* get all users from journey DE */
-var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
-var journeyDeRowsRowCount = dataRows.length
-Write("journeyDeRowsRowCount: " + journeyDeRowsRowCount)
+
 
 /* get coupons */
 
