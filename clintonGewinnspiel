@@ -35,11 +35,17 @@ var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, header
 var resultJSON = Platform.Function.ParseJSON(String(result.Response));
 var codesList = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
 Write('<br>codes: ' + Stringify(codesList) + '<br>');
+var codesArray = codesList.split(',')
 
 /* get all users from journey DE */
 for(var i = 0; i < journeyDeRows.length; i++) {
       var subscriberKey = journeyDeRows[i]["subscriberKey"];
       Write("<br>subscriberKey: " + subscriberKey);
+      
+      for(var i = 0; i < journeyDeRowsCount; i++) {
+      var singleVoucherCode = codesArray[i]
+      Write('<br>' + codesArray[i]);
+      };
 
     };
 </script>
