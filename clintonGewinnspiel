@@ -46,7 +46,7 @@ for(var i = 0; i < journeyDeRows.length; i++) {
 
       var updateRow = Platform.Function.UpdateData(journeyDE,
         ['subscriberKey', subscriberKey],
-        ["coupon"]
+        ["coupon"],
         [singleVoucherCode]
         );
     };
