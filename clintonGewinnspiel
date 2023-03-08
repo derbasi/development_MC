@@ -6,13 +6,13 @@ var marketingAction = 'MA00000035'
 var couponConfigDE = "couponsApiConfig";
 
 /* get coupon information from couponConfigDE */
-var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
 var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
+var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
 
-Write("journeyDE: " + journeyDE)
 /* get all users from journey DE */
 var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
-
+var journeyDeRowsCount = journeyDeRows.length;
+Write("journeyDeRowsCount: " + journeyDeRowsCount)
 /* get coupons */
 
 </script>
