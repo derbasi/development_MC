@@ -9,10 +9,32 @@ var couponConfigDE = "couponsApiConfig";
 var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction)
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction)
 
-/* get all users from journey DE */
+/* get user count from journey DE */
 var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
 var journeyDeRowsCount = journeyDeRows.length;
-Write("journeyDeRowsCount: " + journeyDeRowsCount)
-/* get coupons */
+
+/* build api call to get voucher codes */
+var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
+var contentType = 'application/json';
+var headerNames = ["Authorization"];
+var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
+
+var payload = {
+  "vouchername":"Testgutschein",
+  "validdays":30,
+  "discount": 7,
+  "type":"percent",
+  "amount":journeyDeRowsCount,
+  "code": null,
+  "mintotal":"10.00"
+  };
+
+/* perform api call to get voucher codes */
+var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
+
+/* make voucher codes available */
+var resultJSON = Platform.Function.ParseJSON(String(result.Response));
+var codes = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
+Write('<br>codes: ' + Stringify(codes) + '<br>');
 
 </script>
