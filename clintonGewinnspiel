@@ -1,1 +1,54 @@
-hallo
+<script runat="server" type="text/javascript">
+Platform.Load("Core","1.1")
+
+/* define marketingAction for process */
+var marketingAction = 'MA00000035';
+
+/* define couponsConfig DE */
+var couponConfigDE = "couponsApiConfig";
+
+/* get coupon information from couponConfigDE */
+/* define journeyDE */
+var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction);
+
+/* get required fields */
+var vouchername = Platform.Function.Lookup(couponConfigDE,'vouchername','marketingAction',marketingAction);
+var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAction',marketingAction);
+var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
+var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
+
+/* get optional fields */
+var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',marketingAction);
+if (!code) { 
+  var code = null
+};
+var mintotal = Platform.Function.Lookup(couponConfigDE,'mintotal','marketingAction',marketingAction);
+if (!mintotal) { 
+  var mintotal = null
+}; 
+
+/* get user count from journey DE */
+var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
+var journeyDeRowsCount = journeyDeRows.length;
+
+/* build api call to get voucher codes */
+var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
+var contentType = 'application/json';
+var headerNames = ["Authorization"];
+var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
+var payload = {
+  "vouchername": vouchername,
+  "validdays": validdays,
+  "discount": discount,
+  "type": type,
+  "amount":journeyDeRowsCount,
+  "code": code,
+  "mintotal": mintotal
+  };
+
+/* perform api call to get voucher codes */
+var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
+
+
+
+</script>
