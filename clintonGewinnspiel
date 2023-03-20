@@ -22,5 +22,10 @@ var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',mark
 if (!code) { 
   var code = null
 };
+var mintotal = Platform.Function.Lookup(couponConfigDE,'mintotal','marketingAction',marketingAction);
+if (!mintotal) { 
+  var mintotal = null
+}; 
+
 
 </script>
