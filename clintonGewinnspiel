@@ -23,15 +23,10 @@ if (!code) {
   var code = null
 };
 
-
-try{
-  var minTotal = Platform.Function.Lookup(couponConfigDE,'minTotal','marketingAction',marketingAction);
+var minTotal = Platform.Function.Lookup(couponConfigDE,'minTotal','marketingAction',marketingAction);
 if (minTotal === null) { 
   var minTotal = null
 }; 
-} catch(e) {
-  Write("error" + e)
-}
 
 
 /* get user count from journey DE */
