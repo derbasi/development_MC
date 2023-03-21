@@ -19,7 +19,13 @@ var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingActi
 var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 var country = Platform.Function.Lookup(couponConfigDE,'country','marketingAction',marketingAction);
 
+/* get user count from journey DE */
+var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
+var journeyDeRowsCount = journeyDeRows.length;
 
+/* build api call to get voucher codes */
+var url = Concat('https://www.campdavid-soccx.'+ country + '/APIs/shop/register/voucher/create/')
+Write('<br>url: ' + url)
 
 
 </script>
