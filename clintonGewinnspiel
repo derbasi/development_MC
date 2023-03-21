@@ -57,8 +57,8 @@ for(var i = 0; i < journeyDeRows.length; i++) {
     /* update journeyDE with voucherCode */
     var updateRow = Platform.Function.UpdateData(journeyDE,
       ["SFID"],[subscriberKey],
-      ["coupon"],
-      [singleVoucherCode]
+      ["coupon","validDays"],
+      [singleVoucherCode,validdays]
       );
     };
 
