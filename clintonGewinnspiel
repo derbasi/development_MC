@@ -22,10 +22,62 @@ var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',mark
 if (!code) { 
   var code = null
 };
-var minTotal = Platform.Function.Lookup(couponConfigDE,'minTotal','marketingAction',marketingAction);
+
+
+try{
+  var minTotal = Platform.Function.Lookup(couponConfigDE,'minTotal','marketingAction',marketingAction);
 if (!minTotal) { 
   var minTotal = null
 }; 
+} catch(e) {
+  Write("error" + e)
+}
 
+
+/* get user count from journey DE */
+var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
+var journeyDeRowsCount = journeyDeRows.length;
+
+/* build api call to get voucher codes */
+var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
+var contentType = 'application/json';
+var headerNames = ["Authorization"];
+var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
+var payload = {
+  "vouchername": vouchername,
+  "validdays": validdays,
+  "discount": discount,
+  "type": type,
+  "amount":journeyDeRowsCount,
+  "code": code,
+  "mintotal": mintotal
+  };
+
+/* perform api call to get voucher codes */
+var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
+
+/* make voucher codes available in an array */
+var resultJSON = Platform.Function.ParseJSON(String(result.Response));
+var codesList = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
+var codesArray = codesList.split(',')
+
+/* assign voucher codes to users */
+for(var i = 0; i < journeyDeRows.length; i++) {
+
+    /* get subscriberKey from journey DE */
+    var subscriberKey = journeyDeRows[i]["subscriberKey"];
+    Write("<br>subscriberKey: " + subscriberKey);
+
+    /* get voucherCode for user */
+    var singleVoucherCode = codesArray[i]
+    Write('<br>' + codesArray[i]);
+
+    /* update journeyDE with voucherCode */
+    var updateRow = Platform.Function.UpdateData(journeyDE,
+      ["subscriberKey"],[subscriberKey],
+      ["coupon"],
+      [singleVoucherCode]
+      );
+    };
 
 </script>
