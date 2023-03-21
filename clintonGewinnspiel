@@ -57,23 +57,5 @@ var codesList = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
 var codesArray = codesList.split(',')
 Write("codesList: " + codesList)
 
-/* assign voucher codes to users */
-for(var i = 0; i < journeyDeRows.length; i++) {
-
-    /* get subscriberKey from journey DE */
-    var subscriberKey = journeyDeRows[i]["SFID"];
-    Write("<br>subscriberKey: " + subscriberKey);
-
-    /* get voucherCode for user */
-    var singleVoucherCode = codesArray[i]
-    Write('<br>' + codesArray[i]);
-
-    /* update journeyDE with voucherCode */
-    var updateRow = Platform.Function.UpdateData(journeyDE,
-      ["SFID"],[subscriberKey],
-      ["coupon"],
-      [singleVoucherCode]
-      );
-    };
 
 </script>
