@@ -2,7 +2,7 @@
 Platform.Load("Core","1.1")
 
 /* define marketingAction for process */
-var marketingAction = 'MA00000035';
+var marketingAction = 'MA00000001';
 
 /* define couponsConfig DE */
 var couponConfigDE = "couponsApiConfig";
@@ -60,7 +60,7 @@ var codesArray = codesList.split(',')
 for(var i = 0; i < journeyDeRows.length; i++) {
 
     /* get subscriberKey from journey DE */
-    var subscriberKey = journeyDeRows[i]["subscriberKey"];
+    var subscriberKey = journeyDeRows[i]["SFID"];
     Write("<br>subscriberKey: " + subscriberKey);
 
     /* get voucherCode for user */
@@ -69,7 +69,7 @@ for(var i = 0; i < journeyDeRows.length; i++) {
 
     /* update journeyDE with voucherCode */
     var updateRow = Platform.Function.UpdateData(journeyDE,
-      ["subscriberKey"],[subscriberKey],
+      ["SFID"],[subscriberKey],
       ["coupon"],
       [singleVoucherCode]
       );
