@@ -23,10 +23,6 @@ if (!code) {
   var code = null
 };
 
-var minTotal = Platform.Function.Lookup(couponConfigDE,'minTotal','marketingAction',marketingAction);
-if (minTotal === null) { 
-  var minTotal = null
-}; 
 
 
 
