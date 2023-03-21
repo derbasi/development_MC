@@ -28,11 +28,14 @@ if (minTotal === null) {
   var minTotal = null
 }; 
 
-
-/* get user count from journey DE */
+try{
+  /* get user count from journey DE */
 var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
 var journeyDeRowsCount = journeyDeRows.length;
-Write("journeyDeRowsCount: " + journeyDeRowsCount)
+} catch(e) {
+  Write("error: " + e)
+}
+
 
 
 </script>
