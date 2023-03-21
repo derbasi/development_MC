@@ -17,11 +17,7 @@ var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAc
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
 var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 
-/* get optional fields */
-var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',marketingAction);
-if (!code) { 
-  var code = null
-};
+
 
 
 
