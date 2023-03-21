@@ -13,7 +13,7 @@ var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketi
 
 /* get required fields */
 var vouchername = Platform.Function.Lookup(couponConfigDE,'vouchername','marketingAction',marketingAction);
-var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAction',marketingAction);
+var validDays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAction',marketingAction);
 var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
 var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 
@@ -28,7 +28,7 @@ var headerNames = ["Authorization"];
 var headerValues = ["Bearer " + "t67dgh54j6074t8f4gzj6ho68wo5p645nbw45z0tfd8kuzgu50zg5u6hwjlh8b6vmv4z54"];
 var payload = {
   "vouchername": vouchername,
-  "validdays": validdays,
+  "validDays": validDays,
   "discount": discount,
   "type": type,
   "amount":journeyDeRowsCount
@@ -57,8 +57,8 @@ for(var i = 0; i < journeyDeRows.length; i++) {
     /* update journeyDE with voucherCode */
     var updateRow = Platform.Function.UpdateData(journeyDE,
       ["SFID"],[subscriberKey],
-      ["coupon"],
-      [singleVoucherCode]
+      ["coupon","validDays"],
+      [singleVoucherCode, validDays]
       );
     };
 
