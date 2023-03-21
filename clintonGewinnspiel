@@ -43,9 +43,7 @@ var payload = {
   "validdays": validdays,
   "discount": discount,
   "type": type,
-  "amount":journeyDeRowsCount,
-  "code": code,
-  "mintotal": mintotal
+  "amount":journeyDeRowsCount
   };
 
 /* perform api call to get voucher codes */
