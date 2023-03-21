@@ -55,6 +55,7 @@ var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, header
 var resultJSON = Platform.Function.ParseJSON(String(result.Response));
 var codesList = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
 var codesArray = codesList.split(',')
+Write("<br>codesList: " + codesList)
 
 /* assign voucher codes to users */
 for(var i = 0; i < journeyDeRows.length; i++) {
