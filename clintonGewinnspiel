@@ -18,16 +18,7 @@ var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingActi
 var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 var amount = Platform.Function.Lookup(couponConfigDE,'amount','marketingAction',marketingAction);
 
-/* get optional fields */
-var code = Platform.Function.Lookup(couponConfigDE,'code','marketingAction',marketingAction);
-if (code === null) { 
-  var code = null
-};
 
-var minTotal = Platform.Function.Lookup(couponConfigDE,'minTotal','marketingAction',marketingAction);
-if (minTotal === null) { 
-  var minTotal = null
-}; 
 
 
 /* get user count from journey DE */
