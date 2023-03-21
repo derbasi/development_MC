@@ -32,9 +32,8 @@ var payload = {
   "validDays": validDays,
   "discount": discount,
   "type": type,
-  "amount":journeyDeRowsCount,
-  "code": null,
-  "mintotal": null
+  "amount":journeyDeRowsCount
+
   };
 
 try{
