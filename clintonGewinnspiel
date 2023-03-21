@@ -11,6 +11,11 @@ var couponConfigDE = "couponsApiConfig";
 /* define journeyDE */
 var journeyDE = Platform.Function.Lookup(couponConfigDE,'dataExtension','marketingAction',marketingAction);
 
+/* get required fields */
+var vouchername = Platform.Function.Lookup(couponConfigDE,'vouchername','marketingAction',marketingAction);
+var validdays = Platform.Function.Lookup(couponConfigDE,'validDays','marketingAction',marketingAction);
+var discount = Platform.Function.Lookup(couponConfigDE,'discount','marketingAction',marketingAction);
+var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',marketingAction);
 
 
 </script>
