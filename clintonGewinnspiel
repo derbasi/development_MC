@@ -20,7 +20,7 @@ var type = Platform.Function.Lookup(couponConfigDE,'type','marketingAction',mark
 /* get user count from journey DE */
 var journeyDeRows = Platform.Function.LookupRows(journeyDE,'include','true');
 var journeyDeRowsCount = journeyDeRows.length;
-Write("journeyDE: " + journeyDE + "| journeyDeRowsCount: " + journeyDeRowsCount)
+Write("<br>journeyDE: " + journeyDE + "| journeyDeRowsCount: " + journeyDeRowsCount)
 
 /* build api call to get voucher codes */
 var url = 'https://www.campdavid-soccx.de/APIs/shop/register/voucher/create/'
@@ -37,14 +37,13 @@ var payload = {
   "mintotal": null
   };
 
+try{
 /* perform api call to get voucher codes */
 var result = HTTP.Post(url, contentType, Stringify(payload), headerNames, headerValues);
 
-/* make voucher codes available in an array */
-var resultJSON = Platform.Function.ParseJSON(String(result.Response));
-var codesList = Platform.Function.ParseJSON(String(resultJSON.vouchercodes));
-var codesArray = codesList.split(',')
-Write("<br>codesList: " + codesList)
+} catch(e) {
+  Write("<br>error: " + e)
+}
 
 
 </script>
